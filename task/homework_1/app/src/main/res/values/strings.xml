@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">HomeWork1</string>
+    <string name="get_contacts">Get contacts</string>
 </resources>
