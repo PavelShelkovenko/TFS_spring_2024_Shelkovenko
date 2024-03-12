@@ -16,15 +16,13 @@ import com.pscoding.homework1.ui.theme.HomeWork1Theme
 
 class SecondActivity: ComponentActivity() {
 
-    private lateinit var contacts: ArrayList<String>
+    private var contacts: ArrayList<String>? = null
 
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            when(intent?.action) {
-                GetContactsService.GET_CONTACTS_ACTION -> {
-                    contacts = intent.getStringArrayListExtra(GetContactsService.CONTACTS_KEY) ?: arrayListOf()
-                    getContacts(contacts)
-                }
+            if(intent?.action == GetContactsService.GET_CONTACTS_ACTION) {
+                contacts = intent.getStringArrayListExtra(GetContactsService.CONTACTS_KEY)
+                getContacts(contacts ?: arrayListOf())
             }
         }
     }

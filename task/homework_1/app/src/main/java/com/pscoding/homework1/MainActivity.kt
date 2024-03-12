@@ -33,13 +33,13 @@ import com.pscoding.homework1.ui.theme.HomeWork1Theme
 
 class MainActivity : ComponentActivity() {
 
-    private val contacts: MutableState<List<String>> = mutableStateOf(emptyList())
+    private val contacts: MutableState<List<String>> = mutableStateOf(arrayListOf())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         if (savedInstanceState != null) {
-            contacts.value = savedInstanceState.getStringArrayList(CONTACTS_KEY) ?: emptyList()
+            contacts.value = savedInstanceState.getStringArrayList(CONTACTS_KEY) ?: arrayListOf()
         }
 
         val getContactsContract = object : ActivityResultContract<Intent, ArrayList<String>?>() {
@@ -70,7 +70,7 @@ class MainActivity : ComponentActivity() {
                     val getContactsLauncher = rememberLauncherForActivityResult(
                         contract = getContactsContract
                     ) {
-                        contacts.value = it ?: emptyList()
+                        contacts.value = it ?: arrayListOf()
                     }
 
                     val permissionLauncher = rememberLauncherForActivityResult(
@@ -133,7 +133,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putStringArrayList(CONTACTS_KEY, contacts.value as java.util.ArrayList<String>)
+        outState.putStringArrayList(CONTACTS_KEY, contacts.value as ArrayList<String>)
     }
 
     companion object {
