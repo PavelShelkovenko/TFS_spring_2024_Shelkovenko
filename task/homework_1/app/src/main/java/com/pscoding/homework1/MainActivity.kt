@@ -110,7 +110,7 @@ class MainActivity : ComponentActivity() {
                                     )
                                 }
                             }) {
-                            Text(text = stringResource( R.string.get_contacts))
+                            Text(text = stringResource(R.string.get_contacts))
                         }
                         Box(
                             modifier = Modifier.fillMaxSize(),
