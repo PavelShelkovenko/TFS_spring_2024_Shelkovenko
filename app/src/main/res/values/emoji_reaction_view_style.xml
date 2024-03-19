@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="DefaultEmojiReactionStyle">
+        <item name="reactionCount">0</item>
+        <item name="emojiCode">"2764"</item>
+        <item name="textColor">@color/black</item>
+        <item name="textSize">14sp</item>
+        <item name="selectedBackgroundColor">@color/lightBlue</item>
+        <item name="unselectedBackgroundColor">@color/white</item>
+        <item name="isSelectedReaction">false</item>
+        <item name="borderColor">@color/gray</item>
+        <item name="borderWidth">1dp</item>
+    </style>
+</resources>
