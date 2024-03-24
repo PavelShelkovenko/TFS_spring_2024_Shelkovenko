@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="FlexBoxLayout">
+      <attr name="horizontalContentPadding" format="dimension"/>
+      <attr name="verticalContentPadding" format="dimension"/>
+    </declare-styleable>
+
+    <attr name="FlexBoxLayoutAttr" format="reference"/>
+</resources>
