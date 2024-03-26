@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/textMessage"
+        android:paddingHorizontal="4dp"
+        android:paddingBottom="4dp"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:textColor="@color/white"/>
+
+    <com.pavelshelkovenko.tfs_spring_2024_shelkovenko.custom_views.FlexBoxLayout
+        android:id="@+id/flex_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:horizontalContentPadding="8dp"
+        app:verticalContentPadding="8dp">
+
+    </com.pavelshelkovenko.tfs_spring_2024_shelkovenko.custom_views.FlexBoxLayout>
+
+</merge>

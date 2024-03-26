@@ -1,4 +1,4 @@
-package com.pavelshelkovenko.tfs_spring_2024_shelkovenko
+package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.custom_views
 
 import android.content.Context
 import android.graphics.Canvas
@@ -10,13 +10,15 @@ import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.ColorInt
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.toEmoji
 import kotlin.math.min
 
 
 class EmojiReactionView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0,
+    defStyleAttr: Int = R.attr.emojiDefaultAttr,
     defStyleRes: Int = 0
 ) : View(context, attrs, defStyleAttr, defStyleRes) {
 
@@ -76,9 +78,9 @@ class EmojiReactionView @JvmOverloads constructor(
         val textHeight = reactionCountBounds.height()
 
         // Предполагаемая ширина View
-        val desiredWidth = (reactionCountBounds.width() + emojiBounds.width() + 20f + paddingRight + paddingLeft).toInt()
+        val desiredWidth = (reactionCountBounds.width() + emojiBounds.width() + 50f + paddingRight + paddingLeft).toInt()
         // Предполагаемая высота View
-        val desiredHeight = textHeight * 2 + paddingTop + paddingBottom
+        val desiredHeight = textHeight * 2 + paddingTop + paddingBottom + 25
 
         val widthMode = MeasureSpec.getMode(widthMeasureSpec)
         val widthSize = MeasureSpec.getSize(widthMeasureSpec)
@@ -107,23 +109,23 @@ class EmojiReactionView @JvmOverloads constructor(
         val viewToDrawWidth = reactionCountBounds.width() + emojiBounds.width()
         val topOffset = height / 2 - reactionCountBounds.exactCenterY()
 
-        canvas.drawRoundRect(
-            DEFAULT_PADDING + paddingLeft,
-            DEFAULT_PADDING + paddingTop,
-            measuredWidth - DEFAULT_PADDING - paddingRight,
-            measuredHeight - DEFAULT_PADDING - paddingBottom,
-            DEFAULT_CORNER_RADIUS, DEFAULT_CORNER_RADIUS, borderPaint
-        )
+//        canvas.drawRoundRect(
+//            DEFAULT_PADDING + paddingLeft,
+//            DEFAULT_PADDING + paddingTop,
+//            measuredWidth - DEFAULT_PADDING - paddingRight,
+//            measuredHeight - DEFAULT_PADDING - paddingBottom,
+//            DEFAULT_CORNER_RADIUS, DEFAULT_CORNER_RADIUS, borderPaint
+//        )
         if (isSelectedReaction) {
             backgroundPaint.color = selectedBackgroundColor
         } else {
             backgroundPaint.color = unselectedBackgroundColor
         }
         canvas.drawRoundRect(
-            DEFAULT_PADDING + 1f + paddingLeft,
-            DEFAULT_PADDING + 1f + paddingTop,
-            measuredWidth - (DEFAULT_PADDING + 1f) - paddingRight,
-            measuredHeight - (DEFAULT_PADDING + 1f) - paddingBottom,
+            DEFAULT_PADDING + paddingLeft,
+            DEFAULT_PADDING + paddingTop,
+            measuredWidth - DEFAULT_PADDING - paddingRight,
+            measuredHeight - DEFAULT_PADDING - paddingBottom,
             DEFAULT_CORNER_RADIUS, DEFAULT_CORNER_RADIUS, backgroundPaint
         )
         canvas.drawText(
@@ -253,7 +255,7 @@ class EmojiReactionView @JvmOverloads constructor(
         const val DEFAULT_SELECTED_BACKGROUND_COLOR = Color.CYAN
         const val DEFAULT_BORDER_COLOR = Color.GRAY
         const val DEFAULT_REACTION_COUNT = 0
-        const val DEFAULT_CORNER_RADIUS = 10f
+        const val DEFAULT_CORNER_RADIUS = 35f
         const val DEFAULT_BORDER_WIDTH = 5f
         const val DEFAULT_TEXT_SIZE = 55f
         const val DEFAULT_PADDING = 5f
