@@ -3,8 +3,10 @@
     <color name="light_black">#EA000000</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="white_0.8">#88FFFFFF</color>
     <color name="green">#FF2bc493</color>
     <color name="light_blue">#FF42c5f5</color>
     <color name="gray">#FF252626</color>
     <color name="light_gray">#FF646967</color>
+    <color name="orange">#FFc96b06</color>
 </resources>

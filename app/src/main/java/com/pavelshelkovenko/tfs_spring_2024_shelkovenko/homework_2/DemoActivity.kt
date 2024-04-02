@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.EmojiFactory
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message.reaction.EmojiFactory
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.custom_views.EmojiReactionView
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.custom_views.FlexBoxLayout
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R

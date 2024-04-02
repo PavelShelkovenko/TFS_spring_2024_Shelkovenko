@@ -5,11 +5,12 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.res.ResourcesCompat
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.custom_views.AddButtonView
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.custom_views.EmojiReactionView
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.custom_views.FlexBoxLayout
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.models.Reaction
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message.reaction.Reaction
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.toDp
 
 abstract class MessageViewGroup @JvmOverloads constructor(
@@ -52,9 +53,15 @@ abstract class MessageViewGroup @JvmOverloads constructor(
                 with(newEmojiView) {
                     setEmojiCode(emoji)
                     setReactionCount(count.toString())
-                    setUnselectedBackgroundColor(resources.getColor(R.color.gray))
-                    setSelectedBackgroundColor(resources.getColor(R.color.light_gray))
-                    setTextColor(resources.getColor(R.color.white))
+                    setUnselectedBackgroundColor(
+                        ResourcesCompat.getColor(resources, R.color.gray, null)
+                    )
+                    setSelectedBackgroundColor(
+                        ResourcesCompat.getColor(resources, R.color.light_gray, null)
+                    )
+                    setTextColor(
+                        ResourcesCompat.getColor(resources, R.color.white, null)
+                    )
                     isSelectedReaction = (reaction.userId == localUserId)
                     setOnClickListener {
                         onEmojiClick(emoji)

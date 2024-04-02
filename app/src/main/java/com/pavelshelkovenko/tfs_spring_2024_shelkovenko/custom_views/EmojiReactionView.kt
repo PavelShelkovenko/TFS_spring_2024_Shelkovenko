@@ -44,7 +44,8 @@ class EmojiReactionView @JvmOverloads constructor(
     var reactionCount = ""
         private set
 
-    private val emojiStringHelper = "123" // Эта строка для рассчёта ширины эмоджи (экспериментально получено что ее длина равна 3)
+    // Эта строка для рассчёта ширины эмоджи (экспериментально получено что ее длина равна 3 символа)
+    private val emojiStringHelper = "123"
 
     init {
         initAttributes(attrs, defStyleAttr, defStyleRes)
@@ -109,13 +110,6 @@ class EmojiReactionView @JvmOverloads constructor(
         val viewToDrawWidth = reactionCountBounds.width() + emojiBounds.width()
         val topOffset = height / 2 - reactionCountBounds.exactCenterY()
 
-//        canvas.drawRoundRect(
-//            DEFAULT_PADDING + paddingLeft,
-//            DEFAULT_PADDING + paddingTop,
-//            measuredWidth - DEFAULT_PADDING - paddingRight,
-//            measuredHeight - DEFAULT_PADDING - paddingBottom,
-//            DEFAULT_CORNER_RADIUS, DEFAULT_CORNER_RADIUS, borderPaint
-//        )
         if (isSelectedReaction) {
             backgroundPaint.color = selectedBackgroundColor
         } else {

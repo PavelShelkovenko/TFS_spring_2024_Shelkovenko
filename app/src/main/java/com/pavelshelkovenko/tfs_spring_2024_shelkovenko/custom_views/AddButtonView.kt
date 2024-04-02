@@ -6,6 +6,7 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.View
+import androidx.core.content.res.ResourcesCompat
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.toSp
 import kotlin.math.min
@@ -20,30 +21,30 @@ class AddButtonView @JvmOverloads constructor(
 
     private var backgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
-        color = resources.getColor(R.color.gray)
+        color = ResourcesCompat.getColor(resources,R.color.gray, null)
     }
 
     private var iconPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = resources.getColor(R.color.white)
+        color = ResourcesCompat.getColor(resources, R.color.white, null)
         style = Paint.Style.STROKE
-        strokeWidth = 6f
-        textSize = 16f.toSp(context)
+        strokeWidth = DEFAULT_ICON_STROKE_WIDTH
+        textSize = DEFAULT_TEXT_SIZE.toSp(context)
     }
 
-    private val reactionCount = "1"
-    private val emojiStringHelper = "123"
-    private var reactionCountBounds = Rect()
-    private var emojiBounds = Rect()
+    private val stringHelper1 = "1"
+    private val stringHelper2 = "123"
+    private var stringHelper1Bounds = Rect()
+    private var stringHelper2Bounds = Rect()
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
 
-        iconPaint.getTextBounds(reactionCount, 0, reactionCount.length, reactionCountBounds)
-        iconPaint.getTextBounds(emojiStringHelper, 0, emojiStringHelper.length, emojiBounds)
+        iconPaint.getTextBounds(stringHelper1, 0, stringHelper1.length, stringHelper1Bounds)
+        iconPaint.getTextBounds(stringHelper2, 0, stringHelper2.length, stringHelper2Bounds)
 
-        val textHeight = reactionCountBounds.height()
+        val textHeight = stringHelper1Bounds.height()
 
-        val desiredWidth = (reactionCountBounds.width() + emojiBounds.width() + 50f + paddingRight + paddingLeft).toInt()
+        val desiredWidth = stringHelper1Bounds.width() + stringHelper2Bounds.width() + 50 + paddingRight + paddingLeft
         val desiredHeight = textHeight * 2 + paddingTop + paddingBottom + 25
 
         val widthMode = MeasureSpec.getMode(widthMeasureSpec)
@@ -98,6 +99,8 @@ class AddButtonView @JvmOverloads constructor(
     }
 
     companion object {
+        const val DEFAULT_TEXT_SIZE = 16f
+        const val DEFAULT_ICON_STROKE_WIDTH = 6f
         const val DEFAULT_CORNER_RADIUS = 35f
         const val DEFAULT_PADDING = 5f
     }

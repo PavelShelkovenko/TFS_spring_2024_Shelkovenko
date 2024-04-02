@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/app_navigation"
+    app:startDestination="@id/channelFragment">
+
+    <fragment
+        android:id="@+id/channelFragment"
+        android:name="com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.ChannelFragment"
+        android:label="fragment_channel"
+        tools:layout="@layout/fragment_channel" >
+        <action
+            android:id="@+id/action_channelFragment_to_chatFragment"
+            app:destination="@id/chatFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/peopleFragment"
+        android:name="com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.people.PeopleFragment"
+        android:label="fragment_people"
+        tools:layout="@layout/fragment_people" >
+        <action
+            android:id="@+id/action_peopleFragment_to_anotherProfileFragment"
+            app:destination="@id/anotherProfileFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.profile.ProfileFragment"
+        android:label="fragment_profile"
+        tools:layout="@layout/fragment_profile" />
+    <fragment
+        android:id="@+id/chatFragment"
+        android:name="com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.ChatFragment"
+        android:label="ChatFragment" >
+        <argument
+            android:name="streamName"
+            app:argType="string" />
+        <argument
+            android:name="topicName"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/anotherProfileFragment"
+        android:name="com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.profile.AnotherProfileFragment"
+        android:label="AnotherProfileFragment" >
+        <argument
+            android:name="userName"
+            app:argType="string" />
+    </fragment>
+</navigation>

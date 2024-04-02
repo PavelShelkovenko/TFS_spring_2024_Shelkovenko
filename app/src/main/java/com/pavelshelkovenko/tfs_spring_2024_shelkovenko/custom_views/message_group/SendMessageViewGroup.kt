@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.util.AttributeSet
 import android.widget.TextView
+import androidx.core.content.res.ResourcesCompat
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.custom_views.FlexBoxLayout
 import kotlin.math.max
@@ -20,7 +21,7 @@ class SendMessageViewGroup @JvmOverloads constructor(
 
     init {
         setWillNotDraw(false)
-        backgroundPaint.color = resources.getColor(R.color.green)
+        backgroundPaint.color = ResourcesCompat.getColor(resources, R.color.green, null)
         inflate(context, R.layout.send_message_view_group,this)
     }
 
@@ -64,7 +65,7 @@ class SendMessageViewGroup @JvmOverloads constructor(
         val textMessageView = getChildAt(0)
         val flexBoxLayout = getChildAt(1)
 
-        var widthPointer = measuredWidth - paddingEnd - textMessageView.measuredWidth
+        val widthPointer = measuredWidth - paddingEnd - textMessageView.measuredWidth
         var heightPointer = paddingTop
 
         textMessageView.layout(
@@ -75,12 +76,14 @@ class SendMessageViewGroup @JvmOverloads constructor(
         )
 
         heightPointer += textMessageView.measuredHeight + 2 * innerPadding
-        widthPointer = paddingStart
+
+        val right = measuredWidth - paddingEnd
+        val left = right - flexBoxLayout.measuredWidth
 
         flexBoxLayout.layout(
-            widthPointer,
+            left,
             heightPointer ,
-            widthPointer + flexBoxLayout.measuredWidth,
+            right,
             heightPointer + flexBoxLayout.measuredHeight
         )
     }
@@ -116,7 +119,6 @@ class SendMessageViewGroup @JvmOverloads constructor(
     override fun onRestoreInstanceState(state: Parcelable?) {
         val bundle = state as Bundle
         setTextMessage(bundle.getString(ReceivedMessageViewGroup.DEFAULT_MESSAGE_TEXT_KEY).toString())
-        //textMessage = bundle.getString(DEFAULT_MESSAGE_TEXT_KEY).toString()
         super.onRestoreInstanceState(bundle.getParcelable(INSTANCESTATE_KEY))
         invalidate()
     }
