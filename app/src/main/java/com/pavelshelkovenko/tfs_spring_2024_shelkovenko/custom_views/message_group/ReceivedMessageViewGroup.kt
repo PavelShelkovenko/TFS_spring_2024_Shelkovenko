@@ -1,38 +1,40 @@
-package com.pavelshelkovenko.tfs_spring_2024_shelkovenko
+package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.custom_views.message_group
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.AttributeSet
 import android.util.Log
-import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
-import kotlin.math.roundToInt
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.bitmapToByteArray
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.custom_views.FlexBoxLayout
 
-class MessageViewGroup @JvmOverloads constructor(
+class ReceivedMessageViewGroup @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
     defStyleRes: Int = 0,
-) : ViewGroup(context, attrs, defStyleAttr, defStyleRes) {
+) : MessageViewGroup(context, attrs, defStyleAttr, defStyleRes) {
 
     init {
-        inflate(context, R.layout.message_view_group, this)
+        setWillNotDraw(false)
+        backgroundPaint.color = resources.getColor(R.color.gray)
+        inflate(context, R.layout.received_message_view_group, this)
     }
 
     private val defaultBitmap = ResourcesCompat.getDrawable(
         resources,
-        R.drawable.ic_launcher_foreground,
+        R.drawable.ic_launcher_background,
         null
     )?.toBitmap()
     var userName = DEFAULT_USER_NAME
-        private set
-    var textMessage = DEFAULT_MESSAGE_TEXT
         private set
     var userAvatar: Bitmap = defaultBitmap ?: throw IllegalArgumentException("Drawable not found")
         private set
@@ -48,7 +50,7 @@ class MessageViewGroup @JvmOverloads constructor(
         val userAvatarView = getChildAt(0) as ImageView
         val userNameView = getChildAt(1) as TextView
         val textMessageView = getChildAt(2) as TextView
-        val flexBoxLayout = getChildAt(3)
+        val flexBoxLayout = getFlexBoxLayoutChild()
 
         userNameView.text = userName
         textMessageView.text = textMessage
@@ -57,17 +59,8 @@ class MessageViewGroup @JvmOverloads constructor(
         } catch (ex: Exception) {
             Log.e("MessageViewGroup", ex.message.toString())
         }
+        measureChild(userAvatarView, parentWidthMeasureSpec, parentHeightMeasureSpec)
 
-
-        val innerPadding = 10f.toDp(context).toInt()
-        val availableForUserAvatarWidth = (widthSize * 0.2f).roundToInt()
-        val availableForUserAvatarHeight =
-            availableForUserAvatarWidth    // Чтобы картинка была в ровном квадрате
-        val userAvatarWidthSpec =
-            MeasureSpec.makeMeasureSpec(availableForUserAvatarWidth, MeasureSpec.AT_MOST)
-        val userAvatarHeightSpec =
-            MeasureSpec.makeMeasureSpec(availableForUserAvatarHeight, MeasureSpec.AT_MOST)
-        measureChild(userAvatarView, userAvatarWidthSpec, userAvatarHeightSpec)
 
         val availableForRestChildrenWidth =
             widthSize - userAvatarView.measuredWidth - paddingStart - paddingEnd - innerPadding
@@ -86,7 +79,7 @@ class MessageViewGroup @JvmOverloads constructor(
             textMessageView.measuredWidth,
             userNameView.measuredWidth,
             flexBoxLayout.measuredWidth
-        ) + innerPadding
+        ) + 2 * innerPadding
         val childrenHeight =
             userNameView.measuredHeight + textMessageView.measuredHeight + flexBoxLayout.measuredHeight
 
@@ -95,7 +88,7 @@ class MessageViewGroup @JvmOverloads constructor(
             MeasureSpec.AT_MOST -> paddingStart + paddingEnd + childrenWidth
             MeasureSpec.UNSPECIFIED -> paddingStart + paddingEnd + childrenWidth
             else -> error("Unreachable")
-        }
+        } - paddingEnd
 
         val height: Int = when (heightMode) {
             MeasureSpec.EXACTLY -> paddingTop + paddingBottom + heightSize
@@ -112,11 +105,10 @@ class MessageViewGroup @JvmOverloads constructor(
         var widthPointer = paddingStart
         var heightPointer = paddingTop
 
-        val innerPadding = 10f.toDp(context).toInt()
         val userAvatarView = getChildAt(0)
         val userNameView = getChildAt(1)
         val textMessageView = getChildAt(2)
-        val flexBoxLayout = getChildAt(3)
+        val flexBoxLayout = getFlexBoxLayoutChild()
 
         userAvatarView.layout(
             widthPointer,
@@ -125,7 +117,7 @@ class MessageViewGroup @JvmOverloads constructor(
             heightPointer + userAvatarView.measuredHeight
         )
 
-        widthPointer += userAvatarView.measuredWidth + innerPadding
+        widthPointer += userAvatarView.measuredWidth + 2 * innerPadding
 
         var userNameWidth = userNameView.measuredWidth
 
@@ -170,10 +162,36 @@ class MessageViewGroup @JvmOverloads constructor(
         }
 
         flexBoxLayout.layout(
-            widthPointer,
+            widthPointer - innerPadding,
             heightPointer,
             flexBoxLayoutWidth,
             heightPointer + flexBoxLayout.measuredHeight
+        )
+    }
+
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+
+        val userNameView = getChildAt(1)
+        val textMessageView = getChildAt(2)
+
+        val left = (getChildAt(0).measuredWidth + innerPadding) + paddingLeft
+        val top = paddingTop.toFloat()
+        val right = (left + Integer.max(
+            userNameView.measuredWidth,
+            textMessageView.measuredWidth
+        ) + 3 * innerPadding) - paddingRight
+        val bottom =
+            (top + userNameView.measuredHeight + 2 * innerPadding + textMessageView.measuredHeight - paddingBottom)
+
+        canvas.drawRoundRect(
+            left.toFloat(),
+            top,
+            right.toFloat(),
+            bottom,
+            DEFAULT_CORNER_RADIUS,
+            DEFAULT_CORNER_RADIUS,
+            backgroundPaint
         )
     }
 
@@ -189,22 +207,27 @@ class MessageViewGroup @JvmOverloads constructor(
     override fun onRestoreInstanceState(state: Parcelable?) {
         val bundle = state as Bundle
         userName = bundle.getString(DEFAULT_USER_NAME_KEY).toString()
-        textMessage = bundle.getString(DEFAULT_MESSAGE_TEXT_KEY).toString()
+        setTextMessage(bundle.getString(DEFAULT_MESSAGE_TEXT_KEY).toString())
+        //textMessage = bundle.getString(DEFAULT_MESSAGE_TEXT_KEY).toString()
         val userAvatarByteArray = bundle.getByteArray(DEFAULT_USER_AVATAR_KEY)
         if (userAvatarByteArray != null) {
-            userAvatar = BitmapFactory.decodeByteArray(userAvatarByteArray, 0, userAvatarByteArray.size)
+            userAvatar =
+                BitmapFactory.decodeByteArray(userAvatarByteArray, 0, userAvatarByteArray.size)
         }
         super.onRestoreInstanceState(bundle.getParcelable(INSTANCESTATE_KEY))
         invalidate()
     }
 
-    fun setUserName(newUserName: String) {
-        userName = newUserName
-        requestLayout()
+    override fun getFlexBoxLayoutChild(): FlexBoxLayout {
+        return getChildAt(3) as FlexBoxLayout
     }
 
-    fun setTextMessage(newTextMessage: String) {
-        textMessage = newTextMessage
+    override fun getTextMessageChild(): TextView {
+        return getChildAt(2) as TextView
+    }
+
+    fun setUserName(newUserName: String) {
+        userName = newUserName
         requestLayout()
     }
 
@@ -215,7 +238,6 @@ class MessageViewGroup @JvmOverloads constructor(
 
     companion object {
         const val DEFAULT_USER_NAME = "Default user name"
-        const val DEFAULT_MESSAGE_TEXT = "Default text message"
         const val DEFAULT_MESSAGE_TEXT_KEY = "key_for_message_text"
         const val DEFAULT_USER_NAME_KEY = "key_for_user_name"
         const val DEFAULT_USER_AVATAR_KEY = "key_for_user_avatar"

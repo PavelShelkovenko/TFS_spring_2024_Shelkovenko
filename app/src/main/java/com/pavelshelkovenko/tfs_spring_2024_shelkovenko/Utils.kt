@@ -9,6 +9,10 @@ fun Float.toDp(context: Context) = TypedValue.applyDimension(
     TypedValue.COMPLEX_UNIT_DIP, this, context.resources.displayMetrics
 )
 
+fun Float.toSp(context: Context) = TypedValue.applyDimension(
+    TypedValue.COMPLEX_UNIT_SP, this, context.resources.displayMetrics
+)
+
 fun String.toEmoji(): String {
     return String(Character.toChars(this.toInt(16)))
 }
@@ -18,3 +22,4 @@ fun bitmapToByteArray(bitmap: Bitmap): ByteArray {
     bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
     return stream.toByteArray()
 }
+

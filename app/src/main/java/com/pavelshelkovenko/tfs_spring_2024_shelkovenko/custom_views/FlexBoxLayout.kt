@@ -1,10 +1,12 @@
-package com.pavelshelkovenko.tfs_spring_2024_shelkovenko
+package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.custom_views
 
 import android.content.Context
 import android.util.AttributeSet
 import android.view.ViewGroup
 import androidx.core.content.withStyledAttributes
 import androidx.core.view.children
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.toDp
 import kotlin.math.roundToInt
 
 class FlexBoxLayout @JvmOverloads constructor(
@@ -40,7 +42,8 @@ class FlexBoxLayout @JvmOverloads constructor(
         val heightMode = MeasureSpec.getMode(heightMeasureSpec)
         val heightSize = MeasureSpec.getSize(heightMeasureSpec)
 
-        val defaultWidth = 400
+        val defaultWidth = 200
+        val defaultHeight = 20
 
         val width: Int = when (widthMode) {
             MeasureSpec.EXACTLY -> paddingEnd + paddingStart + widthSize
@@ -64,12 +67,26 @@ class FlexBoxLayout @JvmOverloads constructor(
 
         val height: Int = when (heightMode) {
             MeasureSpec.EXACTLY -> paddingTop + paddingBottom + heightSize
-            MeasureSpec.AT_MOST -> paddingTop + paddingBottom +
-                    (lines) * (children.first().measuredHeight) +
-                    (lines) * (verticalContentPadding)
-            MeasureSpec.UNSPECIFIED -> paddingTop + paddingBottom +
-                    (lines) * (children.first().measuredHeight) +
-                    (lines) * (verticalContentPadding)
+            MeasureSpec.AT_MOST -> {
+                if (childCount > 0) {
+                    paddingTop + paddingBottom +
+                            (lines) * (children.first().measuredHeight) +
+                            (lines) * (verticalContentPadding)
+                } else {
+                    defaultHeight
+                }
+            }
+            MeasureSpec.UNSPECIFIED -> {
+                if (childCount > 0) {
+                    paddingTop + paddingBottom +
+                            (lines) * (children.first().measuredHeight) +
+                            (lines) * (verticalContentPadding)
+                } else {
+                    defaultHeight
+                }
+
+            }
+
             else -> error("Unreachable")
         }
         setMeasuredDimension(width, height)
