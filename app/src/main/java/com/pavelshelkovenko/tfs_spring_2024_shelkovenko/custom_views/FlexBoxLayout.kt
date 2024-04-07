@@ -7,6 +7,7 @@ import androidx.core.content.withStyledAttributes
 import androidx.core.view.children
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.toDp
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 class FlexBoxLayout @JvmOverloads constructor(
@@ -42,17 +43,27 @@ class FlexBoxLayout @JvmOverloads constructor(
         val heightMode = MeasureSpec.getMode(heightMeasureSpec)
         val heightSize = MeasureSpec.getSize(heightMeasureSpec)
 
-        val defaultWidth = 200
-        val defaultHeight = 20
+        var availableWidth = widthSize - paddingStart - paddingEnd
+        var desiredWidth = DEFAULT_WIDTH
+
+        children.forEach { currentChild ->
+            if (availableWidth >= currentChild.measuredWidth) {
+                availableWidth -= (currentChild.measuredWidth)
+                desiredWidth = widthSize - availableWidth
+            } else {
+                desiredWidth = widthSize - availableWidth
+            }
+            availableWidth -= horizontalContentPadding
+        }
 
         val width: Int = when (widthMode) {
             MeasureSpec.EXACTLY -> paddingEnd + paddingStart + widthSize
-            MeasureSpec.AT_MOST -> paddingEnd + paddingStart + widthSize
-            MeasureSpec.UNSPECIFIED -> paddingEnd + paddingStart + defaultWidth
+            MeasureSpec.AT_MOST -> paddingEnd + paddingStart + min(desiredWidth, widthSize)
+            MeasureSpec.UNSPECIFIED -> paddingEnd + paddingStart + DEFAULT_WIDTH
             else -> error("Unreachable")
         }
 
-        var availableWidth = width - paddingStart - paddingEnd
+        availableWidth = width - paddingStart - paddingEnd
         var lines = 1
 
         children.forEach { currentChild ->
@@ -73,7 +84,7 @@ class FlexBoxLayout @JvmOverloads constructor(
                             (lines) * (children.first().measuredHeight) +
                             (lines) * (verticalContentPadding)
                 } else {
-                    defaultHeight
+                    DEFAULT_HEIGHT
                 }
             }
             MeasureSpec.UNSPECIFIED -> {
@@ -82,7 +93,7 @@ class FlexBoxLayout @JvmOverloads constructor(
                             (lines) * (children.first().measuredHeight) +
                             (lines) * (verticalContentPadding)
                 } else {
-                    defaultHeight
+                    DEFAULT_HEIGHT
                 }
 
             }
@@ -116,5 +127,7 @@ class FlexBoxLayout @JvmOverloads constructor(
 
     companion object {
         const val DEFAULT_CONTENT_PADDING = 0f
+        const val DEFAULT_WIDTH = 200
+        const val DEFAULT_HEIGHT = 20
     }
 }

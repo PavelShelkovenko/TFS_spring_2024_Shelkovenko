@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/channelFragment"
+        android:icon="@drawable/ic_megaphone"
+        android:title="@string/channels" />
+    <item
+        android:id="@+id/peopleFragment"
+        android:icon="@drawable/ic_people_24"
+        android:title="@string/people" />
+    <item
+        android:id="@+id/profileFragment"
+        android:icon="@drawable/ic_account_circle_24"
+        android:title="@string/profile" />
+</menu>

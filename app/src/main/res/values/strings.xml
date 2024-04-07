@@ -3,4 +3,17 @@
     <string name="user_avatar">User avatar</string>
     <string name="write_message">Write message…</string>
     <string name="add">Add</string>
+    <string name="channels">Channels</string>
+    <string name="people">People</string>
+    <string name="profile">Profile</string>
+    <string name="subscribed">Subscribed</string>
+    <string name="all_streams">All Streams</string>
+    <string name="search_hint">Search…</string>
+    <string name="cancel_searching_icon">Cancel searching icon</string>
+    <string name="search_icon">Search icon</string>
+    <string name="back_button">Back button</string>
+    <string name="users_search_hint">Users…</string>
+    <string name="log_out">Log out</string>
+    <string name="close_stream_topic_button">Close stream topic button</string>
+    <string name="open_stream_topic_button">Open stream topic button</string>
 </resources>

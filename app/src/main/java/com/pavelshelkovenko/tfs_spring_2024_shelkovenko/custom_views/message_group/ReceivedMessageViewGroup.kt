@@ -25,7 +25,7 @@ class ReceivedMessageViewGroup @JvmOverloads constructor(
 
     init {
         setWillNotDraw(false)
-        backgroundPaint.color = resources.getColor(R.color.gray)
+        backgroundPaint.color = ResourcesCompat.getColor(resources, R.color.gray, null)
         inflate(context, R.layout.received_message_view_group, this)
     }
 
@@ -208,7 +208,6 @@ class ReceivedMessageViewGroup @JvmOverloads constructor(
         val bundle = state as Bundle
         userName = bundle.getString(DEFAULT_USER_NAME_KEY).toString()
         setTextMessage(bundle.getString(DEFAULT_MESSAGE_TEXT_KEY).toString())
-        //textMessage = bundle.getString(DEFAULT_MESSAGE_TEXT_KEY).toString()
         val userAvatarByteArray = bundle.getByteArray(DEFAULT_USER_AVATAR_KEY)
         if (userAvatarByteArray != null) {
             userAvatar =
