@@ -8,9 +8,6 @@ class ReceivedMessageDelegateItem(
     override val id: Int,
     var value: ReceivedMessageModel
 ): MessageDelegateItem() {
-    override fun id(): Any = id
-
-    override fun content(): Any = value
 
     override val reactionList: List<Reaction>
         get() = value.reactionList
@@ -23,8 +20,11 @@ class ReceivedMessageDelegateItem(
         return ReceivedMessageDelegateItem(id = id, value = value)
     }
 
+    override fun id(): Any = id
+    override fun content(): Any = value
+
     override fun compareToOther(other: DelegateItem): Boolean {
-        return (other as ReceivedMessageDelegateItem).value == content()
+        return (other as ReceivedMessageDelegateItem).value == this.value
     }
     override fun payload(other: Any): DelegateItem.Payloadable {
         if (other is ReceivedMessageDelegateItem) {

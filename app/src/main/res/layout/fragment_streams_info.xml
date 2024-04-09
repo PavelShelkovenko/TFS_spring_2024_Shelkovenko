@@ -7,6 +7,74 @@
     tools:context=".presentation.channels.streams.StreamsInfoFragment"
     android:background="@color/light_black">
 
+    <FrameLayout
+        android:id="@+id/error_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <include
+            android:id="@+id/error_component"
+            layout="@layout/error_screen"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </FrameLayout>
+
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/shimmerContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:shimmer_duration="800"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <include layout="@layout/stream_item_shimmer"
+                android:layout_height="60dp"
+                android:layout_width="match_parent"/>
+
+            <include layout="@layout/stream_item_shimmer"
+                android:layout_height="60dp"
+                android:layout_width="match_parent"/>
+
+            <include layout="@layout/stream_item_shimmer"
+                android:layout_height="60dp"
+                android:layout_width="match_parent"/>
+
+            <include layout="@layout/stream_item_shimmer"
+                android:layout_height="60dp"
+                android:layout_width="match_parent"/>
+
+            <include layout="@layout/stream_item_shimmer"
+                android:layout_height="60dp"
+                android:layout_width="match_parent"/>
+
+            <include layout="@layout/stream_item_shimmer"
+                android:layout_height="60dp"
+                android:layout_width="match_parent"/>
+
+            <include layout="@layout/stream_item_shimmer"
+                android:layout_height="60dp"
+                android:layout_width="match_parent"/>
+
+            <include layout="@layout/stream_item_shimmer"
+                android:layout_height="60dp"
+                android:layout_width="match_parent"/>
+
+
+        </LinearLayout>
+
+    </com.facebook.shimmer.ShimmerFrameLayout>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/streams_info_rv"
         android:layout_width="match_parent"

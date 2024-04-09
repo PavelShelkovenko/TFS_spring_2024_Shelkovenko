@@ -2,12 +2,13 @@ package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.messa
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.EmojiItemBinding
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.toEmoji
 
 class EmojiAdapter(private val emojis: List<Emoji>) :
-    RecyclerView.Adapter<EmojiAdapter.ViewHolder>() {
+    ListAdapter<Emoji, EmojiAdapter.ViewHolder>(EmojiDiffCallback()) {
 
     var onEmojiClickListener: ((String) -> Unit)? = null
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
@@ -18,6 +19,7 @@ class EmojiAdapter(private val emojis: List<Emoji>) :
                 false
             )
         )
+
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(emojis[position])

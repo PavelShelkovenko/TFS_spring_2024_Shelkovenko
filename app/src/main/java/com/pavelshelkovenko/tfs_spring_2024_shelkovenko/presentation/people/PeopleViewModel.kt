@@ -1,52 +1,59 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.people
 
-import android.app.Application
-import androidx.core.content.res.ResourcesCompat
-import androidx.core.graphics.drawable.toBitmap
-import androidx.lifecycle.AndroidViewModel
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.generateRandomEmail
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.generateRandomName
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.models.User
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.models.UserOnlineStatus
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.homework_5.GetStubUsersUseCase
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.runCatchingNonCancellation
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlin.random.Random
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 class PeopleViewModel(
-    application: Application
-) : AndroidViewModel(application) {
+    private val stubUsersUseCase: GetStubUsersUseCase
+): ViewModel() {
 
+    private val _screenState = MutableStateFlow<PeopleScreenState>(PeopleScreenState.Initial)
+    val screenState = _screenState.asStateFlow()
 
-    private val _userList = MutableStateFlow<List<User>>(emptyList())
-    val userList = _userList.asStateFlow()
-
-    private val testUserAvatar = ResourcesCompat.getDrawable(
-        application.resources,
-        R.drawable.ic_launcher_background,
-        null
-    )?.toBitmap() ?: throw IllegalArgumentException("Drawable not found")
-
-    private val testUser: User
-    get() = User(
-        id = Random.nextInt(0, 1000000),
-        avatar = testUserAvatar,
-        name = generateRandomName(),
-        email = generateRandomEmail(),
-        status = UserOnlineStatus.entries.shuffled().first()
-    )
+    val searchQueryFlow = MutableStateFlow("")
 
     init {
-        setupStubData()
+        collectSearchQuery()
     }
 
+    private fun collectSearchQuery() {
+        searchQueryFlow
+            .distinctUntilChanged { old, new -> old.contentEquals(new) }
+            .debounce(1000L)
+            .onEach { processSearch(it.trim()) }
+            .flowOn(Dispatchers.Default)
+            .launchIn(viewModelScope)
+    }
 
-    private fun setupStubData() {
-        val newList = mutableListOf<User>()
-        for (i in 1..30) {
-            newList.add(testUser)
+    suspend fun processSearch(query: String) {
+        _screenState.value = PeopleScreenState.Loading
+        runCatchingNonCancellation {
+            stubUsersUseCase.search(query)
+        }.onSuccess {
+            _screenState.value = PeopleScreenState.Content(it)
+        }.onFailure {
+          _screenState.value = PeopleScreenState.Error(it.message.toString())
         }
-        _userList.value = newList
     }
 
+    suspend fun setupStubData() {
+        _screenState.value = PeopleScreenState.Loading
+        runCatchingNonCancellation {
+            stubUsersUseCase.invoke()
+        }.onSuccess {
+            _screenState.value = PeopleScreenState.Content(userList = it)
+        }.onFailure {
+            _screenState.value = PeopleScreenState.Error(it.message.toString())
+        }
+    }
 }

@@ -4,13 +4,12 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.delegate_adapter.Delegat
 
 class StreamDelegateItem(
     val id: Int,
-    private val value: Stream
+    val value: Stream
 ): DelegateItem {
     override fun id(): Any = id
-
     override fun content(): Any = value
 
     override fun compareToOther(other: DelegateItem): Boolean {
-        return (other as StreamDelegateItem).value == content()
+        return (other as StreamDelegateItem).value == this.value
     }
 }

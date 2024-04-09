@@ -8,8 +8,8 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.delegate_adapter.DelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.models.User
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.models.UserOnlineStatus
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.date.MessageDateTimeDelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.date.MessageDateTime
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.date.MessageDateTimeDelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message.MessageDelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message.reaction.EmojiFactory
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message.reaction.Reaction
@@ -52,7 +52,8 @@ class ChatViewModel(
         avatar = localUserAvatar,
         name = "Pavel Shelkovenko",
         email = "",
-        status = UserOnlineStatus.ACTIVE
+        onlineStatus = UserOnlineStatus.ACTIVE,
+        activityStatus = "In a meeting"
     )
 
     private val testUser = User(
@@ -60,7 +61,8 @@ class ChatViewModel(
         avatar = testUserAvatar,
         name = "Ilya Shelkovenko",
         email = "",
-        status = UserOnlineStatus.ACTIVE
+        onlineStatus = UserOnlineStatus.ACTIVE,
+        activityStatus = "In a meeting"
     )
 
     private val stubReaction

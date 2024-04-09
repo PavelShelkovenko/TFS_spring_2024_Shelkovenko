@@ -4,13 +4,12 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.delegate_adapter.Delegat
 
 class TopicDelegateItem(
     val id: Int,
-    private val value: Topic
+    val value: Topic
 ): DelegateItem {
     override fun id(): Any = id
-
     override fun content(): Any = value
 
     override fun compareToOther(other: DelegateItem): Boolean {
-        return (other as TopicDelegateItem).value == content()
+        return (other as TopicDelegateItem).value == this.value
     }
 }

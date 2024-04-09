@@ -16,4 +16,6 @@
     <string name="log_out">Log out</string>
     <string name="close_stream_topic_button">Close stream topic button</string>
     <string name="open_stream_topic_button">Open stream topic button</string>
+    <string name="retry">Retry</string>
+    <string name="some_error_occurred">Some error occurred</string>
 </resources>

@@ -1,132 +1,225 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.delegate_adapter.DelegateItem
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.generateRandomColor
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.generateRandomName
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.homework_5.GetStubStreamsUseCase
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.streams.Stream
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.streams.StreamDelegateItem
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.streams.StreamsInfoFragment
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.streams.StreamDestination
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.topics.Topic
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.topics.TopicDelegateItem
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.runCatchingNonCancellation
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlin.random.Random
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 
 
-class ChannelsViewModel : ViewModel() {
+class ChannelsViewModel(
+    private val stubStreamsUseCase: GetStubStreamsUseCase
+) : ViewModel() {
 
-    private val stubTopic: Topic
-        get() = Topic(
-            id = Random.nextInt(0, 1000000),
-            name = generateRandomName(),
-            messageCount = Random.nextInt(0, 1000),
-            color = generateRandomColor()
-        )
+    private val _allStreamsScreenState =
+        MutableStateFlow<ChannelsScreenState>(ChannelsScreenState.Initial)
+    val allStreamsScreenState = _allStreamsScreenState.asStateFlow()
 
+    private val _subscribedStreamsScreenState =
+        MutableStateFlow<ChannelsScreenState>(ChannelsScreenState.Initial)
+    val subscribedScreenState = _subscribedStreamsScreenState.asStateFlow()
 
-    private val stubTopicList: List<Topic>
-        get() {
-            val newList = mutableListOf<Topic>()
-            for (i in 0..3) {
-                newList.add(stubTopic)
+    private val allStreamsList = MutableStateFlow<List<DelegateItem>>(emptyList())
+    private val subscribedStreamsList = MutableStateFlow<List<DelegateItem>>(emptyList())
+
+    val searchQueryFlow = MutableStateFlow("")
+
+    val streamDestination = MutableStateFlow(StreamDestination.Subscribed)
+
+    init {
+        collectSearchQuery()
+    }
+
+    private fun collectSearchQuery() {
+        searchQueryFlow
+            .distinctUntilChanged { old, new -> old.contentEquals(new) }
+            .debounce(1000L)
+            .drop(1)
+            .onEach { processSearch() }
+            .flowOn(Dispatchers.Default)
+            .launchIn(viewModelScope)
+    }
+
+    suspend fun refreshScreenState() {
+        doActionOnStreamDestination(
+            actionOnAllStreams = {
+                processSearch()
+            },
+            actionOnSubscribedStreams = {
+                processSearch()
             }
-            return newList
-        }
-
-    private val stubSubscribedStream: Stream
-        get() = Stream(
-            id = Random.nextInt(0, 1000000),
-            name = generateRandomName(),
-            topicsList = stubTopicList
         )
+    }
 
-    private val stubAllStream: Stream
-        get() = Stream(
-            id = Random.nextInt(0, 1000000),
-            name = generateRandomName(),
-            topicsList = stubTopicList
-        )
-
-    private val stubSubscribedStreamDelegateItem: StreamDelegateItem
-        get() = StreamDelegateItem(
-            id = Random.nextInt(0, 1000000),
-            value = stubSubscribedStream
-        )
-
-    private val stubAllStreamDelegateItem: StreamDelegateItem
-        get() = StreamDelegateItem(
-            id = Random.nextInt(0, 1000000),
-            value = stubAllStream
-        )
-
-
-    private val stubSubscribedStreamsList: List<DelegateItem>
-        get() {
-            val newList = mutableListOf<DelegateItem>()
-            for (i in 0..30) {
-                newList.add(stubSubscribedStreamDelegateItem)
+    suspend fun processSearch() {
+        doActionOnStreamDestination(
+            actionOnAllStreams = {
+                _allStreamsScreenState.value = ChannelsScreenState.Loading
+            },
+            actionOnSubscribedStreams = {
+                _subscribedStreamsScreenState.value = ChannelsScreenState.Loading
             }
-            return newList
-        }
-
-    private val stubAllStreamsList: List<DelegateItem>
-        get() {
-            val newList = mutableListOf<DelegateItem>()
-            for (i in 0..30) {
-                newList.add(stubAllStreamDelegateItem)
-            }
-            return newList
-        }
-
-
-    private val _allStreamsList = MutableStateFlow(stubAllStreamsList)
-    val allStreamsList = _allStreamsList.asStateFlow()
-
-    private val _subscribedStreamsList = MutableStateFlow(stubSubscribedStreamsList)
-    val subscribedStreamsList = _subscribedStreamsList.asStateFlow()
-
-
-    fun onStreamClick(stream: StreamDelegateItem, streamDestination: String) {
-        val streamModel = stream.content() as Stream
-        when (streamDestination) {
-            StreamsInfoFragment.ALL_STREAMS_DESTINATION -> {
-                if (streamModel.isExpanded) {
-                    val newListWithoutTopics = deleteTopics(
-                        listWhereDeleteTopics = _allStreamsList.value,
-                        stream = stream,
-                        streamModel = streamModel
-                    )
-                    _allStreamsList.value = newListWithoutTopics
-                } else {
-                    val newListWithTopics = addTopics(
-                        listWhereAddTopics = _allStreamsList.value,
-                        stream = stream,
-                        streamModel = streamModel
-                    )
-                    _allStreamsList.value = newListWithTopics
+        )
+        runCatchingNonCancellation {
+            stubStreamsUseCase.search(searchQueryFlow.value.trim(), streamDestination.value)
+        }.onSuccess {
+            doActionOnStreamDestination(
+                actionOnAllStreams = {
+                    _allStreamsScreenState.value = ChannelsScreenState.Content(it)
+                },
+                actionOnSubscribedStreams = {
+                    _subscribedStreamsScreenState.value = ChannelsScreenState.Content(it)
                 }
-            }
-
-            StreamsInfoFragment.SUBSCRIBED_STREAMS_DESTINATION -> {
-                if (streamModel.isExpanded) {
-                    val newListWithoutTopics = deleteTopics(
-                        listWhereDeleteTopics = _subscribedStreamsList.value,
-                        stream = stream,
-                        streamModel = streamModel
-                    )
-                    _subscribedStreamsList.value = newListWithoutTopics
-                } else {
-                    val newListWithTopics = addTopics(
-                        listWhereAddTopics = _subscribedStreamsList.value,
-                        stream = stream,
-                        streamModel = streamModel
-                    )
-                    _subscribedStreamsList.value = newListWithTopics
+            )
+        }.onFailure { error ->
+            doActionOnStreamDestination(
+                actionOnAllStreams = {
+                    _allStreamsScreenState.value =
+                        ChannelsScreenState.Error(error.message.toString())
+                },
+                actionOnSubscribedStreams = {
+                    _subscribedStreamsScreenState.value =
+                        ChannelsScreenState.Error(error.message.toString())
                 }
-            }
+            )
         }
     }
+
+
+
+    suspend fun setupStubData() {
+        doActionOnStreamDestination(
+            actionOnSubscribedStreams = {
+                _subscribedStreamsScreenState.value = ChannelsScreenState.Loading
+            },
+            actionOnAllStreams = {
+                _allStreamsScreenState.value = ChannelsScreenState.Loading
+            }
+        )
+        runCatchingNonCancellation {
+            when (streamDestination.value) {
+                StreamDestination.AllStreams -> {
+                    allStreamsList.value = stubStreamsUseCase.invoke(StreamDestination.AllStreams)
+                }
+                StreamDestination.Subscribed -> {
+                    subscribedStreamsList.value =  stubStreamsUseCase.invoke(StreamDestination.Subscribed)
+                }
+            }
+        }.onSuccess {
+            doActionOnStreamDestination(
+                actionOnSubscribedStreams = {
+                    _subscribedStreamsScreenState.value =
+                        ChannelsScreenState.Content(streamsList = subscribedStreamsList.value)
+                },
+                actionOnAllStreams = {
+                    _allStreamsScreenState.value =
+                        ChannelsScreenState.Content(streamsList = allStreamsList.value)
+                }
+            )
+        }.onFailure { error ->
+            doActionOnStreamDestination(
+                actionOnSubscribedStreams = {
+                    _subscribedStreamsScreenState.value =
+                        ChannelsScreenState.Error(error.message.toString())
+                },
+                actionOnAllStreams = {
+                    _allStreamsScreenState.value =
+                        ChannelsScreenState.Error(error.message.toString())
+                }
+            )
+        }
+    }
+
+    fun onStreamClick(stream: StreamDelegateItem) {
+        doActionOnStreamDestination(
+            actionOnAllStreams = {
+                handleStreamClick(
+                    screenStateForUpdate = _allStreamsScreenState,
+                    stream = stream
+                )
+            },
+            actionOnSubscribedStreams = {
+                handleStreamClick(
+                    screenStateForUpdate = _subscribedStreamsScreenState,
+                    stream = stream
+                )
+            }
+        )
+    }
+
+
+    fun findStreamByItsTopic(topic: Topic): Stream {
+        var result: Stream? = null
+        doActionOnStreamDestination(
+            actionOnAllStreams = {
+                result = findStreamByItsTopicInListSource(
+                    (_allStreamsScreenState.value as ChannelsScreenState.Content).streamsList,
+                    topic
+                )
+            },
+            actionOnSubscribedStreams = {
+                result = findStreamByItsTopicInListSource(
+                    (_subscribedStreamsScreenState.value as ChannelsScreenState.Content).streamsList,
+                    topic
+                )
+            }
+        )
+        return result ?: throw IllegalStateException("Invalid stream")
+    }
+
+    private fun handleStreamClick(
+        screenStateForUpdate: MutableStateFlow<ChannelsScreenState>,
+        stream: StreamDelegateItem,
+    ) {
+        val streamModel = stream.value
+        if (streamModel.isExpanded) {
+            val newListWithoutTopics = deleteTopics(
+                listWhereDeleteTopics = (screenStateForUpdate.value as ChannelsScreenState.Content).streamsList,
+                stream = stream,
+                streamModel = streamModel
+            )
+            screenStateForUpdate.update {
+                (it as ChannelsScreenState.Content).copy(
+                    streamsList = newListWithoutTopics
+                )
+            }
+            doActionOnStreamDestination(
+                actionOnAllStreams = { allStreamsList.value = newListWithoutTopics },
+                actionOnSubscribedStreams = { subscribedStreamsList.value = newListWithoutTopics }
+            )
+        } else {
+            val newListWithTopics = addTopics(
+                listWhereAddTopics = (screenStateForUpdate.value as ChannelsScreenState.Content).streamsList,
+                stream = stream,
+                streamModel = streamModel
+            )
+            screenStateForUpdate.update {
+                (it as ChannelsScreenState.Content).copy(
+                    streamsList = newListWithTopics
+                )
+            }
+            doActionOnStreamDestination(
+                actionOnAllStreams = { allStreamsList.value = newListWithTopics },
+                actionOnSubscribedStreams = { subscribedStreamsList.value = newListWithTopics }
+            )
+        }
+    }
+
 
     private fun addTopics(
         listWhereAddTopics: List<DelegateItem>,
@@ -173,34 +266,37 @@ class ChannelsViewModel : ViewModel() {
         return newList
     }
 
-
-    fun findStreamByItsTopic(topic: Topic, streamDestination: String): Stream {
-        var result: Stream? = null
-        when (streamDestination) {
-            StreamsInfoFragment.ALL_STREAMS_DESTINATION -> {
-                result = findStreamByItsTopicInListSource(_allStreamsList.value, topic)
-            }
-
-            StreamsInfoFragment.SUBSCRIBED_STREAMS_DESTINATION -> {
-                result = findStreamByItsTopicInListSource(_subscribedStreamsList.value, topic)
-            }
-        }
-        return result ?: throw IllegalStateException("Invalid stream")
-    }
-
-    private fun findStreamByItsTopicInListSource(listWhereToFind: List<DelegateItem>, topic: Topic): Stream? {
+    private fun findStreamByItsTopicInListSource(
+        listWhereToFind: List<DelegateItem>,
+        topic: Topic
+    ): Stream? {
         var result: Stream? = null
         listWhereToFind.forEach { delegateItem ->
             try {
                 val resultTopic =
-                    ((delegateItem as StreamDelegateItem).content() as Stream).topicsList.find {
+                    ((delegateItem as StreamDelegateItem).value.topicsList.find {
                         it.id == topic.id
-                    }
+                    })
                 if (resultTopic != null) {
-                    result = (delegateItem.content() as Stream)
+                    result = delegateItem.value
                 }
-            } catch (_: Exception) { }
+            } catch (_: Exception) {
+            }
         }
         return result
+    }
+
+    private inline fun doActionOnStreamDestination(
+        actionOnAllStreams: () -> Unit,
+        actionOnSubscribedStreams: () -> Unit,
+    ) {
+        when (streamDestination.value) {
+            StreamDestination.AllStreams -> {
+                actionOnAllStreams.invoke()
+            }
+            StreamDestination.Subscribed -> {
+                actionOnSubscribedStreams.invoke()
+            }
+        }
     }
 }
