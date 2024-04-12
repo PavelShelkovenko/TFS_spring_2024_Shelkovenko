@@ -25,13 +25,14 @@
     </fragment>
     <fragment
         android:id="@+id/profileFragment"
-        android:name="com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.profile.ProfileFragment"
+        android:name="com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.profile.local.LocalProfileFragment"
         android:label="fragment_profile"
-        tools:layout="@layout/fragment_profile" />
+        tools:layout="@layout/fragment_local_profile" />
     <fragment
         android:id="@+id/chatFragment"
         android:name="com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.ChatFragment"
-        android:label="ChatFragment" >
+        android:label="ChatFragment"
+        tools:layout="@layout/fragment_chat">
         <argument
             android:name="streamName"
             app:argType="string" />
@@ -41,10 +42,8 @@
     </fragment>
     <fragment
         android:id="@+id/anotherProfileFragment"
-        android:name="com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.profile.AnotherProfileFragment"
-        android:label="AnotherProfileFragment" >
-        <argument
-            android:name="userName"
-            app:argType="string" />
+        android:name="com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.profile.another.AnotherProfileFragment"
+        android:label="AnotherProfileFragment"
+        tools:layout="@layout/fragment_another_profile">
     </fragment>
 </navigation>

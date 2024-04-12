@@ -12,7 +12,7 @@ abstract class MessageDelegateItem: DelegateItem {
 
     abstract fun copy(): MessageDelegateItem
 
-    sealed class ChangePayload: DelegateItem.Payloadable {
-        data class ReactionListChanged(val reactionList: List<Reaction>): ChangePayload()
+    sealed class ChangePayload : DelegateItem.Payloadable {
+        data class ReactionListChanged(val reactionList: List<Reaction>) : ChangePayload()
     }
 }

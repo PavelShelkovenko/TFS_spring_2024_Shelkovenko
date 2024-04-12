@@ -1,12 +1,11 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat
 
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
@@ -17,7 +16,6 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.MainActivity
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.FragmentChatBinding
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.delegate_adapter.MainAdapter
@@ -76,24 +74,17 @@ class ChatFragment : Fragment() {
 
         setupClickListeners()
 
-        binding.messageField.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-
-            override fun afterTextChanged(s: Editable?) {
-                viewModel.processMessageFieldChanges(s.toString())
-                val str = s.toString()
-                if (str.isBlank()) {
-                    binding.sendMessageButton.visibility = View.GONE
-                    binding.sendFileButton.visibility = View.VISIBLE
-                } else {
-                    binding.sendMessageButton.visibility = View.VISIBLE
-                    binding.sendFileButton.visibility = View.GONE
-                }
+        binding.messageField.addTextChangedListener {
+            viewModel.processMessageFieldChanges(it.toString())
+            val str = it.toString()
+            if (str.isBlank()) {
+                binding.sendMessageButton.visibility = View.GONE
+                binding.sendFileButton.visibility = View.VISIBLE
+            } else {
+                binding.sendMessageButton.visibility = View.VISIBLE
+                binding.sendFileButton.visibility = View.GONE
             }
-
-        })
+        }
 
         with(binding) {
             streamName.text = args.streamName
@@ -107,16 +98,6 @@ class ChatFragment : Fragment() {
                 }
             }
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        (requireActivity() as MainActivity).hideBottomNavigationView()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        (requireActivity() as MainActivity).showBottomNavigationView()
     }
 
     override fun onDestroyView() {

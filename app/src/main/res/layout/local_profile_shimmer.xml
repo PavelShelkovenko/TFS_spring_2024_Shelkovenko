@@ -4,16 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".presentation.profile.ProfileFragment"
+    tools:context=".presentation.profile.local.LocalProfileFragment"
     android:background="@color/light_black">
 
 
     <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/user_avatar_image"
+        android:id="@+id/user_avatar_image_shimmer"
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:contentDescription="@string/user_avatar"
-        android:src="@drawable/ic_launcher_background"
+        android:background="@color/shimmerColor"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -23,60 +23,48 @@
         app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CutCornersAvatarShape" />
 
     <TextView
-        android:id="@+id/user_name"
-        android:layout_width="wrap_content"
+        android:id="@+id/user_name_shimmer"
+        android:layout_width="220dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Darrewll Steward"
+        android:background="@drawable/shimmer_background"
         android:textSize="28sp"
         android:textColor="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/user_avatar_image" />
+        app:layout_constraintTop_toBottomOf="@+id/user_avatar_image_shimmer" />
 
     <LinearLayout
-        android:id="@+id/user_status_container"
+        android:id="@+id/user_status_container_shimmer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/user_name">
+        app:layout_constraintTop_toBottomOf="@+id/user_name_shimmer">
 
         <TextView
-            android:id="@+id/user_activity_status"
-            android:layout_width="wrap_content"
+            android:id="@+id/user_activity_status_shimmer"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:text="In a meeting"
-            android:textColor="@color/light_gray"
+            android:background="@drawable/shimmer_background"
             android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_avatar_image" />
+            app:layout_constraintTop_toBottomOf="@+id/user_avatar_image_shimmer" />
 
         <TextView
-            android:id="@+id/user_connection_status"
-            android:layout_width="wrap_content"
+            android:id="@+id/user_online_status_shimmer"
+            android:layout_width="50dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
-            android:text="online"
+            android:background="@drawable/shimmer_background"
             android:textColor="@color/green"
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_avatar_image" />
+            app:layout_constraintTop_toBottomOf="@+id/user_avatar_image_shimmer" />
 
     </LinearLayout>
-
-    <Button
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:backgroundTint="@color/gray"
-        android:text="@string/log_out"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/user_status_container" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

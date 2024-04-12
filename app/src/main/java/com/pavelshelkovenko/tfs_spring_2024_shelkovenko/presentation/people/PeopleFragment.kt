@@ -1,18 +1,20 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.people
 
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.FragmentPeopleBinding
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.homework_5.GetStubUsersUseCase
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 class PeopleFragment : Fragment() {
@@ -24,60 +26,118 @@ class PeopleFragment : Fragment() {
 
     private lateinit var viewModel: PeopleViewModel
 
+    private val peopleAdapter by lazy {
+        PeopleAdapter(
+            onUserClickListener = {
+                binding.searchField.setText("")
+                findNavController().navigate(
+                    PeopleFragmentDirections.actionPeopleFragmentToAnotherProfileFragment()
+                )
+            }
+        )
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentPeopleBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this)[PeopleViewModel::class.java]
-        val peopleAdapter = PeopleAdapter()
+        val stubUsersUseCase = GetStubUsersUseCase(requireActivity().applicationContext)
+        viewModel = ViewModelProvider(
+            this,
+            PeopleViewModelFactory(stubUsersUseCase)
+        )[PeopleViewModel::class.java]
         binding.peopleRv.adapter = peopleAdapter
 
-        binding.cancelButton.setOnClickListener {
-            binding.searchField.setText("")
-        }
+        setupClickListeners()
 
-        peopleAdapter.onUserClickListener = { userName ->
-            findNavController().navigate(
-                PeopleFragmentDirections.actionPeopleFragmentToAnotherProfileFragment(userName)
-            )
-        }
-
-        binding.searchField.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-
-            override fun afterTextChanged(s: Editable?) {
-                val str = s.toString()
-                if (str.isBlank()) {
-                    binding.questionMarkButton.visibility = View.VISIBLE
-                    binding.cancelButton.visibility = View.GONE
-                } else {
-                    binding.questionMarkButton.visibility = View.GONE
-                    binding.cancelButton.visibility = View.VISIBLE
+        binding.searchField.addTextChangedListener {
+            it?.let {
+                viewModel.searchQueryFlow.tryEmit(it.toString())
+                with(binding) {
+                    if (it.toString().isEmpty()) {
+                        questionMarkButton.isVisible = true
+                        cancelButton.isVisible = false
+                    } else {
+                        questionMarkButton.isVisible = false
+                        cancelButton.isVisible = true
+                    }
                 }
-            }
 
-        })
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                viewModel.userList.collect { newUserList ->
-                    peopleAdapter.submitList(newUserList)
-                }
             }
         }
 
+        viewModel.screenState
+            .flowWithLifecycle(lifecycle)
+            .onEach(::render)
+            .launchIn(lifecycleScope)
+    }
+
+    private fun setupClickListeners() {
+        with(binding) {
+            cancelButton.setOnClickListener {
+                binding.searchField.setText("")
+            }
+            errorComponent.retryButton.setOnClickListener {
+                lifecycleScope.launch {
+                    if (viewModel.searchQueryFlow.value.isNotEmpty()) {
+                        viewModel.processSearch(viewModel.searchQueryFlow.value)
+                    } else {
+                        viewModel.setupStubData()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun render(newScreenState: PeopleScreenState) {
+        when (newScreenState) {
+            is PeopleScreenState.Content -> {
+                with(binding) {
+                    shimmerContainer.stopShimmer()
+                    shimmerContainer.isVisible = false
+                    peopleRv.isVisible = true
+                    errorContainer.isVisible = false
+                }
+                peopleAdapter.submitList(newScreenState.userList)
+            }
+
+            is PeopleScreenState.Error -> {
+                with(binding) {
+                    shimmerContainer.stopShimmer()
+                    shimmerContainer.isVisible = false
+                    peopleRv.isVisible = false
+                    errorContainer.isVisible = true
+                }
+            }
+
+            is PeopleScreenState.Initial -> {
+                with(binding) {
+                    shimmerContainer.isVisible = false
+                    errorContainer.isVisible = false
+                    peopleRv.isVisible = false
+                }
+            }
+
+            is PeopleScreenState.Loading -> {
+                with(binding) {
+                    shimmerContainer.isVisible = true
+                    shimmerContainer.startShimmer()
+                    errorContainer.isVisible = false
+                    peopleRv.isVisible = false
+                }
+            }
+        }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
+
 }

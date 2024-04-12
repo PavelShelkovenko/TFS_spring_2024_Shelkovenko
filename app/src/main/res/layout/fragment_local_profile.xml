@@ -7,44 +7,10 @@
     tools:context=".presentation.profile.local.LocalProfileFragment"
     android:background="@color/light_black">
 
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:background="@color/gray"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageButton
-            android:id="@+id/back_button"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginStart="12dp"
-            android:layout_gravity="center"
-            android:background="@android:color/transparent"
-            android:src="@drawable/ic_arrow_back_28"
-            android:contentDescription="@string/back_button" />
-
-        <TextView
-            android:id="@+id/stream_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/profile"
-            android:textSize="18sp"
-            android:gravity="center"
-            android:layout_gravity="center"
-            android:layout_marginEnd="36dp"
-            android:textColor="@color/white"/>
-
-    </LinearLayout>
-
-
     <com.facebook.shimmer.ShimmerFrameLayout
         android:id="@+id/shimmerContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="50dp"
         app:shimmer_duration="800"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -62,17 +28,12 @@
         android:id="@+id/error_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="50dp"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:visibility="invisible">
 
-        <include
+        <include layout="@layout/error_screen"
             android:id="@+id/error_component"
-            layout="@layout/error_screen"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"/>
 
     </FrameLayout>
 
@@ -131,7 +92,18 @@
 
     </LinearLayout>
 
+    <Button
+        android:id="@+id/log_out_button"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/gray"
+        android:text="@string/log_out"
+        android:textSize="16sp"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/user_status_container" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-

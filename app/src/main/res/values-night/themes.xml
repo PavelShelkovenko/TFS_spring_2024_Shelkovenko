@@ -1,9 +1,30 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!-- Base application theme. -->
     <style name="Base.Theme.TFS_spring_2024_Shelkovenko" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <!-- Customize your light theme here. -->
+        <item name="colorPrimary">@color/gray</item>
         <item name="emojiDefaultAttr">@style/DefaultEmojiReactionStyle</item>
     </style>
+
+    <style name="Theme.TFS_spring_2024_Shelkovenko" parent="Base.Theme.TFS_spring_2024_Shelkovenko" />
+
+    <style name="EmojiBottomSheetStyle" parent="Widget.Material3.BottomSheet.Modal">
+        <item name="android:background">@color/light_blue</item>
+    </style>
+
+    <style name="EmojiBottomSheetTheme" parent="Theme.Material3.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/EmojiBottomSheetStyle</item>
+    </style>
+
+    <style name="ShapeAppearanceOverlay.CircularAvatarShape" parent="">
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="ShapeAppearanceOverlay.CutCornersAvatarShape" parent="">
+        <item name="cornerSize">10%</item>
+    </style>>
+
+    <style name="CustomTabTextAppearance" parent="TextAppearance.AppCompat.Medium">
+        <item name="android:textSize">18sp</item>  </style>
 
 </resources>

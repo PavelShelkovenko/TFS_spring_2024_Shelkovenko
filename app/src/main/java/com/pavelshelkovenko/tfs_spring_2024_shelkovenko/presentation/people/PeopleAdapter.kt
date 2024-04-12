@@ -9,10 +9,12 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.UserItemBind
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.models.User
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.models.UserOnlineStatus
 
-class PeopleAdapter :
+class PeopleAdapter(
+    private val onUserClickListener: (String) -> Unit
+) :
     ListAdapter<User, PeopleAdapter.ViewHolder>(UserDiffCallback()) {
 
-    var onUserClickListener: ((String) -> Unit)? = null
+    //var onUserClickListener: ((String) -> Unit)? = null
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(
             UserItemBinding.inflate(
@@ -32,7 +34,7 @@ class PeopleAdapter :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(user: User) {
 
-            val backgroundResId = when(user.status) {
+            val backgroundResId = when(user.onlineStatus) {
                 UserOnlineStatus.ACTIVE -> R.drawable.green_circle_background
                 UserOnlineStatus.IDLE -> R.drawable.orange_circle_background
                 UserOnlineStatus.OFFLINE -> R.drawable.gray_circle_background
@@ -44,9 +46,11 @@ class PeopleAdapter :
                 userName.text = user.name
                 userEmail.text = user.email
                 userItemContainer.setOnClickListener {
-                    onUserClickListener?.invoke(user.name)
+                    onUserClickListener.invoke(user.name)
                 }
             }
         }
     }
+
+
 }

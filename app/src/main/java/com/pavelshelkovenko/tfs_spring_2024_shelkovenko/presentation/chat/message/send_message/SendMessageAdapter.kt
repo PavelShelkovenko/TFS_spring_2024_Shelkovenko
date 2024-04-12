@@ -3,10 +3,10 @@ package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.messa
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.models.User
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.SendMessageBinding
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.delegate_adapter.DelegateAdapter
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.delegate_adapter.DelegateItem
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.SendMessageBinding
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.models.User
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message.MessageDelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message.reaction.Reaction
 
@@ -47,7 +47,7 @@ class SendMessageAdapter :
     inner class ViewHolder(private val binding: SendMessageBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(model: SendMessageDelegateItem) {
-            val messageModel = model.content() as SendMessageModel
+            val messageModel = model.value
             with(binding) {
                 messageGroup.setTextMessage(messageModel.textMessage)
                 messageGroup.setReactionList(

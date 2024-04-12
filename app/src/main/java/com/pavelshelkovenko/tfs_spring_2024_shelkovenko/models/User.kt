@@ -7,7 +7,8 @@ data class User(
     val avatar: Bitmap,
     val name: String,
     val email: String,
-    val status: UserOnlineStatus,
+    val onlineStatus: UserOnlineStatus,
+    val activityStatus: String,
 )
 
 enum class UserOnlineStatus {

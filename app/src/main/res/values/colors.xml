@@ -9,4 +9,5 @@
     <color name="gray">#FF252626</color>
     <color name="light_gray">#FF646967</color>
     <color name="orange">#FFc96b06</color>
+    <color name="shimmerColor">#C2C2C2</color>
 </resources>

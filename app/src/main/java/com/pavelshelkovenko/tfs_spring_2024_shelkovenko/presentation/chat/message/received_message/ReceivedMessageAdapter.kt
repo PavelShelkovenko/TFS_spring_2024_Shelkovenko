@@ -3,10 +3,10 @@ package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.messa
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.models.User
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.ReceivedMessageBinding
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.delegate_adapter.DelegateAdapter
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.delegate_adapter.DelegateItem
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.ReceivedMessageBinding
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.models.User
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message.MessageDelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message.reaction.Reaction
 
@@ -46,7 +46,7 @@ class ReceivedMessageAdapter :
     inner class ViewHolder(private val binding: ReceivedMessageBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(model: ReceivedMessageDelegateItem) {
-            val messageModel = model.content() as ReceivedMessageModel
+            val messageModel = model.value
             with(binding) {
                 messageGroup.setUserAvatar(messageModel.userAvatar)
                 messageGroup.setUserName(messageModel.userName)

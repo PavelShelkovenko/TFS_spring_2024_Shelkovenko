@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@color/light_black"
     tools:context=".presentation.people.PeopleFragment">
 
     <LinearLayout
@@ -14,24 +15,24 @@
         android:background="@color/gray"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" >
+        app:layout_constraintTop_toTopOf="parent">
 
         <EditText
             android:id="@+id/search_field"
             android:layout_width="0dp"
-            android:paddingHorizontal="12dp"
-            android:layout_weight="1"
             android:layout_height="match_parent"
-            android:background="@drawable/write_message_edit_text_background"
             android:layout_marginHorizontal="8dp"
-            android:maxLines="1"
             android:layout_marginStart="12dp"
-            android:textColorHint="@color/light_gray"
+            android:layout_weight="1"
+            android:background="@drawable/write_message_edit_text_background"
+            android:hint="@string/users_search_hint"
+            android:maxLines="1"
+            android:paddingHorizontal="12dp"
             android:singleLine="true"
             android:textColor="@color/white"
+            android:textColorHint="@color/light_gray"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            android:hint="@string/users_search_hint" />
+            app:layout_constraintStart_toStartOf="parent" />
 
         <FrameLayout
             android:layout_width="wrap_content"
@@ -45,7 +46,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginRight="8dp"
                 android:background="@android:color/transparent"
-                android:src="@drawable/ic_search_24"/>
+                android:src="@drawable/ic_search_24" />
 
             <ImageButton
                 android:id="@+id/cancel_button"
@@ -53,18 +54,83 @@
                 android:layout_height="48dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginRight="8dp"
-                android:visibility="gone"
                 android:background="@android:color/transparent"
-                android:src="@drawable/ic_close_24"/>
+                android:src="@drawable/ic_close_24"
+                android:visibility="gone" />
 
         </FrameLayout>
 
     </LinearLayout>
 
+
+    <FrameLayout
+        android:id="@+id/error_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="50dp">
+
+        <include layout="@layout/error_screen"
+            android:id="@+id/error_component"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"/>
+
+    </FrameLayout>
+
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/shimmerContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:shimmer_duration="800"
+        android:background="@color/light_black"
+        android:layout_marginTop="50dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/search_container">
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <include layout="@layout/user_item_shimmer"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"/>
+
+            <include layout="@layout/user_item_shimmer"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"/>
+
+            <include layout="@layout/user_item_shimmer"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"/>
+
+            <include layout="@layout/user_item_shimmer"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"/>
+
+            <include layout="@layout/user_item_shimmer"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"/>
+
+            <include layout="@layout/user_item_shimmer"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"/>
+
+            <include layout="@layout/user_item_shimmer"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"/>
+
+
+        </LinearLayout>
+        
+    </com.facebook.shimmer.ShimmerFrameLayout>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/people_rv"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="50dp"
         android:background="@color/light_black"
         android:orientation="vertical"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
@@ -73,4 +139,4 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/search_container" />
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
