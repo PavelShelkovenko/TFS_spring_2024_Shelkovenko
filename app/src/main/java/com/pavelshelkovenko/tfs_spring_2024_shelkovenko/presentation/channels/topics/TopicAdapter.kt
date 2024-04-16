@@ -3,9 +3,10 @@ package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.t
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.TopicItemBinding
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.delegate_adapter.DelegateAdapter
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.delegate_adapter.DelegateItem
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.TopicItemBinding
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Topic
 
 
 class TopicAdapter : DelegateAdapter<TopicDelegateItem, TopicAdapter.ViewHolder>(TopicDelegateItem::class.java) {
@@ -33,7 +34,6 @@ class TopicAdapter : DelegateAdapter<TopicDelegateItem, TopicAdapter.ViewHolder>
         fun bind(model: Topic) {
             with(binding) {
                 topicName.text = model.name
-                messageCount.text = model.messageCount.toString()
                 topicContainer.setBackgroundColor(model.color)
                 topicContainer.setOnClickListener {
                     onTopicClickListener?.invoke(model)

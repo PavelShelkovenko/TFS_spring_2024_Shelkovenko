@@ -6,12 +6,12 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message.reaction.EmojiFactory
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.custom_views.EmojiReactionView
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.custom_views.FlexBoxLayout
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.DemoActivityBinding
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.ReceivedMessageViewGroupBinding
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message.reaction.EmojiFactory
 import kotlin.random.Random
 
 class DemoActivity : AppCompatActivity() {
@@ -53,7 +53,7 @@ class DemoActivity : AppCompatActivity() {
                 R.drawable.ic_launcher_background,
                 null
             )?.toBitmap() ?: throw IllegalArgumentException("Drawable not found")
-           binding.messageGroup.setUserAvatar(someUserAvatar)
+           binding.messageGroup.userAvatar.setImageBitmap(someUserAvatar)
         } catch (ex: Exception) {
             Log.e("DemoActivity", ex.message.toString())
         }
@@ -68,7 +68,7 @@ class DemoActivity : AppCompatActivity() {
         emojiView.apply {
             val emoji = EmojiFactory.getEmojiList().shuffled().first()
             val count = Random.nextInt(1, 3)
-            this.setEmojiCode(emoji.code)
+            this.setEmojiCode(emoji.emojiCode)
             this.setReactionCount(count.toString())
             this.isSelectedReaction = true
             val selectionColor = resources.getColor(R.color.light_blue, null)

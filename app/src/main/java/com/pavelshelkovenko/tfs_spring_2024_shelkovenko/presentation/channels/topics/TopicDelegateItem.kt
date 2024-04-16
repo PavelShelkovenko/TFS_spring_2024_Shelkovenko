@@ -1,6 +1,7 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.topics
 
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.delegate_adapter.DelegateItem
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Topic
 
 class TopicDelegateItem(
     val id: Int,

@@ -1,7 +1,7 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.people
 
 import androidx.recyclerview.widget.DiffUtil
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.models.User
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.User
 
 class UserDiffCallback: DiffUtil.ItemCallback<User>() {
 

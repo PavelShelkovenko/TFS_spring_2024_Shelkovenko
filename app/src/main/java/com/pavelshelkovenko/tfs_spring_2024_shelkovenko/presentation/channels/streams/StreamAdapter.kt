@@ -4,9 +4,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.StreamItemBinding
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.delegate_adapter.DelegateAdapter
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.delegate_adapter.DelegateItem
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.StreamItemBinding
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Stream
 
 class StreamAdapter :
     DelegateAdapter<StreamDelegateItem, StreamAdapter.ViewHolder>(StreamDelegateItem::class.java) {

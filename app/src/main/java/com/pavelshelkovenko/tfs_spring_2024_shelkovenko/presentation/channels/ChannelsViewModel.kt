@@ -3,11 +3,12 @@ package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.delegate_adapter.DelegateItem
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.homework_5.GetStubStreamsUseCase
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.streams.Stream
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.StreamRepository
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Stream
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.StreamDestination
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Topic
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.generateRandomId
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.streams.StreamDelegateItem
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.streams.StreamDestination
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.topics.Topic
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.topics.TopicDelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.runCatchingNonCancellation
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +24,7 @@ import kotlinx.coroutines.flow.update
 
 
 class ChannelsViewModel(
-    private val stubStreamsUseCase: GetStubStreamsUseCase
+    private val repository: StreamRepository
 ) : ViewModel() {
 
     private val _allStreamsScreenState =
@@ -39,7 +40,7 @@ class ChannelsViewModel(
 
     val searchQueryFlow = MutableStateFlow("")
 
-    val streamDestination = MutableStateFlow(StreamDestination.Subscribed)
+    val streamDestination = MutableStateFlow(StreamDestination.SUBSCRIBED)
 
     init {
         collectSearchQuery()
@@ -76,7 +77,13 @@ class ChannelsViewModel(
             }
         )
         runCatchingNonCancellation {
-            stubStreamsUseCase.search(searchQueryFlow.value.trim(), streamDestination.value)
+            val streamsList = repository.searchStreams(searchQueryFlow.value, streamDestination.value)
+            streamsList.map { stream ->
+                StreamDelegateItem(
+                    id = generateRandomId(),
+                    value = stream
+                )
+            }
         }.onSuccess {
             doActionOnStreamDestination(
                 actionOnAllStreams = {
@@ -113,11 +120,25 @@ class ChannelsViewModel(
         )
         runCatchingNonCancellation {
             when (streamDestination.value) {
-                StreamDestination.AllStreams -> {
-                    allStreamsList.value = stubStreamsUseCase.invoke(StreamDestination.AllStreams)
+                StreamDestination.AllSTREAMS -> {
+                    val streamsList = repository.getAllStreams()
+                    val delegateList = streamsList.map { stream ->
+                        StreamDelegateItem(
+                            id = generateRandomId(),
+                            value = stream
+                        )
+                    }
+                    allStreamsList.value = delegateList
                 }
-                StreamDestination.Subscribed -> {
-                    subscribedStreamsList.value =  stubStreamsUseCase.invoke(StreamDestination.Subscribed)
+                StreamDestination.SUBSCRIBED -> {
+                    val streamsList = repository.getSubscribedStreams()
+                    val delegateList = streamsList.map { stream ->
+                        StreamDelegateItem(
+                            id = generateRandomId(),
+                            value = stream
+                        )
+                    }
+                    subscribedStreamsList.value = delegateList
                 }
             }
         }.onSuccess {
@@ -163,19 +184,19 @@ class ChannelsViewModel(
     }
 
 
-    fun findStreamByItsTopic(topic: Topic): Stream {
+    fun findStreamByItsTopicId(topicId: Int): Stream {
         var result: Stream? = null
         doActionOnStreamDestination(
             actionOnAllStreams = {
-                result = findStreamByItsTopicInListSource(
+                result = findStreamByItsTopicIdInListSource(
                     (_allStreamsScreenState.value as ChannelsScreenState.Content).streamsList,
-                    topic
+                    topicId
                 )
             },
             actionOnSubscribedStreams = {
-                result = findStreamByItsTopicInListSource(
+                result = findStreamByItsTopicIdInListSource(
                     (_subscribedStreamsScreenState.value as ChannelsScreenState.Content).streamsList,
-                    topic
+                    topicId
                 )
             }
         )
@@ -237,7 +258,7 @@ class ChannelsViewModel(
                 )
                 newList.add(newStreamDelegateItem)
                 for (topic in streamModel.topicsList) {
-                    val topicDelegateItem = TopicDelegateItem(id = topic.id, value = topic)
+                    val topicDelegateItem = TopicDelegateItem(id = generateRandomId(), value = topic)
                     newList.add(topicDelegateItem)
                 }
             }
@@ -266,21 +287,24 @@ class ChannelsViewModel(
         return newList
     }
 
-    private fun findStreamByItsTopicInListSource(
+    private fun findStreamByItsTopicIdInListSource(
         listWhereToFind: List<DelegateItem>,
-        topic: Topic
+        topicId: Int
     ): Stream? {
-        var result: Stream? = null
-        listWhereToFind.forEach { delegateItem ->
+        val result: Stream? = null
+        var topicIndex: Int? = null
+        listWhereToFind.forEachIndexed { index, delegateItem ->
             try {
-                val resultTopic =
-                    ((delegateItem as StreamDelegateItem).value.topicsList.find {
-                        it.id == topic.id
-                    })
-                if (resultTopic != null) {
-                    result = delegateItem.value
+                if ((delegateItem.content() as Topic).id == topicId) {
+                    topicIndex = index
                 }
-            } catch (_: Exception) {
+            } catch (_: Exception) {}
+        }
+        if (topicIndex != null) {
+            for (i in topicIndex!! downTo 0) {
+                if (listWhereToFind[i] is StreamDelegateItem) {
+                    return (listWhereToFind[i] as StreamDelegateItem).value
+                }
             }
         }
         return result
@@ -291,10 +315,10 @@ class ChannelsViewModel(
         actionOnSubscribedStreams: () -> Unit,
     ) {
         when (streamDestination.value) {
-            StreamDestination.AllStreams -> {
+            StreamDestination.AllSTREAMS -> {
                 actionOnAllStreams.invoke()
             }
-            StreamDestination.Subscribed -> {
+            StreamDestination.SUBSCRIBED -> {
                 actionOnSubscribedStreams.invoke()
             }
         }

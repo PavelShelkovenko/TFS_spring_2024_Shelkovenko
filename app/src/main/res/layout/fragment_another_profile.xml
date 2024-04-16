@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".presentation.profile.local.LocalProfileFragment"
+    tools:context=".presentation.profile.local.OwnProfileFragment"
     android:background="@color/light_black">
 
 
@@ -46,6 +46,7 @@
         android:layout_height="match_parent"
         android:layout_marginTop="50dp"
         app:shimmer_duration="800"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -63,7 +64,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="50dp"
-        android:visibility="invisible"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -80,13 +81,15 @@
         android:id="@+id/user_avatar_image"
         android:layout_width="150dp"
         android:layout_height="150dp"
+        android:layout_marginTop="50dp"
+        android:src="@drawable/ic_launcher_background"
         android:contentDescription="@string/user_avatar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.2"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintVertical_bias="0.3"
         app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CutCornersAvatarShape" />
 
     <TextView
@@ -98,38 +101,18 @@
         android:textColor="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/user_avatar_image" />
+        app:layout_constraintTop_toBottomOf="@+id/user_avatar_image"
+        tools:text="Some Username"/>
 
-    <LinearLayout
-        android:id="@+id/user_status_container"
+    <TextView
+        android:id="@+id/user_online_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/user_name">
-
-        <TextView
-            android:id="@+id/user_activity_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/light_gray"
-            android:textSize="18sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_avatar_image" />
-
-        <TextView
-            android:id="@+id/user_online_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:textColor="@color/green"
-            android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_avatar_image" />
-
-    </LinearLayout>
+        app:layout_constraintTop_toBottomOf="@+id/user_name"
+        tools:text="Some status"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

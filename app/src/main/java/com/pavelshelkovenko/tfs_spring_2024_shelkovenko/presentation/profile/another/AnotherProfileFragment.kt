@@ -10,8 +10,13 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
+import com.bumptech.glide.Glide
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.ZulipApi
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.ZulipUserRepository
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.FragmentAnotherProfileBinding
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.homework_5.GetStubAnotherUserUseCase
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.usecase.GetAnotherProfileUseCase
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.setColoredTextStatus
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -22,6 +27,8 @@ class AnotherProfileFragment : Fragment() {
     private val binding: FragmentAnotherProfileBinding
         get() = _binding ?: throw RuntimeException("FragmentAnotherProfileBinding == null")
 
+
+    private val args by navArgs<AnotherProfileFragmentArgs>()
 
     private lateinit var viewModel: AnotherProfileViewModel
 
@@ -37,17 +44,23 @@ class AnotherProfileFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupClickListeners()
 
-        val stubAnotherUserUseCase = GetStubAnotherUserUseCase(requireActivity().applicationContext)
+        val repository = ZulipUserRepository(ZulipApi())
+        val useCase = GetAnotherProfileUseCase(repository)
+
         viewModel = ViewModelProvider(
             this,
-            AnotherProfileViewModelFactory(stubAnotherUserUseCase)
+            AnotherProfileViewModelFactory(useCase)
         )[AnotherProfileViewModel::class.java]
+
 
         viewModel.screenState
             .flowWithLifecycle(lifecycle)
             .onEach(::render)
             .launchIn(lifecycleScope)
 
+        lifecycleScope.launch {
+            viewModel.downloadData(args.userId)
+        }
     }
 
     override fun onDestroyView() {
@@ -59,7 +72,7 @@ class AnotherProfileFragment : Fragment() {
         with(binding) {
             errorComponent.retryButton.setOnClickListener {
                 lifecycleScope.launch {
-                    viewModel.setupStubData()
+                    viewModel.downloadData(args.userId)
                 }
             }
             backButton.setOnClickListener {
@@ -69,51 +82,40 @@ class AnotherProfileFragment : Fragment() {
     }
 
     private fun render(newScreenState: AnotherProfileScreenState) {
-        when (newScreenState) {
-            is AnotherProfileScreenState.Content -> {
-                with(binding) {
+        with(binding) {
+            when (newScreenState) {
+                is AnotherProfileScreenState.Content -> {
                     shimmerContainer.stopShimmer()
                     errorContainer.isVisible = false
                     shimmerContainer.isVisible = false
                     userAvatarImage.isVisible = true
                     userName.isVisible = true
                     userOnlineStatus.isVisible = true
-                    userActivityStatus.isVisible = true
                     userName.text = newScreenState.anotherUser.name
-                    userAvatarImage.setImageBitmap(newScreenState.anotherUser.avatar)
-                    userActivityStatus.text = newScreenState.anotherUser.activityStatus
-                    userOnlineStatus.text = newScreenState.anotherUser.onlineStatus.name.lowercase()
+                    userOnlineStatus.setColoredTextStatus(newScreenState.anotherUser.onlineStatus)
+                    Glide.with(root).load(newScreenState.anotherUser.avatarUrl).into(userAvatarImage)
                 }
-            }
-            is AnotherProfileScreenState.Error -> {
-                with(binding) {
+                is AnotherProfileScreenState.Error -> {
                     errorContainer.isVisible = true
                     shimmerContainer.isVisible = false
                     userAvatarImage.isVisible = false
                     userName.isVisible = false
                     userOnlineStatus.isVisible = false
-                    userActivityStatus.isVisible = false
                 }
-            }
-            AnotherProfileScreenState.Initial -> {
-                with(binding) {
+                AnotherProfileScreenState.Initial -> {
                     errorContainer.isVisible = false
                     shimmerContainer.isVisible = false
                     userAvatarImage.isVisible = false
                     userName.isVisible = false
                     userOnlineStatus.isVisible = false
-                    userActivityStatus.isVisible = false
                 }
-            }
-            AnotherProfileScreenState.Loading -> {
-                with(binding) {
+                AnotherProfileScreenState.Loading -> {
                     errorContainer.isVisible = false
                     shimmerContainer.isVisible = true
                     shimmerContainer.startShimmer()
                     userAvatarImage.isVisible = false
                     userName.isVisible = false
                     userOnlineStatus.isVisible = false
-                    userActivityStatus.isVisible = false
                 }
             }
         }

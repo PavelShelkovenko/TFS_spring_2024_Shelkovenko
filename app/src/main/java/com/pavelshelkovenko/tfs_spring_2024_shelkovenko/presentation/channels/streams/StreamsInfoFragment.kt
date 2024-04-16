@@ -1,6 +1,7 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.streams
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,9 +11,11 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.ZulipApi
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.ZulipStreamRepository
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.FragmentStreamsInfoBinding
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.delegate_adapter.MainAdapter
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.homework_5.GetStubStreamsUseCase
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.StreamDestination
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.ChannelFragmentDirections
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.ChannelsScreenState
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.ChannelsViewModel
@@ -35,9 +38,9 @@ class StreamsInfoFragment : Fragment() {
             .build()
     }
 
-    private val stubStreamsUseCase = GetStubStreamsUseCase()
+    private val repository = ZulipStreamRepository(ZulipApi())
     private val viewModel: ChannelsViewModel by activityViewModels(
-        factoryProducer = { ChannelsViewModelFactory(stubStreamsUseCase) }
+        factoryProducer = { ChannelsViewModelFactory(repository) }
     )
 
     override fun onCreateView(
@@ -61,13 +64,13 @@ class StreamsInfoFragment : Fragment() {
         setupClickListeners()
 
         when(streamDestination) {
-            StreamDestination.Subscribed -> {
+            StreamDestination.SUBSCRIBED -> {
                 viewModel.subscribedScreenState
                     .flowWithLifecycle(lifecycle)
                     .onEach(::render)
                     .launchIn(lifecycleScope)
             }
-            StreamDestination.AllStreams -> {
+            StreamDestination.AllSTREAMS -> {
                 viewModel.allStreamsScreenState
                     .flowWithLifecycle(lifecycle)
                     .onEach(::render)
@@ -94,33 +97,27 @@ class StreamsInfoFragment : Fragment() {
     }
 
     private fun render(newScreenState: ChannelsScreenState) {
-        when(newScreenState) {
-            is ChannelsScreenState.Initial -> {
-                with(binding) {
+        with(binding) {
+            when(newScreenState) {
+                is ChannelsScreenState.Initial -> {
                     shimmerContainer.isVisible = false
                     streamsInfoRv.isVisible = false
                     errorContainer.isVisible = false
                 }
-            }
-            is ChannelsScreenState.Loading -> {
-                with(binding) {
+                is ChannelsScreenState.Loading -> {
                     shimmerContainer.isVisible = true
                     streamsInfoRv.isVisible = false
                     errorContainer.isVisible = false
                     shimmerContainer.startShimmer()
                 }
-            }
-            is ChannelsScreenState.Content -> {
-                with(binding) {
+                is ChannelsScreenState.Content -> {
                     shimmerContainer.stopShimmer()
                     shimmerContainer.isVisible = false
                     errorContainer.isVisible = false
                     streamsInfoRv.isVisible = true
+                    mainAdapter.submitList(newScreenState.streamsList)
                 }
-                mainAdapter.submitList(newScreenState.streamsList)
-            }
-            is ChannelsScreenState.Error -> {
-                with(binding) {
+                is ChannelsScreenState.Error -> {
                     shimmerContainer.stopShimmer()
                     errorContainer.isVisible = true
                     shimmerContainer.isVisible = false
@@ -138,24 +135,18 @@ class StreamsInfoFragment : Fragment() {
             viewModel.onStreamClick(stream)
         }
 
-        /*
-        Tут streamName получаем таким странным образом потому, что непонятно пока вообще как будет
-        получаться информация по стримам, по топикам, будут ли методы другие чтобы в сеть и вытащить
-        топик по стриму. В общем пока на стабах, сделал так, чтобы работало более менее, но на лучшее
-        решение не претендую
-         */
         topicAdapter.onTopicClickListener = { topic ->
-            val streamName = try {
-                viewModel.findStreamByItsTopic(topic = topic).name
-            } catch (ex: Exception) {
-                "Stream name wasn't found"
-            }
-            findNavController().navigate(
-                ChannelFragmentDirections.actionChannelFragmentToChatFragment(
-                    topicName = "Topic: ${topic.name}",
-                    streamName = streamName
+            try {
+                val stream = viewModel.findStreamByItsTopicId(topicId = topic.id)
+                findNavController().navigate(
+                    ChannelFragmentDirections.actionChannelFragmentToChatFragment(
+                        topicName = topic.name,
+                        streamName = stream.name
+                    )
                 )
-            )
+            } catch (ex: Exception) {
+                Log.d("TAG", "Invalid Stream Name")
+            }
         }
 
         binding.errorComponent.retryButton.setOnClickListener {

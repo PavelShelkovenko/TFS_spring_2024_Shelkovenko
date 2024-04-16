@@ -10,9 +10,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.google.android.material.tabs.TabLayoutMediator
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.ZulipApi
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.ZulipStreamRepository
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.FragmentChannelBinding
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.homework_5.GetStubStreamsUseCase
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.streams.StreamDestination
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.StreamDestination
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.streams.StreamsInfoFragment
 
 class ChannelFragment : Fragment() {
@@ -21,9 +22,10 @@ class ChannelFragment : Fragment() {
     private val binding: FragmentChannelBinding
         get() = _binding ?: throw RuntimeException("FragmentChannelBinding == null")
 
-    private val stubStreamsUseCase = GetStubStreamsUseCase()
+    private val repository = ZulipStreamRepository(ZulipApi())
+
     private val viewModel: ChannelsViewModel by activityViewModels(
-        factoryProducer = { ChannelsViewModelFactory(stubStreamsUseCase) }
+        factoryProducer = { ChannelsViewModelFactory(repository) }
     )
 
     override fun onCreateView(
@@ -45,8 +47,8 @@ class ChannelFragment : Fragment() {
         binding.channelViewPager.adapter = pagerAdapter
         pagerAdapter.update(
             listOf(
-                StreamsInfoFragment.newInstance(StreamDestination.Subscribed),
-                StreamsInfoFragment.newInstance(StreamDestination.AllStreams),
+                StreamsInfoFragment.newInstance(StreamDestination.SUBSCRIBED),
+                StreamsInfoFragment.newInstance(StreamDestination.AllSTREAMS),
             )
         )
         TabLayoutMediator(binding.tabLayout, binding.channelViewPager) { tab, position ->
@@ -54,23 +56,24 @@ class ChannelFragment : Fragment() {
         }.attach()
 
 
-        binding.searchField.addTextChangedListener {
-            it?.let {
-                viewModel.searchQueryFlow.tryEmit(it.toString())
-                with(binding) {
-                    if (it.toString().isEmpty()) {
-                        questionMarkButton.isVisible = true
-                        cancelButton.isVisible = false
-                    } else {
-                        questionMarkButton.isVisible = false
-                        cancelButton.isVisible = true
+        with(binding) {
+            searchField.addTextChangedListener {
+                it?.let {
+                    viewModel.searchQueryFlow.tryEmit(it.toString())
+                    with(binding) {
+                        if (it.toString().isEmpty()) {
+                            questionMarkButton.isVisible = true
+                            cancelButton.isVisible = false
+                        } else {
+                            questionMarkButton.isVisible = false
+                            cancelButton.isVisible = true
+                        }
                     }
                 }
             }
-        }
-
-        binding.cancelButton.setOnClickListener {
-            binding.searchField.setText("")
+            cancelButton.setOnClickListener {
+                binding.searchField.setText("")
+            }
         }
     }
 

@@ -79,7 +79,8 @@ class EmojiReactionView @JvmOverloads constructor(
         val textHeight = reactionCountBounds.height()
 
         // Предполагаемая ширина View
-        val desiredWidth = (reactionCountBounds.width() + emojiBounds.width() + 50f + paddingRight + paddingLeft).toInt()
+        val desiredWidth =
+            (reactionCountBounds.width() + emojiBounds.width() + 50f + paddingRight + paddingLeft).toInt()
         // Предполагаемая высота View
         val desiredHeight = textHeight * 2 + paddingTop + paddingBottom + 25
 
@@ -90,7 +91,10 @@ class EmojiReactionView @JvmOverloads constructor(
 
         val width = when (widthMode) {
             MeasureSpec.EXACTLY -> widthSize // Задан конкретный размер для ширины
-            MeasureSpec.AT_MOST -> min(desiredWidth, widthSize) // Размер не должен превышать заданный размер
+            MeasureSpec.AT_MOST -> min(
+                desiredWidth,
+                widthSize
+            ) // Размер не должен превышать заданный размер
             else -> desiredWidth // Задать предпочтительный размер, если точного или максимального размера не задано
         }
 
@@ -123,7 +127,11 @@ class EmojiReactionView @JvmOverloads constructor(
             DEFAULT_CORNER_RADIUS, DEFAULT_CORNER_RADIUS, backgroundPaint
         )
         canvas.drawText(
-            emojiCode.toEmoji(),
+            try {
+                emojiCode.toEmoji()
+            } catch (e: Exception) {
+                DEFAULT_EMOJI_CODE.toEmoji()
+            },
             widthCenter - (viewToDrawWidth / 2f),
             topOffset,
             textPaint
@@ -243,6 +251,7 @@ class EmojiReactionView @JvmOverloads constructor(
         }
 
     }
+
     companion object {
         const val DEFAULT_UNSELECTED_BACKGROUND_COLOR = Color.WHITE
         const val DEFAULT_TEXT_COLOR = Color.BLACK

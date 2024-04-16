@@ -4,9 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".presentation.profile.local.LocalProfileFragment"
-    android:background="@color/light_black">
-
+    tools:context=".presentation.profile.local.OwnProfileFragment">
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/user_avatar_image_shimmer"
@@ -19,7 +17,7 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.2"
+        app:layout_constraintVertical_bias="0.3"
         app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CutCornersAvatarShape" />
 
     <TextView
@@ -34,37 +32,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/user_avatar_image_shimmer" />
 
-    <LinearLayout
-        android:id="@+id/user_status_container_shimmer"
-        android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/user_online_status_shimmer"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
+        android:background="@drawable/shimmer_background"
+        android:textSize="18sp"
         android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/user_name_shimmer">
-
-        <TextView
-            android:id="@+id/user_activity_status_shimmer"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:background="@drawable/shimmer_background"
-            android:textSize="18sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_avatar_image_shimmer" />
-
-        <TextView
-            android:id="@+id/user_online_status_shimmer"
-            android:layout_width="50dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:background="@drawable/shimmer_background"
-            android:textColor="@color/green"
-            android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/user_avatar_image_shimmer" />
-
-    </LinearLayout>
+        app:layout_constraintTop_toBottomOf="@+id/user_name_shimmer" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
