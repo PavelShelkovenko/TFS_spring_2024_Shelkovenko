@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Rick and Morty</string>
+    <string name="last_seen_location">Last known location: %1$s</string>
+    <string name="first_seen_in">First seen in: %1$s</string>
+    <string name="type">%1$s - %2$s</string>
+    <string name="retry_button">Retry</string>
+    <string name="error_title">Error</string>
+    <string name="alive">Alive</string>
+    <string name="dead">Dead</string>
+    <string name="unknown">unknown</string>
+    <string name="prev_button">Previous character</string>
+    <string name="next_button">Next character</string>
+</resources>
