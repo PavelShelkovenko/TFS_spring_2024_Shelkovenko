@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
-import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.ActivityMainBinding
@@ -31,9 +30,9 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_container)
         bottomNavigationView.setupWithNavController(navController)
 
-        navController.addOnDestinationChangedListener { _, nd: NavDestination, _ ->
-            when(nd.id) {
-                R.id.profileFragment -> bottomNavigationView.isVisible = true
+        navController.addOnDestinationChangedListener { _, navDestination, _ ->
+            when (navDestination.id) {
+                R.id.ownProfileFragment -> bottomNavigationView.isVisible = true
                 R.id.channelFragment -> bottomNavigationView.isVisible = true
                 R.id.peopleFragment -> bottomNavigationView.isVisible = true
                 else -> bottomNavigationView.visibility = View.GONE

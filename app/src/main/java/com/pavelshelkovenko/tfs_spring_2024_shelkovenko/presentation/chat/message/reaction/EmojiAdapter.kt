@@ -5,12 +5,13 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.EmojiItemBinding
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Emoji
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.toEmoji
 
 class EmojiAdapter(private val emojis: List<Emoji>) :
     ListAdapter<Emoji, EmojiAdapter.ViewHolder>(EmojiDiffCallback()) {
 
-    var onEmojiClickListener: ((String) -> Unit)? = null
+    var onEmojiClickListener: ((Emoji) -> Unit)? = null
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(
             EmojiItemBinding.inflate(
@@ -30,9 +31,9 @@ class EmojiAdapter(private val emojis: List<Emoji>) :
     inner class ViewHolder(private val binding: EmojiItemBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(emoji: Emoji) {
             with(binding) {
-                emojiCode.text = emoji.code.toEmoji()
+                emojiCode.text = emoji.emojiCode.toEmoji()
                 emojiCode.setOnClickListener {
-                    onEmojiClickListener?.invoke(emoji.code)
+                    onEmojiClickListener?.invoke(emoji)
                 }
             }
         }

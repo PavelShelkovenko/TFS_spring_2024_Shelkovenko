@@ -1,224 +1,505 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat
 
-import android.app.Application
-import androidx.core.content.res.ResourcesCompat
-import androidx.core.graphics.drawable.toBitmap
-import androidx.lifecycle.AndroidViewModel
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
+import android.util.Log
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.MyUserId
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.delegate_adapter.DelegateItem
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.models.User
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.models.UserOnlineStatus
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.ChatRepository
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Message
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Reaction
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.Operation
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.ReactionEvent
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.generateRandomId
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.getFormattedDate
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.date.MessageDateTime
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.date.MessageDateTimeDelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message.MessageDelegateItem
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message.reaction.EmojiFactory
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message.reaction.Reaction
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message.received_message.ReceivedMessageDelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message.received_message.ReceivedMessageModel
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message.send_message.SendMessageDelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message.send_message.SendMessageModel
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.runCatchingNonCancellation
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlin.random.Random
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ChatViewModel(
-    application: Application
-) : AndroidViewModel(application) {
+    private val repository: ChatRepository
+) : ViewModel() {
 
-    // Унаследовал от AndroidViewModel() на время, эта вьюмодель только для
-    // этой домашки чтобы получить доступ к drawable. Аватарка будет хранится в будущем не в папке res
-
-    private val _stubMessages = MutableStateFlow<List<DelegateItem>>(emptyList())
-    val stubMessages: StateFlow<List<DelegateItem>>
-        get() = _stubMessages
+    private val _screenState = MutableStateFlow<ChatScreenState>(ChatScreenState.Initial)
+    val screenState = _screenState.asStateFlow()
 
 
-    private val _messageToSend = MutableStateFlow("")
+    private val messageToSend = MutableStateFlow("")
+    private var delegateItemList = MutableStateFlow<List<DelegateItem>>(emptyList())
+    private val _isLoadingNextMessages = MutableStateFlow(false)
+    val isLoadingNextMessages = _isLoadingNextMessages
 
-    private val localUserAvatar = ResourcesCompat.getDrawable(
-        application.resources,
-        R.drawable.ic_launcher_foreground,
-        null
-    )?.toBitmap() ?: throw IllegalArgumentException("Drawable not found")
+    private var messageQueueId: String = ""
+    private var hasLoadedLastMessage = false
+    private var hasLoadedFirstMessage = false
+    private var reactionQueueId: String = ""
+    private var lastMessageEventId: String = ""
+    private var lastReactionEventId: String = ""
+    private var newestAnchor = "0"
+    private var oldestAnchor = "0"
 
-    private val testUserAvatar = ResourcesCompat.getDrawable(
-        application.resources,
-        R.drawable.ic_launcher_background,
-        null
-    )?.toBitmap() ?: throw IllegalArgumentException("Drawable not found")
-
-    val localUser = User(
-        id = Random.nextInt(0, 1000000),
-        avatar = localUserAvatar,
-        name = "Pavel Shelkovenko",
-        email = "",
-        onlineStatus = UserOnlineStatus.ACTIVE,
-        activityStatus = "In a meeting"
-    )
-
-    private val testUser = User(
-        id = Random.nextInt(0, 1000000),
-        avatar = testUserAvatar,
-        name = "Ilya Shelkovenko",
-        email = "",
-        onlineStatus = UserOnlineStatus.ACTIVE,
-        activityStatus = "In a meeting"
-    )
-
-    private val stubReaction
-        get() = Reaction(
-            userId = listOf(localUser.id, testUser.id).shuffled().first(),
-            emojiCode = EmojiFactory.getEmojiList().shuffled().first().code,
-            count = Random.nextInt(1, 2)
-        )
-
-    private val stubReactionList = listOf(
-        stubReaction,
-        stubReaction,
-        stubReaction,
-    )
-
-    private val stabMessage1
-        get() = SendMessageDelegateItem(
-            id = Random.nextInt(0, 1000000),
-            value = SendMessageModel(
-                userId = localUser.id,
-                textMessage = "Some Text Message!",
-                reactionList = stubReactionList
-            )
-        )
-    private val stabMessage2
-        get() = ReceivedMessageDelegateItem(
-            id = Random.nextInt(0, 1000000),
-            value = ReceivedMessageModel(
-                userId = testUser.id,
-                userName = testUser.name,
-                userAvatar = testUser.avatar,
-                textMessage = "Another test message!",
-                reactionList = stubReactionList
-            )
-        )
-
-    init {
-        setupList()
-    }
-
-    private fun setupList() {
-
-        val dateInfo = MessageDateTimeDelegateItem(
-            id = 1,
-            value = MessageDateTime("1 February")
-        )
-        _stubMessages.value = listOf(
-            stabMessage2,
-            stabMessage1,
-            dateInfo,
-            stabMessage1,
-            dateInfo,
-            stabMessage2,
-            dateInfo,
-            stabMessage1,
-            stabMessage1,
-            stabMessage2,
-            stabMessage1,
-            dateInfo,
-            stabMessage1,
-            stabMessage2,
-        )
-    }
-
-    fun addMessage() {
-        val newMessage = SendMessageDelegateItem(
-            id = Random.nextInt(0, 1000000),
-            value = SendMessageModel(
-                userId = localUser.id,
-                textMessage = _messageToSend.value,
-                reactionList = emptyList()
-            )
-        )
-        _stubMessages.value = _stubMessages.value.toMutableList().apply {
-            add(newMessage)
+    fun registerForEvents(streamName: String, topicName: String) {
+        viewModelScope.launch {
+            runCatchingNonCancellation {
+                repository.registerForEvents(
+                    streamName = streamName,
+                    topicName = topicName
+                )
+            }.onSuccess { registrationForEventsData ->
+                messageQueueId = registrationForEventsData.messagesQueueId
+                lastMessageEventId = registrationForEventsData.messageLastEventId
+                reactionQueueId = registrationForEventsData.reactionsQueueId
+                lastReactionEventId = registrationForEventsData.reactionLastEventId
+                getMessageEvent()
+                getReactionEvent()
+            }.onFailure { error ->
+                //_screenState.value = ChatScreenState.Error(it.message.toString())
+                Log.e("TAG", error.message.toString())
+            }
         }
     }
+
+
+    fun sendMessage(streamName: String, topicName: String) {
+        viewModelScope.launch {
+            runCatchingNonCancellation {
+                repository.sendMessage(
+                    streamName = streamName,
+                    topicName = topicName,
+                    message = messageToSend.value
+                )
+            }.onFailure { error ->
+                //_screenState.value = (ChatScreenState.Error(error.message.toString()))
+                Log.e("TAG", error.message.toString())
+            }
+        }
+    }
+
+    fun sendReaction(messageId: Int, emojiCode: String, emojiName: String) {
+        viewModelScope.launch {
+            runCatchingNonCancellation {
+                repository.sendReaction(
+                    messageId = messageId,
+                    emojiName = emojiName,
+                    emojiCode = emojiCode
+                )
+            }.onFailure { error ->
+               // _screenState.value = (ChatScreenState.Error(error.message.toString()))
+                Log.e("TAG", error.message.toString())
+            }
+        }
+    }
+
+    private fun removeReaction(messageId: Int, emojiCode: String, emojiName: String) {
+        viewModelScope.launch {
+            runCatchingNonCancellation {
+                repository.removeReaction(
+                    messageId = messageId,
+                    emojiName = emojiName,
+                    emojiCode = emojiCode
+                )
+            }.onFailure { error ->
+                //_screenState.value = (ChatScreenState.Error(error.message.toString()))
+                Log.e("TAG", error.message.toString())
+            }
+        }
+    }
+
 
     fun processMessageFieldChanges(newMessage: String) {
-        _messageToSend.value = newMessage
+        messageToSend.value = newMessage
     }
 
-    fun addEmoji(messageId: Int, emojiCode: String) {
-        var isReactionOld = true
-        val (message, messageIndex) = try {
-            findMessageById(messageId)
-        } catch (ex: Exception) {
-            return
-        }
-        val reaction = try {
-            findReactionByCode(messageId, emojiCode)
-        } catch (ex: Exception) {
-            isReactionOld = false
-            Reaction(localUser.id, emojiCode, 1)
-        }
-        val newReactionList = message.reactionList.toMutableList()
-        if (isReactionOld) {
-            if (reaction.userId == localUser.id) {
-                return
+    fun changeEmojiStatus(messageId: Int, emojiCode: String, emojiName: String) {
+        viewModelScope.launch {
+            withContext(Dispatchers.Default) {
+                val message = delegateItemList.value.find { it.id() == messageId }
+                    ?: return@withContext
+                val reactionWithSimilarEmojiCode =
+                    (message as MessageDelegateItem).reactionList.find { reaction ->
+                        reaction.emojiCode == emojiCode
+                    }
+                reactionWithSimilarEmojiCode?.let { reaction ->
+                    if (reaction.userId == MyUserId.MY_USER_ID) {
+                        removeReaction(
+                            messageId = messageId,
+                            emojiCode = emojiCode,
+                            emojiName = emojiName
+                        )
+                    } else {
+                        sendReaction(
+                            messageId = messageId,
+                            emojiCode = emojiCode,
+                            emojiName = emojiName
+                        )
+                    }
+                }
             }
-            val newReaction = reaction.copy(userId = localUser.id, count = reaction.count + 1)
-            changeReaction(
-                newReaction = newReaction,
-                oldReaction = reaction,
-                reactionList = newReactionList
+        }
+    }
+
+
+    fun load60messages(streamName: String, topicName: String) {
+        viewModelScope.launch {
+            _screenState.value = ChatScreenState.Loading
+            runCatchingNonCancellation {
+                val messages = repository.getMessages(
+                    streamName = streamName,
+                    topicName = topicName,
+                    anchor = "first_unread",
+                    numAfter = 20,
+                    numBefore = 40,
+                )
+                withContext(Dispatchers.Default) {
+                    val messagesUi = convertMessagesToDelegateItemWithDate(messages)
+                    delegateItemList.value = messagesUi
+                    oldestAnchor = findFirstMessageDelegateItem().id().toString()
+                    newestAnchor = findLastMessageDelegateItem().id().toString()
+                    _screenState.value = ChatScreenState.Content(messages = messagesUi)
+                }
+            }.onFailure {
+                _screenState.value = ChatScreenState.Error(it.message.toString())
+            }
+        }
+    }
+
+    private fun findFirstMessageDelegateItem(): MessageDelegateItem {
+        return delegateItemList.value.first { it is MessageDelegateItem } as MessageDelegateItem
+    }
+
+    private fun findLastMessageDelegateItem(): MessageDelegateItem {
+        return delegateItemList.value.last { it is MessageDelegateItem } as MessageDelegateItem
+    }
+
+    fun load20NewestMessages(streamName: String, topicName: String) {
+        if (!hasLoadedLastMessage) {
+            viewModelScope.launch {
+                _isLoadingNextMessages.value = true
+                withContext(Dispatchers.Default) {
+                    runCatchingNonCancellation {
+                        repository.getMessages(
+                            streamName = streamName,
+                            topicName = topicName,
+                            anchor = newestAnchor,
+                            numAfter = 20,
+                            numBefore = 0,
+                        )
+                    }.onSuccess { messages ->
+                        val messagesUi = convertMessagesToDelegateItemWithDate(messages)
+                        if (messagesUi.first().id() == findLastMessageDelegateItem().id()) {
+                            _isLoadingNextMessages.value = false
+                            hasLoadedLastMessage = true
+                            return@withContext
+                        }
+                        val newDelegateList = delegateItemList.value + messagesUi
+                        delegateItemList.value = newDelegateList
+                        newestAnchor = findLastMessageDelegateItem().id().toString()
+                        _screenState.value = ChatScreenState.Content(messages = newDelegateList)
+                        _isLoadingNextMessages.value = false
+                    }.onFailure { error ->
+                        Log.d("TAG", error.message.toString())
+                        _isLoadingNextMessages.value = false
+                    }
+                }
+            }
+        }
+    }
+
+    fun load20OldestMessages(streamName: String, topicName: String) {
+        if (!hasLoadedFirstMessage) {
+            viewModelScope.launch {
+                _isLoadingNextMessages.value = true
+                withContext(Dispatchers.Default) {
+                    runCatchingNonCancellation {
+                        repository.getMessages(
+                            streamName = streamName,
+                            topicName = topicName,
+                            anchor = oldestAnchor,
+                            numAfter = 0,
+                            numBefore = 20,
+                        )
+                    }.onSuccess { messages ->
+                        val messagesUi = convertMessagesToDelegateItemWithDate(messages)
+                        /*
+                         Тут нужно проверка чтобы не вставлял дупликаты, из-за того, что getMessages
+                         возвращает список сообщений вместе с якорем
+                         */
+                        if (messagesUi.first().id() == findFirstMessageDelegateItem().id()) {
+                            _isLoadingNextMessages.value = false
+                            hasLoadedFirstMessage = true
+                            return@withContext
+                        }
+                        /*
+                         Так как getMessages(anchor = anchor) возвращает список сообщений вместе с сообщением которое было
+                         взято в качестве якоря, то нужно его дропнуть чтобы не было дупликатов
+                         */
+                        val listWithoutDuplicate = messagesUi.dropLast(1)
+                        val newDelegateList = listWithoutDuplicate + delegateItemList.value
+                        delegateItemList.value = newDelegateList
+                        oldestAnchor = findFirstMessageDelegateItem().id().toString()
+                        _screenState.value = ChatScreenState.Content(messages = newDelegateList)
+                        _isLoadingNextMessages.value = false
+                    }.onFailure { error ->
+                        Log.d("TAG", error.message.toString())
+                        _isLoadingNextMessages.value = false
+                    }
+                }
+            }
+        }
+
+    }
+
+
+    private fun getReactionEvent() {
+        viewModelScope.launch {
+            while (true) {
+                runCatchingNonCancellation {
+                    repository.getReactionEvents(
+                        queueId = reactionQueueId,
+                        lastEventId = lastReactionEventId
+                    )
+                }.onSuccess { receivedReactionEventData ->
+                    lastReactionEventId = receivedReactionEventData.newLastEventId
+                    handleReceivedReactionEvents(receivedReactionEventData.reactionEvents)
+                }.onFailure {
+                    Log.d("TAG", it.message.toString())
+                }
+                delay(3000L)
+            }
+        }
+    }
+
+    private fun getMessageEvent() {
+        viewModelScope.launch {
+            while (true) {
+                runCatchingNonCancellation {
+                    repository.getMessageEvents(
+                        queueId = messageQueueId,
+                        lastEventId = lastMessageEventId
+                    )
+                }.onSuccess { receivedMessageEventData ->
+                    lastMessageEventId = receivedMessageEventData.newLastEventId
+                    handleReceivedMessageEvents(receivedMessageEventData.newMessages)
+                }.onFailure {
+                    Log.d("TAG", it.message.toString())
+                }
+                delay(3000L)
+            }
+        }
+    }
+
+    private suspend fun handleReceivedMessageEvents(newMessages: List<Message>) {
+        withContext(Dispatchers.Default) {
+            val messagesUi = parseMessageToDelegateItem(messages = newMessages)
+            val oldMessagesUi = delegateItemList.value
+            val newMessagesUi = oldMessagesUi + messagesUi
+            delegateItemList.value = newMessagesUi
+            _screenState.value = ChatScreenState.Content(messages = newMessagesUi)
+        }
+    }
+
+    private suspend fun handleReceivedReactionEvents(reactionEventList: List<ReactionEvent>) {
+        withContext(Dispatchers.Default) {
+            reactionEventList.forEach { reactionEvent ->
+                val message = delegateItemList.value.find { it.id() == reactionEvent.messageId }
+                    ?: return@withContext
+                val (oldMessage, messageIndex) =
+                    (message as MessageDelegateItem) to delegateItemList.value.indexOf(message)
+                val reactionWithSimilarEmojiCode = oldMessage.reactionList.find { reaction ->
+                    reaction.emojiCode == reactionEvent.emojiCode
+                }
+                when (reactionEvent.operation) {
+                    Operation.ADD -> {
+                        handleAddReaction(
+                            messageWhereAddReaction = oldMessage,
+                            messageIndex = messageIndex,
+                            reactionForAdding = reactionWithSimilarEmojiCode,
+                            userId = reactionEvent.userId,
+                            emojiCode = reactionEvent.emojiCode,
+                            emojiName = reactionEvent.emojiName
+                        )
+                    }
+
+                    Operation.REMOVE -> {
+                        handleRemoveReaction(
+                            messageWhereRemoveReaction = oldMessage,
+                            messageIndex = messageIndex,
+                            reactionForRemoving = reactionWithSimilarEmojiCode,
+                            userId = reactionEvent.userId
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun handleAddReaction(
+        messageWhereAddReaction: MessageDelegateItem,
+        messageIndex: Int,
+        reactionForAdding: Reaction?,
+        userId: Int,
+        emojiCode: String,
+        emojiName: String,
+    ) {
+        if (reactionForAdding == null) {
+            val newReaction = Reaction(
+                userId = userId,
+                emojiCode = emojiCode,
+                emojiName = emojiName,
+                count = 1
+            )
+            val newReactionList = messageWhereAddReaction.reactionList.toMutableList()
+            newReactionList.add(newReaction)
+            setNewMessageAndUpdateState(
+                oldMessage = messageWhereAddReaction,
+                messageIndex = messageIndex,
+                newReactionList = newReactionList
             )
         } else {
-            newReactionList.add(reaction)
-        }
-        setNewMessage(message, messageIndex, newReactionList)
-    }
-
-    fun changeEmojiStatus(messageId: Int, emojiCode: String) {
-        val (message, messageIndex) = try {
-            findMessageById(messageId)
-        } catch (ex: Exception) {
-            return
-        }
-        val oldReaction = try {
-            findReactionByCode(messageId, emojiCode)
-        } catch (ex: Exception) {
-            return
-        }
-        val newReactionList = message.reactionList.toMutableList()
-        if (oldReaction.userId == localUser.id) {
-            if (oldReaction.count == 1) {
-                newReactionList.remove(oldReaction)
-                setNewMessage(message, messageIndex, newReactionList)
-            } else {
-                val newReaction =
-                    oldReaction.copy(userId = testUser.id, count = oldReaction.count - 1)
-                changeReaction(
-                    newReaction = newReaction,
-                    oldReaction,
-                    reactionList = newReactionList
-                )
-                setNewMessage(message, messageIndex, newReactionList)
-            }
-        } else {
-            val newReaction = oldReaction.copy(userId = localUser.id, count = oldReaction.count + 1)
-            changeReaction(newReaction = newReaction, oldReaction, reactionList = newReactionList)
-            setNewMessage(message, messageIndex, newReactionList)
+            val newReaction = reactionForAdding.copy(
+                userId = userId,
+                count = reactionForAdding.count + 1
+            )
+            val newReactionList = messageWhereAddReaction.reactionList.toMutableList()
+            changeReaction(
+                newReaction = newReaction,
+                oldReaction = reactionForAdding,
+                reactionList = newReactionList
+            )
+            setNewMessageAndUpdateState(
+                oldMessage = messageWhereAddReaction,
+                messageIndex = messageIndex,
+                newReactionList = newReactionList
+            )
         }
     }
 
-    private fun setNewMessage(
-        message: MessageDelegateItem,
+    private fun handleRemoveReaction(
+        messageWhereRemoveReaction: MessageDelegateItem,
         messageIndex: Int,
-        newReactionList: MutableList<Reaction>
+        reactionForRemoving: Reaction?,
+        userId: Int,
     ) {
-        val newMessage = message.copy()
-        newMessage.changeReactionList(newReactionList)
-        val newList = _stubMessages.value.toMutableList().apply {
-            set(messageIndex, newMessage)
+        val mutableReactionList = messageWhereRemoveReaction.reactionList.toMutableList()
+        if (reactionForRemoving != null) {
+            if (reactionForRemoving.count == 1) {
+                mutableReactionList.remove(reactionForRemoving)
+                setNewMessageAndUpdateState(
+                    oldMessage = messageWhereRemoveReaction,
+                    messageIndex = messageIndex,
+                    newReactionList = mutableReactionList
+                )
+            } else {
+                if (userId == MyUserId.MY_USER_ID) {
+                    removeMyReactionFromReactionList(
+                        messageWhereRemoveReaction = messageWhereRemoveReaction,
+                        messageIndex = messageIndex,
+                        reactionList = mutableReactionList,
+                        reactionForRemove = reactionForRemoving
+                    )
+                } else {
+                    removeReactionFromReactionList(
+                        messageWhereRemoveReaction = messageWhereRemoveReaction,
+                        messageIndex = messageIndex,
+                        reactionList = mutableReactionList,
+                        userId = userId,
+                        reaction = reactionForRemoving
+                    )
+                }
+            }
         }
-        _stubMessages.value = newList
+    }
+
+    private fun convertMessagesToDelegateItemWithDate(messages: List<Message>): List<DelegateItem> {
+        return (messages)
+            .sortedBy { it.dateInUTCSeconds }
+            .groupBy { message ->
+                getFormattedDate(message.dateInUTCSeconds)
+            }
+            .flatMap { (date, messages) ->
+                if (alreadyExistingDateInChat(date)) {
+                    parseMessageToDelegateItem(messages)
+                } else {
+                    listOf(
+                        MessageDateTimeDelegateItem(
+                            id = generateRandomId(),
+                            value = MessageDateTime(
+                                dateTime = date
+                            )
+                        )
+                    ) + parseMessageToDelegateItem(
+                        messages
+                    )
+                }
+
+            }
+    }
+
+    private fun alreadyExistingDateInChat(date: String): Boolean {
+        delegateItemList.value.forEach { delegateItem ->
+            if (delegateItem is MessageDateTimeDelegateItem) {
+                if (delegateItem.value.dateTime == date) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    private fun removeMyReactionFromReactionList(
+        messageWhereRemoveReaction: MessageDelegateItem,
+        messageIndex: Int,
+        reactionList: MutableList<Reaction>,
+        reactionForRemove: Reaction
+    ) {
+        val newReaction = reactionForRemove.copy(
+            userId = generateRandomId(),
+            count = reactionForRemove.count - 1
+        )
+        changeReaction(
+            newReaction = newReaction,
+            oldReaction = reactionForRemove,
+            reactionList = reactionList
+        )
+        setNewMessageAndUpdateState(
+            oldMessage = messageWhereRemoveReaction,
+            messageIndex = messageIndex,
+            newReactionList = reactionList
+        )
+    }
+
+    private fun removeReactionFromReactionList(
+        messageWhereRemoveReaction: MessageDelegateItem,
+        messageIndex: Int,
+        reactionList: MutableList<Reaction>,
+        userId: Int,
+        reaction: Reaction
+    ) {
+        val newReaction = reaction.copy(
+            userId = userId,
+            count = reaction.count - 1
+        )
+        changeReaction(
+            newReaction = newReaction,
+            oldReaction = reaction,
+            reactionList = reactionList
+        )
+        setNewMessageAndUpdateState(
+            oldMessage = messageWhereRemoveReaction,
+            messageIndex = messageIndex,
+            newReactionList = reactionList
+        )
     }
 
     private fun changeReaction(
@@ -230,20 +511,47 @@ class ChatViewModel(
         reactionList[oldReactionIndex] = newReaction
     }
 
-    private fun findReactionByCode(messageId: Int, emojiCode: String): Reaction {
-        val (message, _) = findMessageById(messageId)
-        val reaction = message.reactionList.find { reaction ->
-            reaction.emojiCode == emojiCode
-        } ?: throw IllegalStateException("No such reaction with given emoji code")
-        return reaction
+    private fun setNewMessageAndUpdateState(
+        oldMessage: MessageDelegateItem,
+        messageIndex: Int,
+        newReactionList: MutableList<Reaction>
+    ) {
+        val newMessage = oldMessage.copy()
+        newMessage.changeReactionList(newReactionList)
+        val newList = delegateItemList.value.toMutableList().apply {
+            set(messageIndex, newMessage)
+        }
+        delegateItemList.value = newList
+        _screenState.value = ChatScreenState.Content(messages = delegateItemList.value)
     }
 
-    private fun findMessageById(messageId: Int): Pair<MessageDelegateItem, Int> {
-        val message = _stubMessages.value.filterIsInstance<MessageDelegateItem>().find {
-            it.id == messageId
-        } ?: throw IllegalStateException("No such message with given message id")
-        val messageIndex = _stubMessages.value.indexOf(message)
-        return Pair(message, messageIndex)
+    private fun parseMessageToDelegateItem(messages: List<Message>): List<DelegateItem> {
+        val delegateMessagesList = mutableListOf<DelegateItem>()
+        messages.forEach { message ->
+            if (message.userId == MyUserId.MY_USER_ID) {
+                val delegateMessage = SendMessageDelegateItem(
+                    id = message.id,
+                    value = SendMessageModel(
+                        userId = message.userId,
+                        textMessage = message.message,
+                        reactionList = message.reactions
+                    )
+                )
+                delegateMessagesList.add(delegateMessage)
+            } else {
+                val delegateMessage = ReceivedMessageDelegateItem(
+                    id = message.id,
+                    value = ReceivedMessageModel(
+                        userId = message.userId,
+                        avatarUrl = message.avatarUrl,
+                        textMessage = message.message,
+                        reactionList = message.reactions,
+                        userName = message.userName
+                    )
+                )
+                delegateMessagesList.add(delegateMessage)
+            }
+        }
+        return delegateMessagesList
     }
-
 }

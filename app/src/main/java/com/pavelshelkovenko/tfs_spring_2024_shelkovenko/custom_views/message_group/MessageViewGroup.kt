@@ -10,7 +10,7 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.custom_views.AddButtonView
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.custom_views.EmojiReactionView
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.custom_views.FlexBoxLayout
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message.reaction.Reaction
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Reaction
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.toDp
 
 abstract class MessageViewGroup @JvmOverloads constructor(
@@ -20,7 +20,7 @@ abstract class MessageViewGroup @JvmOverloads constructor(
     defStyleRes: Int = 0,
 ) : ViewGroup(context, attrs, defStyleAttr, defStyleRes) {
 
-    protected val innerPadding = 8f.toDp(context).toInt()
+    protected val innerPadding = DEFAULT_INNER_PADDING.toDp(context).toInt()
 
     protected var backgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
@@ -40,7 +40,7 @@ abstract class MessageViewGroup @JvmOverloads constructor(
     fun setReactionList(
         localUserId: Int?,
         newReactionList: List<Reaction>,
-        onEmojiClick: (String) -> Unit,
+        onEmojiClick: (Reaction) -> Unit,
         onAddIconClick: () -> Unit,
     ) {
         val flexBoxLayout = getFlexBoxLayoutChild()
@@ -48,10 +48,10 @@ abstract class MessageViewGroup @JvmOverloads constructor(
         if (newReactionList.isNotEmpty()) {
             newReactionList.forEach { reaction ->
                 val newEmojiView = EmojiReactionView(context)
-                val emoji = reaction.emojiCode
+                val emojiCode = reaction.emojiCode
                 val count = reaction.count
                 with(newEmojiView) {
-                    setEmojiCode(emoji)
+                    setEmojiCode(emojiCode)
                     setReactionCount(count.toString())
                     setUnselectedBackgroundColor(
                         ResourcesCompat.getColor(resources, R.color.gray, null)
@@ -64,7 +64,7 @@ abstract class MessageViewGroup @JvmOverloads constructor(
                     )
                     isSelectedReaction = (reaction.userId == localUserId)
                     setOnClickListener {
-                        onEmojiClick(emoji)
+                        onEmojiClick(reaction)
                     }
                 }
                 flexBoxLayout.addView(newEmojiView, flexBoxLayout.childCount)
@@ -79,6 +79,7 @@ abstract class MessageViewGroup @JvmOverloads constructor(
 
     companion object {
         const val DEFAULT_CORNER_RADIUS = 55f
+        const val DEFAULT_INNER_PADDING = 8f
         const val DEFAULT_MESSAGE_TEXT = "Default text message"
     }
 

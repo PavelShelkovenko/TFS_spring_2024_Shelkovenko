@@ -2,7 +2,7 @@ package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.people
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.homework_5.GetStubUsersUseCase
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.UserRepository
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.runCatchingNonCancellation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 class PeopleViewModel(
-    private val stubUsersUseCase: GetStubUsersUseCase
+    private val userRepository: UserRepository,
 ): ViewModel() {
 
     private val _screenState = MutableStateFlow<PeopleScreenState>(PeopleScreenState.Initial)
@@ -30,7 +30,7 @@ class PeopleViewModel(
         searchQueryFlow
             .distinctUntilChanged { old, new -> old.contentEquals(new) }
             .debounce(1000L)
-            .onEach { processSearch(it.trim()) }
+            .onEach { processSearch(it) }
             .flowOn(Dispatchers.Default)
             .launchIn(viewModelScope)
     }
@@ -38,7 +38,7 @@ class PeopleViewModel(
     suspend fun processSearch(query: String) {
         _screenState.value = PeopleScreenState.Loading
         runCatchingNonCancellation {
-            stubUsersUseCase.search(query)
+            userRepository.searchUsers(query)
         }.onSuccess {
             _screenState.value = PeopleScreenState.Content(it)
         }.onFailure {
@@ -46,10 +46,10 @@ class PeopleViewModel(
         }
     }
 
-    suspend fun setupStubData() {
+    suspend fun downloadData() {
         _screenState.value = PeopleScreenState.Loading
         runCatchingNonCancellation {
-            stubUsersUseCase.invoke()
+            userRepository.getAllUsers()
         }.onSuccess {
             _screenState.value = PeopleScreenState.Content(userList = it)
         }.onFailure {

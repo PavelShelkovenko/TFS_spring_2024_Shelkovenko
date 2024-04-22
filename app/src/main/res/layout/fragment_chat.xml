@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/stub"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/light_black"
-    tools:context=".MainActivity"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context=".MainActivity">
 
     <LinearLayout
+        android:id="@+id/stream_info"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:background="@color/green"
@@ -21,21 +22,21 @@
             android:id="@+id/back_button"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_marginStart="12dp"
             android:layout_gravity="center"
+            android:layout_marginStart="12dp"
             android:background="@android:color/transparent"
-            android:src="@drawable/ic_arrow_back_28"
-            android:contentDescription="@string/back_button" />
+            android:contentDescription="@string/back_button"
+            android:src="@drawable/ic_arrow_back_28" />
 
         <TextView
             android:id="@+id/stream_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="#general"
-            android:textSize="18sp"
-            android:layout_marginStart="18dp"
             android:layout_gravity="center"
-            android:textColor="@color/white"/>
+            android:layout_marginStart="18dp"
+            android:text="#general"
+            android:textColor="@color/white"
+            android:textSize="18sp" />
 
     </LinearLayout>
 
@@ -43,48 +44,107 @@
         android:id="@+id/topic_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Topic: #testing"
+        android:background="@color/gray"
         android:gravity="center"
         android:padding="6dp"
+        android:text="Topic: #testing"
         android:textColor="@color/light_gray"
-        android:background="@color/gray"
-        android:textSize="16sp"/>
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@+id/stream_info" />
+
+    <FrameLayout
+        android:id="@+id/error_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/topic_name">
+
+        <include layout="@layout/error_screen"
+            android:id="@+id/error_component"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"/>
+
+    </FrameLayout>
+
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/shimmerContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/topic_name"
+        app:shimmer_duration="800">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <include layout="@layout/send_message_shimmer" />
+
+            <include layout="@layout/received_message_shimmer" />
+
+            <include layout="@layout/received_message_shimmer" />
+
+            <include layout="@layout/send_message_shimmer" />
+
+            <include layout="@layout/send_message_shimmer" />
+
+            <include layout="@layout/received_message_shimmer" />
+
+            <include layout="@layout/send_message_shimmer" />
+
+            <include layout="@layout/received_message_shimmer"/>
+
+            <include layout="@layout/received_message_shimmer" />
+
+        </LinearLayout>
+
+    </com.facebook.shimmer.ShimmerFrameLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/chat_rv"
-        android:layout_weight="9"
+        android:id="@+id/chat_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/topic_name"
+        android:layout_marginTop="8dp"
+        app:stackFromEnd="true"/>
 
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp"
         android:layout_marginHorizontal="8dp"
         android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/chat_rv"
+        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
         <EditText
             android:id="@+id/message_field"
             android:layout_width="0dp"
-            android:paddingHorizontal="12dp"
-            android:layout_weight="8"
             android:layout_height="match_parent"
-            android:background="@drawable/write_message_edit_text_background"
             android:layout_marginHorizontal="8dp"
+            android:layout_weight="8"
+            android:background="@drawable/write_message_edit_text_background"
+            android:hint="@string/write_message"
             android:maxLines="1"
-            android:textColorHint="@color/white"
+            android:paddingHorizontal="12dp"
             android:singleLine="true"
             android:textColor="@color/white"
+            android:textColorHint="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            android:hint="@string/write_message" />
+            app:layout_constraintStart_toStartOf="parent" />
 
         <FrameLayout
             android:layout_width="wrap_content"
@@ -95,9 +155,9 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_marginStart="8dp"
-                android:visibility="gone"
                 android:background="@drawable/green_circle_background"
-                android:src="@drawable/ic_send_24"/>
+                android:src="@drawable/ic_send_24"
+                android:visibility="gone" />
 
             <ImageButton
                 android:id="@+id/send_file_button"
@@ -105,7 +165,7 @@
                 android:layout_height="48dp"
                 android:layout_marginStart="8dp"
                 android:background="@android:color/transparent"
-                android:src="@drawable/ic_add_circle_outline_48"/>
+                android:src="@drawable/ic_add_circle_outline_48" />
 
         </FrameLayout>
 
@@ -113,4 +173,4 @@
     </LinearLayout>
 
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

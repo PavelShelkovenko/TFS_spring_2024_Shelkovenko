@@ -3,12 +3,12 @@ package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.messa
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.ReceivedMessageBinding
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.delegate_adapter.DelegateAdapter
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.delegate_adapter.DelegateItem
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.models.User
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Reaction
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message.MessageDelegateItem
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message.reaction.Reaction
 
 class ReceivedMessageAdapter :
     DelegateAdapter<ReceivedMessageDelegateItem, ReceivedMessageAdapter.ViewHolder>(
@@ -17,8 +17,8 @@ class ReceivedMessageAdapter :
 
     var onMessageLongClickListener: ((Int) -> Unit)? = null
     var onAddIconClickListener: ((Int) -> Unit)? = null
-    var onEmojiClickListener: ((Int, String) -> Unit)? = null
-    var localUser: User? = null
+    var onEmojiClickListener: ((Int, Reaction) -> Unit)? = null
+    var localUserId: Int? = null
 
     override fun onCreateViewHolder(parent: ViewGroup): RecyclerView.ViewHolder {
         return ViewHolder(
@@ -48,14 +48,14 @@ class ReceivedMessageAdapter :
         fun bind(model: ReceivedMessageDelegateItem) {
             val messageModel = model.value
             with(binding) {
-                messageGroup.setUserAvatar(messageModel.userAvatar)
+                Glide.with(itemView).load(messageModel.avatarUrl).into(messageGroup.userAvatar)
                 messageGroup.setUserName(messageModel.userName)
                 messageGroup.setTextMessage(messageModel.textMessage)
                 messageGroup.setReactionList(
-                    localUser?.id,
+                    localUserId,
                     messageModel.reactionList,
-                    onEmojiClick = { emojiCode ->
-                        onEmojiClickListener?.invoke(model.id, emojiCode)
+                    onEmojiClick = { reaction ->
+                        onEmojiClickListener?.invoke(model.id, reaction)
                     },
                     onAddIconClick = {
                         onAddIconClickListener?.invoke(model.id)
@@ -73,10 +73,10 @@ class ReceivedMessageAdapter :
             newReactionList: List<Reaction>
         ) {
             binding.messageGroup.setReactionList(
-                localUser?.id,
+                localUserId,
                 newReactionList,
-                onEmojiClick = { emojiCode ->
-                    onEmojiClickListener?.invoke(model.id, emojiCode)
+                onEmojiClick = { reaction ->
+                    onEmojiClickListener?.invoke(model.id, reaction)
                 },
                 onAddIconClick = {
                     onAddIconClickListener?.invoke(model.id)

@@ -1,6 +1,6 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message.send_message
 
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message.reaction.Reaction
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Reaction
 
 data class SendMessageModel(
     val userId: Int,

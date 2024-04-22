@@ -1,13 +1,13 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.util.TypedValue
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import java.io.ByteArrayOutputStream
+import android.view.View
+import android.widget.TextView
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.UserOnlineStatus
+import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.concurrent.CancellationException
 import kotlin.random.Random
 
@@ -20,7 +20,13 @@ fun Float.toSp(context: Context) = TypedValue.applyDimension(
 )
 
 fun String.toEmoji(): String {
-    return String(Character.toChars(this.toInt(16)))
+    return this.split("-")
+        .map { String(Character.toChars(it.toInt(16))) }
+        .joinToString(separator = "")
+}
+
+fun String.processSearch(query: String): Boolean {
+    return this.lowercase().contains(query.trim().lowercase())
 }
 
 inline fun <T> runCatchingNonCancellation(block: () -> T): Result<T> {
@@ -33,95 +39,6 @@ inline fun <T> runCatchingNonCancellation(block: () -> T): Result<T> {
     }
 }
 
-suspend fun <T1, T2, R> asyncAwait(
-    s1: suspend CoroutineScope.() -> T1,
-    s2: suspend CoroutineScope.() -> T2,
-    transform: suspend (T1, T2) -> R
-): R {
-    return coroutineScope {
-        val result1 = async(block = s1)
-        val result2 = async(block = s2)
-
-        transform(
-            result1.await(),
-            result2.await()
-        )
-    }
-}
-
-fun bitmapToByteArray(bitmap: Bitmap): ByteArray {
-    val stream = ByteArrayOutputStream()
-    bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-    return stream.toByteArray()
-}
-
-
-fun generateRandomName(): String {
-    val firstNameList = listOf(
-        "Emma",
-        "Noah",
-        "Olivia",
-        "Liam",
-        "Ava",
-        "William",
-        "Sophia",
-        "Mason",
-        "Isabella",
-        "James"
-    )
-    val lastNameList = listOf(
-        "Smith",
-        "Johnson",
-        "Williams",
-        "Brown",
-        "Jones",
-        "Miller",
-        "Davis",
-        "Taylor",
-        "Martin",
-        "Anderson"
-    )
-
-    val firstName = firstNameList[Random.nextInt(firstNameList.size)]
-    val lastName = lastNameList[Random.nextInt(lastNameList.size)]
-
-    return "$firstName $lastName"
-}
-
-fun generateRandomEmail(): String {
-    val firstNameList = listOf(
-        "Emma",
-        "Noah",
-        "Olivia",
-        "Liam",
-        "Ava",
-        "William",
-        "Sophia",
-        "Mason",
-        "Isabella",
-        "James"
-    )
-    val lastNameList = listOf(
-        "Smith",
-        "Johnson",
-        "Williams",
-        "Brown",
-        "Jones",
-        "Miller",
-        "Davis",
-        "Taylor",
-        "Martin",
-        "Anderson"
-    )
-    val emailDomains = listOf("@gmail.com", "@yahoo.com", "@hotmail.com", "@outlook.com")
-
-    val firstName = firstNameList[Random.nextInt(firstNameList.size)]
-    val lastName = lastNameList[Random.nextInt(lastNameList.size)]
-    val emailDomain = emailDomains[Random.nextInt(emailDomains.size)]
-
-    return "$firstName.$lastName${Random.nextInt(1000)}$emailDomain"
-}
-
 fun generateRandomColor(): Int {
     val red = Random.nextInt(256)
     val green = Random.nextInt(256)
@@ -129,8 +46,61 @@ fun generateRandomColor(): Int {
     return Color.argb(255, red, green, blue)
 }
 
+fun getFormattedDate(dateOfMessageInSeconds: Int): String {
+    val formatter = SimpleDateFormat("dd MMMM")
+    val calendar = Calendar.getInstance()
+    calendar.timeInMillis = dateOfMessageInSeconds * 1000L
+    return formatter.format(calendar.time)
+}
 
-fun throwRandomError() {
-    val randInt = Random.nextInt(from = 0, until = 10)
-    if (randInt <= 2) throw IllegalStateException("Stub exception")
+fun generateRandomId(): Int {
+    return Random.nextInt()
+}
+
+fun View.setColoredBackgroundStatus(status: UserOnlineStatus) {
+    when (status) {
+        UserOnlineStatus.ACTIVE -> {
+            this.setBackgroundResource(R.drawable.green_circle_background)
+        }
+        UserOnlineStatus.IDLE -> {
+            this.setBackgroundResource(R.drawable.orange_circle_background)
+        }
+        UserOnlineStatus.OFFLINE -> {
+            this.setBackgroundResource(R.drawable.gray_circle_background)
+        }
+    }
+}
+
+fun TextView.setColoredTextStatus(status: UserOnlineStatus) {
+    val resources = this.resources
+    val context = this.context
+    when (status) {
+        UserOnlineStatus.ACTIVE -> {
+            this.setTextColor(
+                resources.getColor(
+                    R.color.green,
+                    context?.theme
+                )
+            )
+            this.text = resources.getString(R.string.status_active)
+        }
+        UserOnlineStatus.IDLE -> {
+            this.setTextColor(
+                resources.getColor(
+                    R.color.orange,
+                    context?.theme
+                )
+            )
+            this.text = resources.getString(R.string.status_idle)
+        }
+        UserOnlineStatus.OFFLINE -> {
+            this.setTextColor(
+                resources.getColor(
+                    R.color.light_gray,
+                    context?.theme
+                )
+            )
+            this.text = resources.getString(R.string.status_offline)
+        }
+    }
 }

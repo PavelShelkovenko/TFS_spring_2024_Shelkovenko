@@ -11,8 +11,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.ZulipApi
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.ZulipUserRepository
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.FragmentPeopleBinding
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.homework_5.GetStubUsersUseCase
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -28,10 +29,10 @@ class PeopleFragment : Fragment() {
 
     private val peopleAdapter by lazy {
         PeopleAdapter(
-            onUserClickListener = {
+            onUserClickListener = { userId ->
                 binding.searchField.setText("")
                 findNavController().navigate(
-                    PeopleFragmentDirections.actionPeopleFragmentToAnotherProfileFragment()
+                    PeopleFragmentDirections.actionPeopleFragmentToAnotherProfileFragment(userId)
                 )
             }
         )
@@ -47,10 +48,10 @@ class PeopleFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val stubUsersUseCase = GetStubUsersUseCase(requireActivity().applicationContext)
+        val repository = ZulipUserRepository(ZulipApi())
         viewModel = ViewModelProvider(
             this,
-            PeopleViewModelFactory(stubUsersUseCase)
+            PeopleViewModelFactory(repository)
         )[PeopleViewModel::class.java]
         binding.peopleRv.adapter = peopleAdapter
 
@@ -88,7 +89,7 @@ class PeopleFragment : Fragment() {
                     if (viewModel.searchQueryFlow.value.isNotEmpty()) {
                         viewModel.processSearch(viewModel.searchQueryFlow.value)
                     } else {
-                        viewModel.setupStubData()
+                        viewModel.downloadData()
                     }
                 }
             }
@@ -96,36 +97,29 @@ class PeopleFragment : Fragment() {
     }
 
     private fun render(newScreenState: PeopleScreenState) {
-        when (newScreenState) {
-            is PeopleScreenState.Content -> {
-                with(binding) {
+        with(binding) {
+            when (newScreenState) {
+                is PeopleScreenState.Content -> {
                     shimmerContainer.stopShimmer()
                     shimmerContainer.isVisible = false
                     peopleRv.isVisible = true
                     errorContainer.isVisible = false
+                    peopleAdapter.submitList(newScreenState.userList)
                 }
-                peopleAdapter.submitList(newScreenState.userList)
-            }
-
-            is PeopleScreenState.Error -> {
-                with(binding) {
+                is PeopleScreenState.Error -> {
                     shimmerContainer.stopShimmer()
                     shimmerContainer.isVisible = false
                     peopleRv.isVisible = false
                     errorContainer.isVisible = true
                 }
-            }
 
-            is PeopleScreenState.Initial -> {
-                with(binding) {
+                is PeopleScreenState.Initial -> {
                     shimmerContainer.isVisible = false
                     errorContainer.isVisible = false
                     peopleRv.isVisible = false
                 }
-            }
 
-            is PeopleScreenState.Loading -> {
-                with(binding) {
+                is PeopleScreenState.Loading -> {
                     shimmerContainer.isVisible = true
                     shimmerContainer.startShimmer()
                     errorContainer.isVisible = false

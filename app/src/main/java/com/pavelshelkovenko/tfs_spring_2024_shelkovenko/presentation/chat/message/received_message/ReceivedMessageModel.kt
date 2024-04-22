@@ -1,11 +1,10 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message.received_message
 
-import android.graphics.Bitmap
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message.reaction.Reaction
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Reaction
 
 data class ReceivedMessageModel(
     val userId: Int,
-    val userAvatar: Bitmap,
+    val avatarUrl: String,
     val userName: String,
     val textMessage: String,
     val reactionList: List<Reaction>

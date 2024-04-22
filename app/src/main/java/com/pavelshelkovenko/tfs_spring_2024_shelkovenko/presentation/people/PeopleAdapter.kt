@@ -4,17 +4,15 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
+import com.bumptech.glide.Glide
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.UserItemBinding
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.models.User
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.models.UserOnlineStatus
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.User
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.setColoredBackgroundStatus
 
 class PeopleAdapter(
-    private val onUserClickListener: (String) -> Unit
-) :
-    ListAdapter<User, PeopleAdapter.ViewHolder>(UserDiffCallback()) {
+    private val onUserClickListener: (Int) -> Unit
+) : ListAdapter<User, PeopleAdapter.ViewHolder>(UserDiffCallback()) {
 
-    //var onUserClickListener: ((String) -> Unit)? = null
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
         ViewHolder(
             UserItemBinding.inflate(
@@ -33,20 +31,13 @@ class PeopleAdapter(
     inner class ViewHolder(private val binding: UserItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(user: User) {
-
-            val backgroundResId = when(user.onlineStatus) {
-                UserOnlineStatus.ACTIVE -> R.drawable.green_circle_background
-                UserOnlineStatus.IDLE -> R.drawable.orange_circle_background
-                UserOnlineStatus.OFFLINE -> R.drawable.gray_circle_background
-            }
-
             with(binding) {
-                userAvatarImage.setImageBitmap(user.avatar)
-                userOnlineStatus.setBackgroundResource(backgroundResId)
                 userName.text = user.name
                 userEmail.text = user.email
+                userOnlineStatus.setColoredBackgroundStatus(user.onlineStatus)
+                Glide.with(itemView).load(user.avatarUrl).into(userAvatarImage)
                 userItemContainer.setOnClickListener {
-                    onUserClickListener.invoke(user.name)
+                    onUserClickListener.invoke(user.id)
                 }
             }
         }

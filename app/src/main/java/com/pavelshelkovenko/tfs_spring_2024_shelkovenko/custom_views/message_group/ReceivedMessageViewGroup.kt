@@ -1,19 +1,14 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.custom_views.message_group
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.AttributeSet
-import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
-import androidx.core.graphics.drawable.toBitmap
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.bitmapToByteArray
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.custom_views.FlexBoxLayout
 
 class ReceivedMessageViewGroup @JvmOverloads constructor(
@@ -23,21 +18,19 @@ class ReceivedMessageViewGroup @JvmOverloads constructor(
     defStyleRes: Int = 0,
 ) : MessageViewGroup(context, attrs, defStyleAttr, defStyleRes) {
 
+    var userAvatar: ImageView
+        private set
+
     init {
         setWillNotDraw(false)
         backgroundPaint.color = ResourcesCompat.getColor(resources, R.color.gray, null)
         inflate(context, R.layout.received_message_view_group, this)
+        userAvatar = findViewById(R.id.user_avatar_tv)
     }
 
-    private val defaultBitmap = ResourcesCompat.getDrawable(
-        resources,
-        R.drawable.ic_launcher_background,
-        null
-    )?.toBitmap()
     var userName = DEFAULT_USER_NAME
         private set
-    var userAvatar: Bitmap = defaultBitmap ?: throw IllegalArgumentException("Drawable not found")
-        private set
+
 
     override fun onMeasure(parentWidthMeasureSpec: Int, parentHeightMeasureSpec: Int) {
         super.onMeasure(parentWidthMeasureSpec, parentHeightMeasureSpec)
@@ -54,11 +47,6 @@ class ReceivedMessageViewGroup @JvmOverloads constructor(
 
         userNameView.text = userName
         textMessageView.text = textMessage
-        try {
-            userAvatarView.setImageBitmap(userAvatar)
-        } catch (ex: Exception) {
-            Log.e("MessageViewGroup", ex.message.toString())
-        }
         measureChild(userAvatarView, parentWidthMeasureSpec, parentHeightMeasureSpec)
 
 
@@ -199,7 +187,6 @@ class ReceivedMessageViewGroup @JvmOverloads constructor(
         val bundle = Bundle()
         bundle.putString(DEFAULT_USER_NAME_KEY, userName)
         bundle.putString(DEFAULT_MESSAGE_TEXT_KEY, textMessage)
-        bundle.putByteArray(DEFAULT_USER_AVATAR_KEY, bitmapToByteArray(userAvatar))
         bundle.putParcelable(INSTANCESTATE_KEY, super.onSaveInstanceState())
         return bundle
     }
@@ -208,11 +195,6 @@ class ReceivedMessageViewGroup @JvmOverloads constructor(
         val bundle = state as Bundle
         userName = bundle.getString(DEFAULT_USER_NAME_KEY).toString()
         setTextMessage(bundle.getString(DEFAULT_MESSAGE_TEXT_KEY).toString())
-        val userAvatarByteArray = bundle.getByteArray(DEFAULT_USER_AVATAR_KEY)
-        if (userAvatarByteArray != null) {
-            userAvatar =
-                BitmapFactory.decodeByteArray(userAvatarByteArray, 0, userAvatarByteArray.size)
-        }
         super.onRestoreInstanceState(bundle.getParcelable(INSTANCESTATE_KEY))
         invalidate()
     }
@@ -230,16 +212,10 @@ class ReceivedMessageViewGroup @JvmOverloads constructor(
         requestLayout()
     }
 
-    fun setUserAvatar(newUserAvatar: Bitmap) {
-        userAvatar = newUserAvatar
-        requestLayout()
-    }
-
     companion object {
         const val DEFAULT_USER_NAME = "Default user name"
         const val DEFAULT_MESSAGE_TEXT_KEY = "key_for_message_text"
         const val DEFAULT_USER_NAME_KEY = "key_for_user_name"
-        const val DEFAULT_USER_AVATAR_KEY = "key_for_user_avatar"
         const val INSTANCESTATE_KEY = "instanceState"
     }
 }
