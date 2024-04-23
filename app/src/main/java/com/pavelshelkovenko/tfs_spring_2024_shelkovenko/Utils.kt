@@ -5,7 +5,10 @@ import android.graphics.Color
 import android.util.TypedValue
 import android.view.View
 import android.widget.TextView
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Stream
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.UserOnlineStatus
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.streams.adapter.StreamDelegateItem
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.delegate_adapter.DelegateItem
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.concurrent.CancellationException
@@ -25,7 +28,7 @@ fun String.toEmoji(): String {
         .joinToString(separator = "")
 }
 
-fun String.processSearch(query: String): Boolean {
+fun String.containsQuery(query: String): Boolean {
     return this.lowercase().contains(query.trim().lowercase())
 }
 
@@ -102,5 +105,15 @@ fun TextView.setColoredTextStatus(status: UserOnlineStatus) {
             )
             this.text = resources.getString(R.string.status_offline)
         }
+    }
+}
+
+
+fun List<Stream>.toDelegateList(): List<DelegateItem> {
+    return this.map {
+        StreamDelegateItem(
+            it.id,
+            value = it
+        )
     }
 }

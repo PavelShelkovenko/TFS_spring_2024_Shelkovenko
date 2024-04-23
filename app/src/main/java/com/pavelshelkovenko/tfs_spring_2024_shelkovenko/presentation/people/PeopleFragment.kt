@@ -1,36 +1,46 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.people
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.ZulipApi
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.ZulipUserRepository
+import by.kirich1409.viewbindingdelegate.viewBinding
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.FragmentPeopleBinding
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.di.DiContainer
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.ElmBaseFragment
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.people.adapter.PeopleAdapter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import vivid.money.elmslie.android.renderer.elmStoreWithRenderer
+import vivid.money.elmslie.core.store.Store
 
-class PeopleFragment : Fragment() {
+class PeopleFragment :
+    ElmBaseFragment<PeopleEffect, PeopleState, PeopleEvent>(R.layout.fragment_people) {
 
+    private val binding: FragmentPeopleBinding by viewBinding(FragmentPeopleBinding::bind)
 
-    private var _binding: FragmentPeopleBinding? = null
-    private val binding: FragmentPeopleBinding
-        get() = _binding ?: throw RuntimeException("FragmentPeopleBinding == null")
+    private val searchQueryFlow = MutableStateFlow("")
 
-    private lateinit var viewModel: PeopleViewModel
+    override val store: Store<PeopleEvent, PeopleEffect, PeopleState> by elmStoreWithRenderer(
+        elmRenderer = this
+    ) {
+        DiContainer.peopleStoreFactory.create()
+    }
+
+    private var firstBoot = true
 
     private val peopleAdapter by lazy {
         PeopleAdapter(
             onUserClickListener = { userId ->
-                binding.searchField.setText("")
+                clearSearchFieldText()
                 findNavController().navigate(
                     PeopleFragmentDirections.actionPeopleFragmentToAnotherProfileFragment(userId)
                 )
@@ -38,100 +48,104 @@ class PeopleFragment : Fragment() {
         )
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentPeopleBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val repository = ZulipUserRepository(ZulipApi())
-        viewModel = ViewModelProvider(
-            this,
-            PeopleViewModelFactory(repository)
-        )[PeopleViewModel::class.java]
-        binding.peopleRv.adapter = peopleAdapter
-
+        if (savedInstanceState == null && firstBoot) {
+            store.accept(PeopleEvent.Ui.Init)
+        }
+        firstBoot = false
         setupClickListeners()
+        /*
+        drop(1) нужен для того, чтобы мы не делали запрос в сеть лишний раз, так как onEach всегда
+        сработает 1 раз, даже если мы не поменяем текст в поиске. Случается это из-за того, что у
+        StateFlow replay = 1, так еще и addTextChangedListener на 73 строчке заэмитит значение во флоу
+        даже если в searchField ничего не поменялось.
+         */
 
-        binding.searchField.addTextChangedListener {
-            it?.let {
-                viewModel.searchQueryFlow.tryEmit(it.toString())
-                with(binding) {
-                    if (it.toString().isEmpty()) {
-                        questionMarkButton.isVisible = true
-                        cancelButton.isVisible = false
+        with(binding) {
+            peopleRv.adapter = peopleAdapter
+            searchField.addTextChangedListener { editable ->
+                editable?.let { query ->
+                    searchQueryFlow.tryEmit(query.trim().toString())
+                    if (query.isEmpty()) {
+                        showQuestionMarkButton()
                     } else {
-                        questionMarkButton.isVisible = false
-                        cancelButton.isVisible = true
+                        showCancelButton()
                     }
                 }
-
             }
         }
+    }
 
-        viewModel.screenState
-            .flowWithLifecycle(lifecycle)
-            .onEach(::render)
+    override fun onResume() {
+        super.onResume()
+        searchQueryFlow
+            .drop(1)
+            .debounce(800)
+            .onEach { query ->
+                store.accept(PeopleEvent.Ui.QueryChanged(query))
+            }
+            .flowOn(Dispatchers.IO)
             .launchIn(lifecycleScope)
     }
 
-    private fun setupClickListeners() {
+    override fun render(state: PeopleState) {
         with(binding) {
-            cancelButton.setOnClickListener {
-                binding.searchField.setText("")
-            }
-            errorComponent.retryButton.setOnClickListener {
-                lifecycleScope.launch {
-                    if (viewModel.searchQueryFlow.value.isNotEmpty()) {
-                        viewModel.processSearch(viewModel.searchQueryFlow.value)
-                    } else {
-                        viewModel.downloadData()
-                    }
-                }
-            }
-        }
-    }
-
-    private fun render(newScreenState: PeopleScreenState) {
-        with(binding) {
-            when (newScreenState) {
-                is PeopleScreenState.Content -> {
+            when (state) {
+                is PeopleState.Content -> {
                     shimmerContainer.stopShimmer()
                     shimmerContainer.isVisible = false
                     peopleRv.isVisible = true
                     errorContainer.isVisible = false
-                    peopleAdapter.submitList(newScreenState.userList)
+                    peopleAdapter.submitList(state.userList)
                 }
-                is PeopleScreenState.Error -> {
+                is PeopleState.Error -> {
                     shimmerContainer.stopShimmer()
                     shimmerContainer.isVisible = false
                     peopleRv.isVisible = false
                     errorContainer.isVisible = true
                 }
-
-                is PeopleScreenState.Initial -> {
+                is PeopleState.Initial -> {
                     shimmerContainer.isVisible = false
                     errorContainer.isVisible = false
                     peopleRv.isVisible = false
                 }
-
-                is PeopleScreenState.Loading -> {
+                is PeopleState.Loading -> {
                     shimmerContainer.isVisible = true
-                    shimmerContainer.startShimmer()
                     errorContainer.isVisible = false
                     peopleRv.isVisible = false
+                    shimmerContainer.startShimmer()
                 }
             }
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    private fun setupClickListeners() {
+        with(binding) {
+            errorComponent.retryButton.setOnClickListener {
+                store.accept(PeopleEvent.Ui.QueryChanged(newQuery = searchQueryFlow.value.trim()))
+            }
+            cancelButton.setOnClickListener {
+                clearSearchFieldText()
+            }
+        }
     }
 
+    private fun showCancelButton() {
+        with(binding) {
+            questionMarkButton.isVisible = false
+            cancelButton.isVisible = true
+        }
+    }
+
+    private fun showQuestionMarkButton() {
+        with(binding) {
+            questionMarkButton.isVisible = true
+            cancelButton.isVisible = false
+        }
+    }
+
+    private fun clearSearchFieldText() {
+        binding.searchField.setText("")
+    }
 }

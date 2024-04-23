@@ -1,8 +1,8 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message.received_message
 
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.delegate_adapter.DelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Reaction
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message.MessageDelegateItem
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.delegate_adapter.DelegateItem
 
 class ReceivedMessageDelegateItem(
     override val id: Int,

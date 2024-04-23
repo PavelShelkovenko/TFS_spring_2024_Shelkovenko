@@ -1,7 +1,7 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message
 
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.delegate_adapter.DelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Reaction
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.delegate_adapter.DelegateItem
 
 abstract class MessageDelegateItem: DelegateItem {
 

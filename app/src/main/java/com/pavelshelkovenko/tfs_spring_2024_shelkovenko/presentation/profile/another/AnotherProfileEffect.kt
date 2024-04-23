@@ -1,0 +1,3 @@
+package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.profile.another
+
+interface AnotherProfileEffect

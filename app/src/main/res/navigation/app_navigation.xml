@@ -25,7 +25,7 @@
     </fragment>
     <fragment
         android:id="@+id/ownProfileFragment"
-        android:name="com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.profile.local.OwnProfileFragment"
+        android:name="com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.profile.own.OwnProfileFragment"
         android:label="fragment_own_profile"
         tools:layout="@layout/fragment_own_profile" />
     <fragment

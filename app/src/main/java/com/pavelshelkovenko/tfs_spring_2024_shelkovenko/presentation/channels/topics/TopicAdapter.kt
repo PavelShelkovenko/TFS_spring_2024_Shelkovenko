@@ -4,9 +4,9 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.TopicItemBinding
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.delegate_adapter.DelegateAdapter
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.delegate_adapter.DelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Topic
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.delegate_adapter.DelegateAdapter
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.delegate_adapter.DelegateItem
 
 
 class TopicAdapter : DelegateAdapter<TopicDelegateItem, TopicAdapter.ViewHolder>(TopicDelegateItem::class.java) {

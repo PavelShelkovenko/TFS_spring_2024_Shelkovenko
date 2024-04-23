@@ -1,35 +1,37 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.streams
 
 import android.os.Bundle
-import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.ZulipApi
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.ZulipStreamRepository
+import by.kirich1409.viewbindingdelegate.viewBinding
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.FragmentStreamsInfoBinding
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.delegate_adapter.MainAdapter
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.di.DiContainer
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.StreamDestination
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.ElmBaseFragment
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.ChannelFragment
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.ChannelFragmentDirections
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.ChannelsScreenState
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.ChannelsViewModel
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.ChannelsViewModelFactory
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.streams.adapter.StreamAdapter
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.streams.adapter.StreamDelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.topics.TopicAdapter
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.delegate_adapter.MainAdapter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import vivid.money.elmslie.android.renderer.elmStoreWithRenderer
+import vivid.money.elmslie.core.store.Store
 
-class StreamsInfoFragment : Fragment() {
+class StreamsInfoFragment :
+    ElmBaseFragment<StreamEffect, StreamState, StreamEvent>(R.layout.fragment_streams_info) {
 
-    private var _binding: FragmentStreamsInfoBinding? = null
-    private val binding: FragmentStreamsInfoBinding
-        get() = _binding ?: throw RuntimeException("FragmentStreamsInfoBinding == null")
+    private val binding: FragmentStreamsInfoBinding by viewBinding(FragmentStreamsInfoBinding::bind)
+
+    private var firstBoot = true
 
     private val mainAdapter by lazy {
         MainAdapter.Builder()
@@ -38,86 +40,81 @@ class StreamsInfoFragment : Fragment() {
             .build()
     }
 
-    private val repository = ZulipStreamRepository(ZulipApi())
-    private val viewModel: ChannelsViewModel by activityViewModels(
-        factoryProducer = { ChannelsViewModelFactory(repository) }
-    )
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentStreamsInfoBinding.inflate(inflater, container, false)
-        return binding.root
+    override val store: Store<StreamEvent, StreamEffect, StreamState> by elmStoreWithRenderer(
+        elmRenderer = this
+    ) {
+        DiContainer.streamStoreFactory.create()
     }
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        val streamDestination = requireArguments().getSerializable(
-            STREAMS_DESTINATION_KEY,
-        ) as StreamDestination
-
         binding.streamsInfoRv.adapter = mainAdapter
-
         setupClickListeners()
 
-        when(streamDestination) {
-            StreamDestination.SUBSCRIBED -> {
-                viewModel.subscribedScreenState
-                    .flowWithLifecycle(lifecycle)
-                    .onEach(::render)
-                    .launchIn(lifecycleScope)
-            }
-            StreamDestination.AllSTREAMS -> {
-                viewModel.allStreamsScreenState
-                    .flowWithLifecycle(lifecycle)
-                    .onEach(::render)
-                    .launchIn(lifecycleScope)
-            }
+        if (savedInstanceState == null && firstBoot) {
+            store.accept(StreamEvent.Ui.Init(streamDestination = getStreamDestinationFromArgs()))
         }
-
+        firstBoot = false
     }
 
     override fun onResume() {
         super.onResume()
-        val streamDestination = requireArguments().getSerializable(
-            STREAMS_DESTINATION_KEY,
-        ) as StreamDestination
-        viewModel.streamDestination.tryEmit(streamDestination)
-        lifecycleScope.launch {
-            viewModel.refreshScreenState()
+        (parentFragment as ChannelFragment).searchQueryFlow
+            .drop(1)
+            .debounce(800)
+            .onEach { query ->
+                store.accept(StreamEvent.Ui.QueryChanged(query, getStreamDestinationFromArgs()))
+            }
+            .flowOn(Dispatchers.IO)
+            .launchIn(lifecycleScope)
+    }
+
+    override fun handleEffect(effect: StreamEffect) {
+        when (effect) {
+            is StreamEffect.OnTopicClick -> {
+                findNavController().navigate(
+                    ChannelFragmentDirections.actionChannelFragmentToChatFragment(
+                        topicName = effect.topicName,
+                        streamName = effect.streamName
+                    )
+                )
+            }
         }
     }
 
-    override fun onDestroyView() {
-        _binding = null
-        super.onDestroyView()
-    }
-
-    private fun render(newScreenState: ChannelsScreenState) {
+    override fun render(state: StreamState) {
         with(binding) {
-            when(newScreenState) {
-                is ChannelsScreenState.Initial -> {
+            when (state) {
+                is StreamState.Initial -> {
                     shimmerContainer.isVisible = false
                     streamsInfoRv.isVisible = false
                     errorContainer.isVisible = false
                 }
-                is ChannelsScreenState.Loading -> {
+
+                is StreamState.Loading -> {
                     shimmerContainer.isVisible = true
                     streamsInfoRv.isVisible = false
                     errorContainer.isVisible = false
                     shimmerContainer.startShimmer()
                 }
-                is ChannelsScreenState.Content -> {
+
+                is StreamState.Content -> {
                     shimmerContainer.stopShimmer()
                     shimmerContainer.isVisible = false
                     errorContainer.isVisible = false
                     streamsInfoRv.isVisible = true
-                    mainAdapter.submitList(newScreenState.streamsList)
+                    when(getStreamDestinationFromArgs()) {
+                        StreamDestination.ALL -> {
+                            mainAdapter.submitList(state.allStreamsList)
+                        }
+                        StreamDestination.SUBSCRIBED -> {
+                            mainAdapter.submitList(state.subscribedStreamsList)
+                        }
+                    }
+
                 }
-                is ChannelsScreenState.Error -> {
+
+                is StreamState.Error -> {
                     shimmerContainer.stopShimmer()
                     errorContainer.isVisible = true
                     shimmerContainer.isVisible = false
@@ -132,33 +129,38 @@ class StreamsInfoFragment : Fragment() {
         val topicAdapter = mainAdapter.delegates.get(1) as TopicAdapter
 
         streamAdapter.onStreamClickListener = { stream: StreamDelegateItem ->
-            viewModel.onStreamClick(stream)
+            store.accept(
+                StreamEvent.Ui.OnStreamClick(
+                    stream = stream,
+                    streamDestination = getStreamDestinationFromArgs()
+                )
+            )
         }
 
         topicAdapter.onTopicClickListener = { topic ->
-            try {
-                val stream = viewModel.findStreamByItsTopicId(topicId = topic.id)
-                findNavController().navigate(
-                    ChannelFragmentDirections.actionChannelFragmentToChatFragment(
-                        topicName = topic.name,
-                        streamName = stream.name
-                    )
+            store.accept(
+                StreamEvent.Ui.OnTopicClick(
+                    topic = topic,
+                    streamDestination = getStreamDestinationFromArgs()
                 )
-            } catch (ex: Exception) {
-                Log.d("TAG", "Invalid Stream Name")
-            }
+            )
         }
 
         binding.errorComponent.retryButton.setOnClickListener {
-            lifecycleScope.launch {
-                if (viewModel.searchQueryFlow.value.isNotEmpty()) {
-                    viewModel.processSearch()
-                } else {
-                    viewModel.setupStubData()
-                }
-            }
+            store.accept(
+                StreamEvent.Ui.QueryChanged(
+                    newQuery = (parentFragment as ChannelFragment).searchQueryFlow.value,
+                    streamDestination = getStreamDestinationFromArgs()
+                )
+            )
         }
+    }
 
+
+    private fun getStreamDestinationFromArgs(): StreamDestination {
+        return requireArguments().getSerializable(
+            STREAMS_DESTINATION_KEY,
+        ) as StreamDestination
     }
 
     companion object {

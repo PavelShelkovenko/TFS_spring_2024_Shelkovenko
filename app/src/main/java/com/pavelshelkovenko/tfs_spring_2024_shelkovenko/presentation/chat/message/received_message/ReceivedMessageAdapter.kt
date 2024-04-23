@@ -5,10 +5,10 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.ReceivedMessageBinding
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.delegate_adapter.DelegateAdapter
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.delegate_adapter.DelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Reaction
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.message.MessageDelegateItem
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.delegate_adapter.DelegateAdapter
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.delegate_adapter.DelegateItem
 
 class ReceivedMessageAdapter :
     DelegateAdapter<ReceivedMessageDelegateItem, ReceivedMessageAdapter.ViewHolder>(
