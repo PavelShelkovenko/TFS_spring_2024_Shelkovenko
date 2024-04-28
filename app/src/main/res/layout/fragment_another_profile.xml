@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".presentation.profile.local.OwnProfileFragment"
+    tools:context=".presentation.profile.own.OwnProfileFragment"
     android:background="@color/light_black">
 
 
@@ -18,8 +18,8 @@
 
         <ImageButton
             android:id="@+id/back_button"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
             android:layout_marginStart="12dp"
             android:layout_gravity="center"
             android:background="@android:color/transparent"
@@ -52,7 +52,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <include layout="@layout/local_profile_shimmer"
+        <include layout="@layout/own_profile_shimmer"
             android:layout_height="match_parent"
             android:layout_width="match_parent"/>
 
@@ -82,15 +82,15 @@
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:layout_marginTop="50dp"
-        android:src="@drawable/ic_launcher_background"
         android:contentDescription="@string/user_avatar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintVertical_bias="0.3"
-        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CutCornersAvatarShape" />
+        app:layout_constraintVertical_bias="0.25"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CutCornersAvatarShape"
+        tools:src="@drawable/ic_launcher_background"/>
 
     <TextView
         android:id="@+id/user_name"

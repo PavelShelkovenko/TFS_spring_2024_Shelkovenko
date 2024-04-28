@@ -1,11 +1,11 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data
 
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.containsQuery
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.toUser
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.toUserStatus
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.UserRepository
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.User
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.UserOnlineStatus
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.processSearch
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -28,7 +28,7 @@ class ZulipUserRepository(
                     allUsersOnlineStatus[emailKey]?.aggregated?.userOnlineStatusDto?.toUserStatus()
                         ?: UserOnlineStatus.OFFLINE
 
-                if (isMoreThan7MinutesAgo(lastSeenTime)) {
+                if (isOffline(lastSeenTime)) {
                     statusValue = UserOnlineStatus.OFFLINE
                 }
                 user.copy(onlineStatus = statusValue)
@@ -67,11 +67,11 @@ class ZulipUserRepository(
         return if (query.isBlank()) {
             getAllUsers()
         } else {
-            getAllUsers().filter { it.name.processSearch(query) }
+            getAllUsers().filter { it.name.containsQuery(query) }
         }
     }
 }
-private fun isMoreThan7MinutesAgo(timestampInSeconds: Long): Boolean {
+private fun isOffline(timestampInSeconds: Long): Boolean {
     val timestamp = Instant.ofEpochSecond(timestampInSeconds)
     val now = Instant.now()
     val minutesDifference = ChronoUnit.MINUTES.between(timestamp, now)

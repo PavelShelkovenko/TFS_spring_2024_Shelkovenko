@@ -8,5 +8,5 @@ data class Stream(
 )
 
 enum class StreamDestination {
-    AllSTREAMS, SUBSCRIBED
+    ALL, SUBSCRIBED
 }

@@ -17,50 +17,40 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.Ope
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.generateRandomColor
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.generateRandomId
 
-fun UserDto.toUser(): User {
-    return User(
-        id = this.id,
-        avatarUrl = this.avatarUrl,
-        name = this.userName,
-        email = this.email,
-    )
+fun UserDto.toUser(): User = User(
+    id = this.id,
+    avatarUrl = this.avatarUrl,
+    name = this.userName,
+    email = this.email,
+)
+
+
+fun UserOnlineStatusDto.toUserStatus(): UserOnlineStatus = when (this) {
+    UserOnlineStatusDto.ACTIVE -> UserOnlineStatus.ACTIVE
+    UserOnlineStatusDto.IDLE -> UserOnlineStatus.IDLE
+    UserOnlineStatusDto.OFFLINE -> UserOnlineStatus.OFFLINE
 }
 
-fun UserOnlineStatusDto.toUserStatus(): UserOnlineStatus {
-    return when (this) {
-        UserOnlineStatusDto.ACTIVE -> UserOnlineStatus.ACTIVE
-        UserOnlineStatusDto.IDLE -> UserOnlineStatus.IDLE
-        UserOnlineStatusDto.OFFLINE -> UserOnlineStatus.OFFLINE
-    }
-}
+fun StreamDto.toStream(): Stream = Stream(id = this.id, name = this.streamName)
 
-fun StreamDto.toStream(): Stream {
-    return Stream(
-        id = this.id,
-        name = this.streamName,
-    )
-}
+fun TopicDto.toTopic(): Topic = Topic(
+    id = generateRandomId(),
+    name = this.topicName,
+    lastMessageId = this.lastMessageId,
+    color = generateRandomColor()
+)
 
-fun TopicDto.toTopic(): Topic {
-    return Topic(
-        id = generateRandomId(),
-        name = this.topicName,
-        lastMessageId = this.lastMessageId,
-        color = generateRandomColor()
-    )
-}
 
-fun MessageDto.toMessage(): Message {
-    return Message(
-        id = this.id,
-        avatarUrl = this.avatarUrl,
-        message = this.message,
-        userId = this.userId,
-        userName = this.userName,
-        dateInUTCSeconds = this.dateInUTCSeconds,
-        reactions = this.reactions.toReaction(MyUserId.MY_USER_ID)
-    )
-}
+fun MessageDto.toMessage(): Message = Message(
+    id = this.id,
+    avatarUrl = this.avatarUrl,
+    message = this.message,
+    userId = this.userId,
+    userName = this.userName,
+    dateInUTCSeconds = this.dateInUTCSeconds,
+    reactions = this.reactions.toReaction(MyUserId.MY_USER_ID)
+)
+
 
 fun List<ReactionDto>.toReaction(myUserId: Int): List<Reaction> {
     return this.groupBy { it.emojiCode }
@@ -76,9 +66,7 @@ fun List<ReactionDto>.toReaction(myUserId: Int): List<Reaction> {
         }
 }
 
-fun OperationDto.toOperation(): Operation {
-    return when(this) {
-        OperationDto.ADD -> Operation.ADD
-        OperationDto.REMOVE -> Operation.REMOVE
-    }
+fun OperationDto.toOperation(): Operation = when (this) {
+    OperationDto.ADD -> Operation.ADD
+    OperationDto.REMOVE -> Operation.REMOVE
 }

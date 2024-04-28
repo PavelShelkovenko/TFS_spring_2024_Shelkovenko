@@ -1,122 +1,92 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.profile.another
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.flowWithLifecycle
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import by.kirich1409.viewbindingdelegate.viewBinding
 import com.bumptech.glide.Glide
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.ZulipApi
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.ZulipUserRepository
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.FragmentAnotherProfileBinding
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.usecase.GetAnotherProfileUseCase
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.di.DiContainer
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.ElmBaseFragment
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.setColoredTextStatus
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import vivid.money.elmslie.android.renderer.elmStoreWithRenderer
+import vivid.money.elmslie.core.store.Store
 
-class AnotherProfileFragment : Fragment() {
+class AnotherProfileFragment :
+    ElmBaseFragment<AnotherProfileEffect, AnotherProfileState, AnotherProfileEvent>(R.layout.fragment_another_profile) {
 
-    private var _binding: FragmentAnotherProfileBinding? = null
-    private val binding: FragmentAnotherProfileBinding
-        get() = _binding ?: throw RuntimeException("FragmentAnotherProfileBinding == null")
-
+    private val binding: FragmentAnotherProfileBinding by viewBinding(FragmentAnotherProfileBinding::bind)
 
     private val args by navArgs<AnotherProfileFragmentArgs>()
 
-    private lateinit var viewModel: AnotherProfileViewModel
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        _binding = FragmentAnotherProfileBinding.inflate(inflater, container, false)
-        return binding.root
+    override val store: Store<AnotherProfileEvent, AnotherProfileEffect, AnotherProfileState> by elmStoreWithRenderer(
+        elmRenderer = this
+    ) {
+        DiContainer.anotherProfileStoreFactory.create()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        if (savedInstanceState == null) {
+            store.accept(AnotherProfileEvent.Ui.Init(args.userId))
+        }
         setupClickListeners()
-
-        val repository = ZulipUserRepository(ZulipApi())
-        val useCase = GetAnotherProfileUseCase(repository)
-
-        viewModel = ViewModelProvider(
-            this,
-            AnotherProfileViewModelFactory(useCase)
-        )[AnotherProfileViewModel::class.java]
-
-
-        viewModel.screenState
-            .flowWithLifecycle(lifecycle)
-            .onEach(::render)
-            .launchIn(lifecycleScope)
-
-        lifecycleScope.launch {
-            viewModel.downloadData(args.userId)
-        }
     }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
-    private fun setupClickListeners() {
+    
+    override fun render(state: AnotherProfileState) {
         with(binding) {
-            errorComponent.retryButton.setOnClickListener {
-                lifecycleScope.launch {
-                    viewModel.downloadData(args.userId)
-                }
-            }
-            backButton.setOnClickListener {
-                findNavController().popBackStack()
-            }
-        }
-    }
-
-    private fun render(newScreenState: AnotherProfileScreenState) {
-        with(binding) {
-            when (newScreenState) {
-                is AnotherProfileScreenState.Content -> {
-                    shimmerContainer.stopShimmer()
-                    errorContainer.isVisible = false
+            when (state) {
+                is AnotherProfileState.Content -> {
                     shimmerContainer.isVisible = false
+                    errorContainer.isVisible = false
                     userAvatarImage.isVisible = true
                     userName.isVisible = true
                     userOnlineStatus.isVisible = true
-                    userName.text = newScreenState.anotherUser.name
-                    userOnlineStatus.setColoredTextStatus(newScreenState.anotherUser.onlineStatus)
-                    Glide.with(root).load(newScreenState.anotherUser.avatarUrl).into(userAvatarImage)
+                    shimmerContainer.stopShimmer()
+                    userName.text = state.anotherUser.name
+                    userOnlineStatus.setColoredTextStatus(status = state.anotherUser.onlineStatus)
+                    Glide.with(root).load(state.anotherUser.avatarUrl).into(userAvatarImage)
                 }
-                is AnotherProfileScreenState.Error -> {
+
+                is AnotherProfileState.Error -> {
                     errorContainer.isVisible = true
                     shimmerContainer.isVisible = false
                     userAvatarImage.isVisible = false
                     userName.isVisible = false
                     userOnlineStatus.isVisible = false
+                    shimmerContainer.stopShimmer()
                 }
-                AnotherProfileScreenState.Initial -> {
+
+                is AnotherProfileState.Initial -> {
                     errorContainer.isVisible = false
                     shimmerContainer.isVisible = false
                     userAvatarImage.isVisible = false
                     userName.isVisible = false
                     userOnlineStatus.isVisible = false
                 }
-                AnotherProfileScreenState.Loading -> {
-                    errorContainer.isVisible = false
+
+                is AnotherProfileState.Loading -> {
                     shimmerContainer.isVisible = true
-                    shimmerContainer.startShimmer()
+                    errorContainer.isVisible = false
                     userAvatarImage.isVisible = false
                     userName.isVisible = false
                     userOnlineStatus.isVisible = false
+                    shimmerContainer.startShimmer()
                 }
+            }
+        }
+    }
+
+    private fun setupClickListeners() {
+        with(binding) {
+            errorComponent.retryButton.setOnClickListener {
+                store.accept(AnotherProfileEvent.Ui.ReloadData(args.userId))
+            }
+            backButton.setOnClickListener {
+                findNavController().popBackStack()
             }
         }
     }

@@ -4,8 +4,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.DateItemBinding
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.delegate_adapter.DelegateAdapter
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.delegate_adapter.DelegateItem
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.delegate_adapter.DelegateAdapter
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.delegate_adapter.DelegateItem
 
 class MessageDateTimeAdapter :
     DelegateAdapter<MessageDateTimeDelegateItem, MessageDateTimeAdapter.ViewHolder>(MessageDateTimeDelegateItem::class.java) {

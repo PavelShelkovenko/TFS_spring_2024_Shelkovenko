@@ -21,7 +21,7 @@ class ZulipChatRepository(
         numAfter: Int
     ): List<Message> {
         // Пока сделал так, потом через Di буду в конструктор инжектить NarrowBuilderHelper
-        val narrow = NarrowBuilderHelper().getNarrow(topicName, streamName)
+        val narrow = NarrowBuilderHelper().getNarrowArrayWithObjectStructure(topicName, streamName)
         val response = zulipApi.getMessages(
             anchor = anchor,
             numBefore = numBefore,
@@ -61,7 +61,7 @@ class ZulipChatRepository(
 
 
     override suspend fun registerForEvents(streamName: String, topicName: String): RegistrationForEventsData {
-        val narrow = NarrowBuilderHelper().getNarrowArray(
+        val narrow = NarrowBuilderHelper().getNarrowArrayWithArrayStructure(
             streamName = streamName, topicName = topicName
         )
         val registrationForMessages = zulipApi.registerMessageEvents(narrow)
@@ -103,9 +103,7 @@ class ZulipChatRepository(
             queueId = queueId,
             lastEventId = lastEventId
         ).reactionEvents
-
         val newLastEventId = reactionEventsDto.last().id
-
         val reactionEvents = reactionEventsDto.map { reactionEventDto ->
             ReactionEvent(
                 emojiCode = reactionEventDto.emojiCode,
@@ -115,13 +113,9 @@ class ZulipChatRepository(
                 userId = reactionEventDto.userId
             )
         }
-
         return ReceivedReactionEventData(
             newLastEventId = newLastEventId,
             reactionEvents = reactionEvents
         )
     }
-
-
-
 }

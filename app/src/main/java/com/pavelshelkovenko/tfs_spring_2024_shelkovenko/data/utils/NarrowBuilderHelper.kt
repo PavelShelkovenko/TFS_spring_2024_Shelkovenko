@@ -4,7 +4,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 class NarrowBuilderHelper {
-    fun getNarrow(topicName: String, streamName: String): JSONArray {
+    fun getNarrowArrayWithObjectStructure(topicName: String, streamName: String): JSONArray {
         val jsonObjStream = JSONObject()
         jsonObjStream.put(OPERAND_KEY, streamName)
         jsonObjStream.put(OPERATOR_KEY, OPERATOR_VALUE_STREAM)
@@ -19,7 +19,7 @@ class NarrowBuilderHelper {
         return jsonArray
     }
 
-    fun getNarrowArray(topicName: String, streamName: String): JSONArray {
+    fun getNarrowArrayWithArrayStructure(topicName: String, streamName: String): JSONArray {
         val jsonArrayStream = JSONArray()
         jsonArrayStream.put(OPERATOR_VALUE_STREAM)
         jsonArrayStream.put(streamName)
