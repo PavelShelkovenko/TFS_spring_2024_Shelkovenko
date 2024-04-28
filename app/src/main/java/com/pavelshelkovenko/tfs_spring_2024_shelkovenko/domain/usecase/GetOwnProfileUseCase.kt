@@ -1,9 +1,10 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.usecase
 
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.UserRepository
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.User
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.repository.UserRepository
+import javax.inject.Inject
 
-class GetOwnProfileUseCase(
+class GetOwnProfileUseCase @Inject constructor(
     private val userRepository: UserRepository
 ) {
 

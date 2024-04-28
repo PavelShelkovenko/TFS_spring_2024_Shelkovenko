@@ -4,6 +4,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 class NarrowBuilderHelper {
+
     fun getNarrowArrayWithObjectStructure(topicName: String, streamName: String): JSONArray {
         val jsonObjStream = JSONObject()
         jsonObjStream.put(OPERAND_KEY, streamName)

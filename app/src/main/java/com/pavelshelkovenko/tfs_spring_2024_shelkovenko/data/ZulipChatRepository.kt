@@ -3,16 +3,19 @@ package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.NarrowBuilderHelper
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.toMessage
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.toOperation
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.ChatRepository
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Message
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.ReactionEvent
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.ReceivedMessageEventData
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.ReceivedReactionEventData
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.RegistrationForEventsData
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.repository.ChatRepository
+import javax.inject.Inject
 
-class ZulipChatRepository(
-    private val zulipApi: ZulipApi
+class ZulipChatRepository @Inject constructor(
+    private val zulipApi: ZulipApi,
+    private val narrowBuilderHelper: NarrowBuilderHelper
 ): ChatRepository {
+
     override suspend fun getMessages(
         streamName: String,
         topicName: String,
@@ -20,8 +23,7 @@ class ZulipChatRepository(
         numBefore: Int,
         numAfter: Int
     ): List<Message> {
-        // Пока сделал так, потом через Di буду в конструктор инжектить NarrowBuilderHelper
-        val narrow = NarrowBuilderHelper().getNarrowArrayWithObjectStructure(topicName, streamName)
+        val narrow = narrowBuilderHelper.getNarrowArrayWithObjectStructure(topicName, streamName)
         val response = zulipApi.getMessages(
             anchor = anchor,
             numBefore = numBefore,
@@ -61,7 +63,7 @@ class ZulipChatRepository(
 
 
     override suspend fun registerForEvents(streamName: String, topicName: String): RegistrationForEventsData {
-        val narrow = NarrowBuilderHelper().getNarrowArrayWithArrayStructure(
+        val narrow = narrowBuilderHelper.getNarrowArrayWithArrayStructure(
             streamName = streamName, topicName = topicName
         )
         val registrationForMessages = zulipApi.registerMessageEvents(narrow)

@@ -18,31 +18,48 @@ okHttp = "4.11.0"
 okHttp-logging = "4.11.0"
 glide = "4.12.0"
 viewbindingpropertydelegateNoreflection = "1.5.9"
+dagger = "2.51.1"
 
 [libraries]
+
+# Core
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
-androidx-navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
-androidx-navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigationFragmentKtx" }
-elmslie-android = { module = "com.github.vivid-money.elmslie:elmslie-android", version.ref = "elmslieCore" }
-elmslie-core = { module = "com.github.vivid-money.elmslie:elmslie-core", version.ref = "elmslieCore" }
-facebook-shimmer = { module = "com.facebook.shimmer:shimmer", version.ref = "shimmerVersion" }
-junit = { group = "junit", name = "junit", version.ref = "junit" }
-androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
-androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
-androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+
+#  Glide
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
 glide-compiler = { group = "com.github.bumptech.glide", name = "compiler", version.ref = "glide"}
+
+# UI common
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+facebook-shimmer = { module = "com.facebook.shimmer:shimmer", version.ref = "shimmerVersion" }
+view-binding-property-delegate = { module = "com.github.kirich1409:viewbindingpropertydelegate-noreflection", version.ref = "viewbindingpropertydelegateNoreflection" }
+
+# Ui Arcitecture
+elmslie-android = { module = "com.github.vivid-money.elmslie:elmslie-android", version.ref = "elmslieCore" }
+elmslie-core = { module = "com.github.vivid-money.elmslie:elmslie-core", version.ref = "elmslieCore" }
+
+# Navigation
+androidx-navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
+androidx-navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigationFragmentKtx" }
+
+# DI
+dagger = { group = "com.google.dagger", name = "dagger", version.ref = "dagger"}
+dagger-compiler = { group = "com.google.dagger", name = "dagger-compiler", version.ref = "dagger"}
 
 # Network
 retrofit-core = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 retrofit-gson-converter = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 okHttp-core = { module = "com.squareup.okhttp3:okhttp", version.ref = "okHttp" }
 okHttp-logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okHttp-logging" }
-viewbindingpropertydelegate-noreflection = { module = "com.github.kirich1409:viewbindingpropertydelegate-noreflection", version.ref = "viewbindingpropertydelegateNoreflection" }
+
+# Testing
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -56,4 +73,5 @@ navigation-safe-args = { id = "androidx.navigation.safeargs.kotlin", version.ref
 network = ["retrofit-core", "retrofit-gson-converter", "okHttp-core", "okHttp-logging-interceptor"]
 navigation = ["androidx-navigation-fragment-ktx", "androidx-navigation-ui-ktx"]
 core = ["androidx-core-ktx", "androidx-lifecycle-runtime-ktx", "androidx-appcompat", "androidx-activity"]
-ui-common = ["androidx-constraintlayout", "material", "facebook-shimmer"]
+ui-common = ["androidx-constraintlayout", "material", "facebook-shimmer", "view-binding-property-delegate"]
+elmslie = ["elmslie-android", "elmslie-core"]

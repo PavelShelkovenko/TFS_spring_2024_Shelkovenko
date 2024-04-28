@@ -1,15 +1,16 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data
 
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.containsQuery
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.toUser
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.toUserStatus
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.UserRepository
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.User
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.UserOnlineStatus
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.repository.UserRepository
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.containsQuery
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import javax.inject.Inject
 
-class ZulipUserRepository(
+class ZulipUserRepository @Inject constructor(
     private val zulipApi: ZulipApi
 ) : UserRepository {
 

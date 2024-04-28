@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/light_black"
-    tools:context=".presentation.people.PeopleFragment">
+    tools:context=".presentation.screens.people.PeopleFragment">
 
     <LinearLayout
         android:id="@+id/search_container"

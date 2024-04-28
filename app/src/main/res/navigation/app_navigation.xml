@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/channelFragment"
-        android:name="com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.channels.ChannelFragment"
+        android:name="com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.channels.ChannelFragment"
         android:label="fragment_channel"
         tools:layout="@layout/fragment_channel" >
         <action
@@ -16,7 +16,7 @@
     </fragment>
     <fragment
         android:id="@+id/peopleFragment"
-        android:name="com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.people.PeopleFragment"
+        android:name="com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.people.PeopleFragment"
         android:label="fragment_people"
         tools:layout="@layout/fragment_people" >
         <action
@@ -25,12 +25,12 @@
     </fragment>
     <fragment
         android:id="@+id/ownProfileFragment"
-        android:name="com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.profile.own.OwnProfileFragment"
+        android:name="com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.profile.own.OwnProfileFragment"
         android:label="fragment_own_profile"
         tools:layout="@layout/fragment_own_profile" />
     <fragment
         android:id="@+id/chatFragment"
-        android:name="com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.chat.ChatFragment"
+        android:name="com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.ChatFragment"
         android:label="ChatFragment"
         tools:layout="@layout/fragment_chat">
         <argument
@@ -42,7 +42,7 @@
     </fragment>
     <fragment
         android:id="@+id/anotherProfileFragment"
-        android:name="com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.profile.another.AnotherProfileFragment"
+        android:name="com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.profile.another.AnotherProfileFragment"
         android:label="AnotherProfileFragment"
         tools:layout="@layout/fragment_another_profile">
         <argument
