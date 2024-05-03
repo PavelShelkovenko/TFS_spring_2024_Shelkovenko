@@ -42,15 +42,21 @@ android {
 }
 
 dependencies {
-    implementation(libs.bundles.network)
     implementation(libs.bundles.core)
-    implementation(libs.bundles.navigation)
     implementation(libs.bundles.ui.common)
+    implementation(libs.bundles.navigation)
+    implementation(libs.bundles.network)
+    implementation(libs.bundles.elmslie)
+
+    // DI
+    implementation(libs.dagger)
+    kapt(libs.dagger.compiler)
+
+    // Glide
     implementation(libs.glide)
-    implementation(libs.elmslie.core)
-    implementation(libs.elmslie.android)
-    implementation(libs.viewbindingpropertydelegate.noreflection)
     kapt(libs.glide.compiler)
+
+    // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

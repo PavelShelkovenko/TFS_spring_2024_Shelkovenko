@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <com.pavelshelkovenko.tfs_spring_2024_shelkovenko.custom_views.message_group.ReceivedMessageViewGroup
+    <com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.custom_views.message_group.ReceivedMessageViewGroup
         android:id="@+id/messageGroup"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -13,6 +13,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintWidth_percent="0.75">
 
-    </com.pavelshelkovenko.tfs_spring_2024_shelkovenko.custom_views.message_group.ReceivedMessageViewGroup>
+    </com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.custom_views.message_group.ReceivedMessageViewGroup>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

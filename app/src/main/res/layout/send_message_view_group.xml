@@ -12,13 +12,13 @@
         android:layout_width="wrap_content"
         android:textColor="@color/white"/>
 
-    <com.pavelshelkovenko.tfs_spring_2024_shelkovenko.custom_views.FlexBoxLayout
+    <com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.custom_views.FlexBoxLayout
         android:id="@+id/flex_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:horizontalContentPadding="8dp"
         app:verticalContentPadding="8dp">
 
-    </com.pavelshelkovenko.tfs_spring_2024_shelkovenko.custom_views.FlexBoxLayout>
+    </com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.custom_views.FlexBoxLayout>
 
 </merge>

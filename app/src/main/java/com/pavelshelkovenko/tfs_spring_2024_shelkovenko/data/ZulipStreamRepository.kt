@@ -1,13 +1,14 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data
 
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.containsQuery
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.toStream
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.toTopic
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.StreamRepository
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Stream
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.StreamDestination
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.repository.StreamRepository
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.containsQuery
+import javax.inject.Inject
 
-class ZulipStreamRepository(
+class ZulipStreamRepository @Inject constructor(
     private val zulipApi: ZulipApi
 ): StreamRepository {
     override suspend fun getAllStreams(): List<Stream> {

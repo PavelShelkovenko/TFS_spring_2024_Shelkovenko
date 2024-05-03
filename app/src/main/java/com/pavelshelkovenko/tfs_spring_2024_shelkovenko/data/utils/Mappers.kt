@@ -14,8 +14,8 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Topic
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.User
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.UserOnlineStatus
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.Operation
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.generateRandomColor
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.generateRandomId
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.generateRandomColor
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.generateRandomId
 
 fun UserDto.toUser(): User = User(
     id = this.id,

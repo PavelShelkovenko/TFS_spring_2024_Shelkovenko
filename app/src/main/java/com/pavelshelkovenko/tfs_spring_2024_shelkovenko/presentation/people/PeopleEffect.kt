@@ -1,3 +1,0 @@
-package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.people
-
-interface PeopleEffect
