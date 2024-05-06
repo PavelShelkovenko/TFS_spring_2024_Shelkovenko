@@ -7,8 +7,11 @@ import javax.inject.Inject
 class GetAnotherProfileUseCase @Inject constructor(
     private val userRepository: UserRepository
 ) {
+    suspend fun getAnotherUserFromCache(userId: Int): User? {
+        return userRepository.getAnotherUserFromCache(userId)
+    }
 
-    suspend operator fun invoke(userId: Int): User {
-        return userRepository.getAnotherUser(userId = userId)
+    suspend fun getAnotherUserFromNetwork(userId: Int): User {
+        return userRepository.getAnotherUserFromNetwork(userId)
     }
 }

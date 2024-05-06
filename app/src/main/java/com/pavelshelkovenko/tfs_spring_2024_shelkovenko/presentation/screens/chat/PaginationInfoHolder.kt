@@ -5,5 +5,5 @@ data class PaginationInfoHolder(
    var hasLoadedNewestMessage: Boolean = false,
    var hasLoadedOldestMessage: Boolean = false,
    var oldestAnchor: String = "0",
-   var newestAnchor: String = "0"
+   var newestAnchor: String = "first_unread"
 )

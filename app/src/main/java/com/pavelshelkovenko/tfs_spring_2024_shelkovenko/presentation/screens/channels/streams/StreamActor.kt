@@ -1,6 +1,6 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.channels.streams
 
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.StreamDestination
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.repository.StreamRepository
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.runCatchingNonCancellation
 import kotlinx.coroutines.flow.Flow
@@ -22,21 +22,14 @@ class StreamActor(
                             streamDestination = command.streamDestination
                         )
                     )
-                }.onFailure { error ->
-                    emit(StreamEvent.Internal.Error(throwable = error))
+                }.onFailure {
+                    emit(StreamEvent.Internal.MinorError(errorMessageId = R.string.load_streams_error))
                 }
             }
 
             is StreamCommand.LoadData -> flow {
                 runCatchingNonCancellation {
-                    when (command.streamDestination) {
-                        StreamDestination.ALL -> {
-                            repository.getAllStreams()
-                        }
-                        StreamDestination.SUBSCRIBED -> {
-                            repository.getSubscribedStreams()
-                        }
-                    }
+                    repository.getStreamsByDestination(command.streamDestination)
                 }.onSuccess { streams ->
                     emit(
                         StreamEvent.Internal.DataLoaded(
@@ -46,6 +39,21 @@ class StreamActor(
                     )
                 }.onFailure { error ->
                     emit(StreamEvent.Internal.Error(throwable = error))
+                }
+            }
+
+            is StreamCommand.LoadDataFromCache -> flow {
+                runCatchingNonCancellation {
+                    repository.getStreamsByDestinationFromCache(command.streamDestination)
+                }.onSuccess { streams ->
+                    emit(
+                        StreamEvent.Internal.DataLoadedFromCache(
+                            streams = streams,
+                            streamDestination = command.streamDestination
+                        )
+                    )
+                }.onFailure {
+                    emit(StreamEvent.Internal.MinorError(errorMessageId = R.string.load_streams_error))
                 }
             }
         }

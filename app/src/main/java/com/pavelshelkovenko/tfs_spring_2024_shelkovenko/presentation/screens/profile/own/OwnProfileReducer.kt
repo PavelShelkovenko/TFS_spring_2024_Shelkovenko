@@ -13,26 +13,35 @@ class OwnProfileReducer : ScreenDslReducer<
 
     override fun Result.internal(event: OwnProfileEvent.Internal) = when (event) {
 
-        is OwnProfileEvent.Internal.DataLoaded -> state {
-            OwnProfileState.Content(ownUser = event.user)
+        is OwnProfileEvent.Internal.DataLoadedFromNetwork -> {
+            state { OwnProfileState.Content(ownUser = event.user) }
         }
 
-        is OwnProfileEvent.Internal.Error -> state {
-            OwnProfileState.Error(errorMessage = event.throwable.message.toString())
+        is OwnProfileEvent.Internal.Error -> state { OwnProfileState.Error(errorMessage = event.errorMessage) }
+
+        is OwnProfileEvent.Internal.DataLoadedFromCache -> {
+            if (event.user == null) {
+                state { OwnProfileState.Loading }
+            } else {
+                state { OwnProfileState.Content(ownUser = event.user) }
+            }
         }
 
+        is OwnProfileEvent.Internal.MinorError -> effects {
+            +OwnProfileEffect.MinorError(errorMessageId = event.errorMessageId)
+        }
     }
 
     override fun Result.ui(event: OwnProfileEvent.Ui) = when (event) {
 
         is OwnProfileEvent.Ui.StartProcess -> {
-            state { OwnProfileState.Loading }
-            commands { +OwnProfileCommand.LoadData }
+            commands { +OwnProfileCommand.LoadDataFromCache }
+            commands { +OwnProfileCommand.LoadDataFromNetwork }
         }
 
         is OwnProfileEvent.Ui.ReloadData -> {
             state { OwnProfileState.Loading }
-            commands { +OwnProfileCommand.LoadData }
+            commands { +OwnProfileCommand.LoadDataFromNetwork }
         }
 
     }

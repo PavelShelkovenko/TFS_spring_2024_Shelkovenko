@@ -1,6 +1,12 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.di.modules.core
 
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.ZulipApi
+import android.content.Context
+import androidx.room.Room
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.AppDatabase
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.dao.ChatDao
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.dao.StreamDao
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.dao.UserDao
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.ZulipApi
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.NarrowBuilderHelper
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.di.scopes.ApplicationScope
 import dagger.Module
@@ -21,6 +27,28 @@ class DataModule {
     @ApplicationScope
     @Provides
     fun providesZulipApi(retrofitClient: Retrofit): ZulipApi = retrofitClient.create()
+
+    @ApplicationScope
+    @Provides
+    fun providesDatabase(context: Context): AppDatabase {
+        return Room.databaseBuilder(
+            context.applicationContext,
+            AppDatabase::class.java,
+            AppDatabase.DB_NAME
+        ).fallbackToDestructiveMigration().build()
+    }
+
+    @ApplicationScope
+    @Provides
+    fun provideUserDao(db: AppDatabase): UserDao = db.userDao()
+
+    @ApplicationScope
+    @Provides
+    fun provideStreamDao(db: AppDatabase): StreamDao = db.streamDao()
+
+    @ApplicationScope
+    @Provides
+    fun provideChatDao(db: AppDatabase): ChatDao = db.chatDao()
 
     @ApplicationScope
     @Provides

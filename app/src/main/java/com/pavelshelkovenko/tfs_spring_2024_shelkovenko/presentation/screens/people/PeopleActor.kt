@@ -1,5 +1,6 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.people
 
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.repository.UserRepository
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.runCatchingNonCancellation
 import kotlinx.coroutines.flow.Flow
@@ -11,13 +12,23 @@ class PeopleActor(
 ): Actor<PeopleCommand, PeopleEvent>() {
     override fun execute(command: PeopleCommand): Flow<PeopleEvent> {
         return when(command) {
-            is PeopleCommand.LoadData -> flow {
+            is PeopleCommand.LoadDataFromNetwork -> flow {
                 runCatchingNonCancellation {
-                    repository.getAllUsers()
+                    repository.getAllUsersFromNetwork()
                 }.onSuccess { users ->
-                    emit(PeopleEvent.Internal.DataLoaded(users = users))
+                    emit(PeopleEvent.Internal.DataLoadedFromNetwork(users = users))
+                }.onFailure {
+                    emit(PeopleEvent.Internal.MinorError(errorMessageId = R.string.some_error_occurred))
+                }
+            }
+
+            is PeopleCommand.LoadDataFromCache -> flow {
+                runCatchingNonCancellation {
+                    repository.getAllUsersFromCache()
+                }.onSuccess { users ->
+                    emit(PeopleEvent.Internal.DataLoadedFromNetwork(users = users))
                 }.onFailure { error ->
-                    emit(PeopleEvent.Internal.Error(throwable = error))
+                    emit(PeopleEvent.Internal.Error(errorMessage = error.message.toString()))
                 }
             }
 
@@ -25,11 +36,13 @@ class PeopleActor(
                 runCatchingNonCancellation {
                     repository.searchUsers(command.query)
                 }.onSuccess { users ->
-                    emit(PeopleEvent.Internal.DataLoaded(users = users))
-                }.onFailure { error ->
-                    emit(PeopleEvent.Internal.Error(throwable = error))
+                    emit(PeopleEvent.Internal.DataLoadedFromNetwork(users = users))
+                }.onFailure {
+                    emit(PeopleEvent.Internal.MinorError(errorMessageId = R.string.some_error_occurred))
                 }
             }
+
+
         }
     }
 

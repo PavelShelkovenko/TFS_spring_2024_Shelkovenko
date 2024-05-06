@@ -17,8 +17,9 @@ retrofit = "2.9.0"
 okHttp = "4.11.0"
 okHttp-logging = "4.11.0"
 glide = "4.12.0"
-viewbindingpropertydelegateNoreflection = "1.5.9"
+viewbindingPropertyDelegate = "1.5.9"
 dagger = "2.51.1"
+room = "2.6.1"
 
 [libraries]
 
@@ -28,15 +29,11 @@ androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtim
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 
-#  Glide
-glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
-glide-compiler = { group = "com.github.bumptech.glide", name = "compiler", version.ref = "glide"}
-
 # UI common
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 facebook-shimmer = { module = "com.facebook.shimmer:shimmer", version.ref = "shimmerVersion" }
-view-binding-property-delegate = { module = "com.github.kirich1409:viewbindingpropertydelegate-noreflection", version.ref = "viewbindingpropertydelegateNoreflection" }
+view-binding-property-delegate = { module = "com.github.kirich1409:viewbindingpropertydelegate-noreflection", version.ref = "viewbindingPropertyDelegate" }
 
 # Ui Arcitecture
 elmslie-android = { module = "com.github.vivid-money.elmslie:elmslie-android", version.ref = "elmslieCore" }
@@ -55,6 +52,15 @@ retrofit-core = { module = "com.squareup.retrofit2:retrofit", version.ref = "ret
 retrofit-gson-converter = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 okHttp-core = { module = "com.squareup.okhttp3:okhttp", version.ref = "okHttp" }
 okHttp-logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okHttp-logging" }
+
+#  Glide
+glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
+glide-compiler = { group = "com.github.bumptech.glide", name = "compiler", version.ref = "glide"}
+
+# Room
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -75,3 +81,4 @@ navigation = ["androidx-navigation-fragment-ktx", "androidx-navigation-ui-ktx"]
 core = ["androidx-core-ktx", "androidx-lifecycle-runtime-ktx", "androidx-appcompat", "androidx-activity"]
 ui-common = ["androidx-constraintlayout", "material", "facebook-shimmer", "view-binding-property-delegate"]
 elmslie = ["elmslie-android", "elmslie-core"]
+room = ["room-runtime", "room-ktx"]

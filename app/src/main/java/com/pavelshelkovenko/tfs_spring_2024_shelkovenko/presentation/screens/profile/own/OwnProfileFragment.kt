@@ -11,6 +11,7 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.FragmentOwnP
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.base.ElmBaseFragment
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.getApplication
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.setColoredTextStatus
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.showErrorToast
 import vivid.money.elmslie.android.renderer.elmStoreWithRenderer
 import vivid.money.elmslie.core.store.Store
 import javax.inject.Inject
@@ -24,11 +25,11 @@ class OwnProfileFragment :
     lateinit var ownProfileStoreFactory: OwnProfileStoreFactory
 
     override fun onAttach(context: Context) {
-        super.onAttach(context)
         context.getApplication
             .appComponent
             .ownProfileComponent()
             .inject(this)
+        super.onAttach(context)
     }
 
     override val store: Store<OwnProfileEvent, OwnProfileEffect, OwnProfileState> by elmStoreWithRenderer(
@@ -45,6 +46,12 @@ class OwnProfileFragment :
 
         binding.errorComponent.retryButton.setOnClickListener {
             store.accept(OwnProfileEvent.Ui.ReloadData)
+        }
+    }
+
+    override fun handleEffect(effect: OwnProfileEffect) {
+        when(effect) {
+            is OwnProfileEffect.MinorError -> { showErrorToast(effect.errorMessageId, requireActivity()) }
         }
     }
 

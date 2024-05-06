@@ -7,7 +7,7 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.Reg
 
 interface ChatRepository {
 
-    suspend fun getMessages(
+    suspend fun getMessagesFromNetwork(
         streamName: String,
         topicName: String,
         anchor: String,
@@ -15,6 +15,24 @@ interface ChatRepository {
         numAfter: Int,
     ): List<Message>
 
+    suspend fun getMessagesFromCache(
+        streamName: String,
+        topicName: String,
+    ): List<Message>
+
+    suspend fun getPagingMessages(
+        streamName: String,
+        topicName: String,
+        anchor: String,
+        numBefore: Int,
+        numAfter: Int
+    ): List<Message>
+
+    suspend fun saveMessagesInCache(
+        messages: List<Message>,
+        streamName: String,
+        topicName: String
+    )
 
     suspend fun sendMessage(streamName: String, topicName: String, message: String)
 

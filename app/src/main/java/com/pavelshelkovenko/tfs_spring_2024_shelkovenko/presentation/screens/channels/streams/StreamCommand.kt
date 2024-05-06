@@ -6,6 +6,8 @@ sealed interface StreamCommand {
 
     data class LoadData(val streamDestination: StreamDestination): StreamCommand
 
+    data class LoadDataFromCache(val streamDestination: StreamDestination): StreamCommand
+
     data class ProcessSearch(val query: String, val streamDestination: StreamDestination):
         StreamCommand
 }

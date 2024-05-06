@@ -56,11 +56,18 @@ sealed interface ChatEvent {
             val emojiCode: String,
             val emojiName: String
         ): Ui
+
+        data class ClosingChat(
+            val streamName: String,
+            val topicName: String
+        ): Ui
     }
 
     sealed interface Internal : ChatEvent {
 
-        data class LoadInitialMessages(val messages: List<Message>) : Internal
+        data class LoadMessagesFromNetwork(val messages: List<Message>) : Internal
+
+        data class LoadMessagesFromCache(val messages: List<Message>) : Internal
 
         data class LoadPagingNewerMessages(val messages: List<Message>) : Internal
 
@@ -69,12 +76,6 @@ sealed interface ChatEvent {
         data class Error(val throwable: Throwable) : Internal
 
         data class MinorError(val errorMessageId: Int) : Internal
-
-        data object LoadingPagingDataFinished: Internal
-
-        data object GetMessageLongPollingData: Internal
-
-        data object GetReactionLongPollingData: Internal
 
         data class RegistrationForChatEventsDataReceived(
             val registrationForEventsData: RegistrationForEventsData
@@ -87,5 +88,13 @@ sealed interface ChatEvent {
         data class ReactionEventsDataReceived(
             val receivedReactionEventData: ReceivedReactionEventData
         ) : Internal
+
+        data object LoadingPagingDataFinished: Internal
+
+        data object GetMessageLongPollingData: Internal
+
+        data object GetReactionLongPollingData: Internal
+
+        data object CachedMessagesSaved: Internal
     }
 }

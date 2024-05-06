@@ -5,9 +5,9 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.StreamDest
 
 interface StreamRepository {
 
-    suspend fun getAllStreams(): List<Stream>
+    suspend fun getStreamsByDestination(streamDestination: StreamDestination): List<Stream>
 
-    suspend fun getSubscribedStreams(): List<Stream>
+    suspend fun getStreamsByDestinationFromCache(streamDestination: StreamDestination): List<Stream>
 
     suspend fun searchStreams(query: String, streamDestination: StreamDestination): List<Stream>
 }

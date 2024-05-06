@@ -154,7 +154,6 @@
                 android:id="@+id/send_message_button"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:layout_marginStart="8dp"
                 android:background="@drawable/green_circle_background"
                 android:src="@drawable/ic_send_24"
                 android:visibility="gone" />
@@ -163,7 +162,6 @@
                 android:id="@+id/send_file_button"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:layout_marginStart="8dp"
                 android:background="@android:color/transparent"
                 android:src="@drawable/ic_add_circle_outline_48" />
 

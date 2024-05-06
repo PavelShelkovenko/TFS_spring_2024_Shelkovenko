@@ -1,10 +1,10 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils
 
 import android.content.Context
-import android.graphics.Color
 import android.util.TypedValue
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.App
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Stream
@@ -42,13 +42,6 @@ inline fun <T> runCatchingNonCancellation(block: () -> T): Result<T> {
     } catch (e: Exception) {
         Result.failure(e)
     }
-}
-
-fun generateRandomColor(): Int {
-    val red = Random.nextInt(256)
-    val green = Random.nextInt(256)
-    val blue = Random.nextInt(256)
-    return Color.argb(255, red, green, blue)
 }
 
 fun getFormattedDate(dateOfMessageInSeconds: Int): String {
@@ -122,3 +115,11 @@ fun List<Stream>.toDelegateList(): List<DelegateItem> {
 
 val Context.getApplication: App
     get() = applicationContext as App
+
+fun showErrorToast(errorMessageId: Int, context: Context) {
+    val errorMessage = context.resources.getString(errorMessageId)
+    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+}
+
+
+

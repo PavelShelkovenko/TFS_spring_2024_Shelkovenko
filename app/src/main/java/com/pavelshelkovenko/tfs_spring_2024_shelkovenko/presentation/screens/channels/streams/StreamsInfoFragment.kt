@@ -18,6 +18,7 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.cha
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.channels.streams.adapter.StreamDelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.channels.topics.TopicAdapter
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.getApplication
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.showErrorToast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.drop
@@ -41,11 +42,11 @@ class StreamsInfoFragment :
     lateinit var streamStoreFactory: StreamStoreFactory
 
     override fun onAttach(context: Context) {
-        super.onAttach(context)
         context.getApplication
             .appComponent
             .streamComponent()
             .inject(this)
+        super.onAttach(context)
     }
 
     override val store: Store<StreamEvent, StreamEffect, StreamState> by elmStoreWithRenderer(
@@ -93,6 +94,8 @@ class StreamsInfoFragment :
                     )
                 )
             }
+
+            is StreamEffect.MinorError -> { showErrorToast(effect.errorMessageId, requireActivity()) }
         }
     }
 

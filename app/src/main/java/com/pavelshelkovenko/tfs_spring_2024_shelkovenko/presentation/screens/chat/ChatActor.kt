@@ -15,9 +15,9 @@ class ChatActor(
 ) : Actor<ChatCommand, ChatEvent>() {
     override fun execute(command: ChatCommand): Flow<ChatEvent> {
         return when (command) {
-            is ChatCommand.LoadInitialMessages -> flow {
+            is ChatCommand.LoadMessagesFromNetwork -> flow {
                 runCatchingNonCancellation {
-                    repository.getMessages(
+                    repository.getMessagesFromNetwork(
                         streamName = command.streamName,
                         topicName = command.topicName,
                         anchor = command.anchor,
@@ -25,7 +25,20 @@ class ChatActor(
                         numAfter = command.numAfter
                     )
                 }.onSuccess { messages ->
-                    emit(ChatEvent.Internal.LoadInitialMessages(messages = messages))
+                    emit(ChatEvent.Internal.LoadMessagesFromNetwork(messages = messages))
+                }.onFailure {
+                    emit(ChatEvent.Internal.MinorError(errorMessageId = R.string.load_messages_error))
+                }
+            }
+
+            is ChatCommand.LoadMessagesFromCache -> flow {
+                runCatchingNonCancellation {
+                    repository.getMessagesFromCache(
+                        streamName = command.streamName,
+                        topicName = command.topicName,
+                    )
+                }.onSuccess { messages ->
+                    emit(ChatEvent.Internal.LoadMessagesFromCache(messages = messages))
                 }.onFailure { error ->
                     emit(ChatEvent.Internal.Error(throwable = error))
                 }
@@ -33,7 +46,7 @@ class ChatActor(
 
             is ChatCommand.LoadPagingNewerMessages -> flow {
                 runCatchingNonCancellation {
-                    repository.getMessages(
+                    repository.getPagingMessages(
                         streamName = command.streamName,
                         topicName = command.topicName,
                         anchor = command.anchor,
@@ -51,7 +64,7 @@ class ChatActor(
 
             is ChatCommand.LoadPagingOlderMessages -> flow {
                 runCatchingNonCancellation {
-                    repository.getMessages(
+                    repository.getPagingMessages(
                         streamName = command.streamName,
                         topicName = command.topicName,
                         anchor = command.anchor,
@@ -171,6 +184,20 @@ class ChatActor(
                     emit(ChatEvent.Internal.GetReactionLongPollingData)
                 }
 
+            }
+
+            is ChatCommand.SaveMessagesInCache -> flow {
+                runCatchingNonCancellation {
+                    repository.saveMessagesInCache(
+                        streamName = command.streamName,
+                        topicName = command.topicName,
+                        messages = command.messages
+                    )
+                }.onSuccess {
+                    emit(ChatEvent.Internal.CachedMessagesSaved)
+                }.onFailure { error ->
+                    Log.d("ChatActor", "${error.message}")
+                }
             }
         }
     }

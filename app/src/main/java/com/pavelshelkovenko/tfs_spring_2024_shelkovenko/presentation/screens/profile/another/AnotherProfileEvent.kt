@@ -12,8 +12,12 @@ sealed interface AnotherProfileEvent {
 
     sealed interface Internal : AnotherProfileEvent {
 
-        data class DataLoaded(val user: User) : Internal
+        data class DataLoadedFromNetwork(val user: User) : Internal
 
-        data class Error(val throwable: Throwable) : Internal
+        data class DataLoadedFromCache(val user: User?) : Internal
+
+        data class Error(val errorMessage: String) : Internal
+
+        data class MinorError(val errorMessageId: Int) : Internal
     }
 }

@@ -15,8 +15,12 @@ sealed interface PeopleEvent {
 
     sealed interface Internal: PeopleEvent {
 
-        data class DataLoaded(val users: List<User>) : Internal
+        data class DataLoadedFromNetwork(val users: List<User>) : Internal
 
-        data class Error(val throwable: Throwable) : Internal
+        data class DataLoadedFromCache(val users: List<User>) : Internal
+
+        data class Error(val errorMessage: String) : Internal
+
+        data class MinorError(val errorMessageId: Int) : Internal
     }
 }

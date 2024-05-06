@@ -13,6 +13,7 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.FragmentPeop
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.base.ElmBaseFragment
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.people.adapter.PeopleAdapter
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.getApplication
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.showErrorToast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
@@ -39,11 +40,11 @@ class PeopleFragment :
     lateinit var peopleStoreFactory: PeopleStoreFactory
 
     override fun onAttach(context: Context) {
-        super.onAttach(context)
         context.getApplication
             .appComponent
             .peopleComponent()
             .inject(this)
+        super.onAttach(context)
     }
 
 
@@ -103,6 +104,12 @@ class PeopleFragment :
             }
             .flowOn(Dispatchers.IO)
             .launchIn(lifecycleScope)
+    }
+
+    override fun handleEffect(effect: PeopleEffect) {
+        when(effect) {
+            is PeopleEffect.MinorError -> { showErrorToast(effect.errorMessageId, requireActivity()) }
+        }
     }
 
     override fun render(state: PeopleState) {
@@ -167,6 +174,6 @@ class PeopleFragment :
     }
 
     private fun clearSearchFieldText() {
-        binding.searchField.setText("")
+        binding.searchField.text.clear()
     }
 }
