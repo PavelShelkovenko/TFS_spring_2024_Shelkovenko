@@ -1,0 +1,52 @@
+[versions]
+agp = "8.4.0-rc02"
+elmslieCore = "3.0.0-alpha10"
+httpclientAndroid = "4.3.5.1"
+kotlin = "1.9.22"
+coreKtx = "1.12.0"
+junit = "4.13.2"
+junitVersion = "1.1.5"
+espressoCore = "3.5.1"
+appcompat = "1.6.1"
+kotlinxSerializationJson = "1.6.3"
+material = "1.11.0"
+activity = "1.8.2"
+constraintlayout = "2.1.4"
+kotest = "5.8.1"
+retrofit = "2.11.0"
+rules = "1.5.0"
+kaspresso = "1.5.5"
+viewbindingpropertydelegateFull = "1.5.9"
+wiremock = "2.27.2"
+hamcrest = "2.2"
+androidx-test = "1.5.0"
+
+[libraries]
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-espresso-intents = { module = "androidx.test.espresso:espresso-intents", version.ref = "espressoCore" }
+converter-kotlinx-serialization = { module = "com.squareup.retrofit2:converter-kotlinx-serialization", version.ref = "retrofit" }
+elmslie-android = { module = "com.github.vivid-money.elmslie:elmslie-android", version.ref = "elmslieCore" }
+elmslie-core = { module = "com.github.vivid-money.elmslie:elmslie-core", version.ref = "elmslieCore" }
+httpclient-android = { module = "org.apache.httpcomponents:httpclient-android", version.ref = "httpclientAndroid" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+kotest-junit = { group = "io.kotest", name = "kotest-runner-junit5", version.ref = "kotest" }
+kotest-assertions = { group = "io.kotest", name = "kotest-assertions-core", version.ref = "kotest" }
+kotest-property = { group = "io.kotest", name = "kotest-property", version.ref = "kotest" }
+androidx-rules = { group = "androidx.test", name = "rules", version.ref = "rules" }
+androidx-test-core = { group = "androidx.test", name = "core", version.ref = "androidx-test" }
+kaspresso = { group = "com.kaspersky.android-components", name = "kaspresso", version.ref = "kaspresso" }
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+viewbindingpropertydelegate-full = { module = "com.github.kirich1409:viewbindingpropertydelegate-full", version.ref = "viewbindingpropertydelegateFull" }
+wiremock = { group = "com.github.tomakehurst", name = "wiremock-standalone", version.ref = "wiremock" }
+hamcrest = { group = "org.hamcrest", name = "hamcrest", version.ref = "hamcrest" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+jetbrains-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
