@@ -52,6 +52,10 @@ dependencies {
     implementation(libs.dagger)
     kapt(libs.dagger.compiler)
 
+    // Room
+    implementation(libs.bundles.room)
+    kapt(libs.room.compiler)
+
     // Glide
     implementation(libs.glide)
     kapt(libs.glide.compiler)

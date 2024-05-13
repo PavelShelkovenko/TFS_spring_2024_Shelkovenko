@@ -13,6 +13,7 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.FragmentAnot
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.base.ElmBaseFragment
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.getApplication
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.setColoredTextStatus
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.showErrorToast
 import vivid.money.elmslie.android.renderer.elmStoreWithRenderer
 import vivid.money.elmslie.core.store.Store
 import javax.inject.Inject
@@ -28,11 +29,11 @@ class AnotherProfileFragment :
     lateinit var anotherProfileStoreFactory: AnotherProfileStoreFactory
 
     override fun onAttach(context: Context) {
-        super.onAttach(context)
         context.getApplication
             .appComponent
             .anotherProfileComponent()
             .inject(this)
+        super.onAttach(context)
     }
 
     override val store: Store<AnotherProfileEvent, AnotherProfileEffect, AnotherProfileState> by elmStoreWithRenderer(
@@ -48,7 +49,15 @@ class AnotherProfileFragment :
         }
         setupClickListeners()
     }
-    
+
+    override fun handleEffect(effect: AnotherProfileEffect) {
+        when(effect) {
+            is AnotherProfileEffect.MinorError -> {
+                showErrorToast(effect.errorMessageId, requireActivity())
+            }
+        }
+    }
+
     override fun render(state: AnotherProfileState) {
         with(binding) {
             when (state) {

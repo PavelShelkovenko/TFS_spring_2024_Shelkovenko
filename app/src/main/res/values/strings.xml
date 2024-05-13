@@ -24,4 +24,6 @@
     <string name="send_reaction_error">Cannot send reaction</string>
     <string name="remove_reaction_error">Cannot remove reaction, check your internet connection</string>
     <string name="load_messages_error">Cannot load messages, check your internet connection</string>
+    <string name="process_search_error">Cannot perform search, check your internet connection</string>
+    <string name="load_streams_error">Cannot load streams, check your internet connection</string>
 </resources>

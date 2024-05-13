@@ -24,7 +24,7 @@ class ChannelFragment : Fragment(R.layout.fragment_channel) {
 
         val tabs: List<String> = listOf(
             resources.getString(R.string.subscribed),
-            resources.getString(R.string.all_streams)
+            resources.getString(R.string.all_streams),
         )
         val pagerAdapter = ChannelPagerAdapter(childFragmentManager, viewLifecycleOwner.lifecycle)
         binding.channelViewPager.adapter = pagerAdapter
@@ -50,7 +50,7 @@ class ChannelFragment : Fragment(R.layout.fragment_channel) {
                 }
             }
             cancelButton.setOnClickListener {
-                binding.searchField.setText("")
+                binding.searchField.text.clear()
             }
         }
     }

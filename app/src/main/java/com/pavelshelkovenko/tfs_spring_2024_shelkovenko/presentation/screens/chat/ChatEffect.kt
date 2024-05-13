@@ -5,4 +5,6 @@ sealed interface ChatEffect {
     data class MinorError(val errorMessageId: Int): ChatEffect
 
     data object NewMessageReceived: ChatEffect
+
+    data object CloseChat: ChatEffect
 }

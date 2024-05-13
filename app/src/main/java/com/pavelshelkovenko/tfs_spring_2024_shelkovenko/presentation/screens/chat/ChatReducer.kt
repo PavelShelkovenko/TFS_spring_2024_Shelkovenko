@@ -1,6 +1,6 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat
 
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.MyUserId
+import android.util.Log
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Message
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Reaction
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.Operation
@@ -13,6 +13,7 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.cha
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.message.received_message.ReceivedMessageModel
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.message.send_message.SendMessageDelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.message.send_message.SendMessageModel
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.MyUserId
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.generateRandomId
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.getFormattedDate
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,11 +32,11 @@ class ChatReducer @Inject constructor(
         ChatCommand>
     (ChatEvent.Ui::class, ChatEvent.Internal::class) {
 
+
     private var delegateItemList = MutableStateFlow<List<DelegateItem>>(emptyList())
 
-
     override fun Result.internal(event: ChatEvent.Internal) = when (event) {
-        is ChatEvent.Internal.LoadInitialMessages -> {
+        is ChatEvent.Internal.LoadMessagesFromNetwork -> {
             val messagesUi = convertMessagesToDelegateItemWithDate(event.messages)
             delegateItemList.value = messagesUi
             paginationInfoHolder.apply {
@@ -43,6 +44,18 @@ class ChatReducer @Inject constructor(
                 newestAnchor = getLastMessageDelegateItem().id().toString()
             }
             state { ChatState.Content(messages = messagesUi) }
+        }
+
+        is ChatEvent.Internal.LoadMessagesFromCache -> {
+            if (event.messages.isEmpty()) {
+                state { ChatState.Loading }
+            } else {
+                paginationInfoHolder.apply {
+                    newestAnchor = event.messages.last().id.toString()
+                }
+                val messagesUi = convertMessagesToDelegateItemWithDate(event.messages)
+                state { ChatState.Content(messages = messagesUi) }
+            }
         }
 
         is ChatEvent.Internal.Error -> {
@@ -103,6 +116,7 @@ class ChatReducer @Inject constructor(
         }
 
         is ChatEvent.Internal.LoadPagingNewerMessages -> {
+            Log.d("TAG", "messages = ${event.messages}")
             handlePagingNewMessages(
                 messages = event.messages,
                 onUpdateState = { newDelegateItemsList ->
@@ -141,17 +155,26 @@ class ChatReducer @Inject constructor(
                 )
             }
         }
+
+        ChatEvent.Internal.CachedMessagesSaved -> {
+            effects { +ChatEffect.CloseChat }
+        }
     }
 
 
     override fun Result.ui(event: ChatEvent.Ui) = when (event) {
         is ChatEvent.Ui.StartProcess -> {
-            state { ChatState.Loading }
             commands {
-                +ChatCommand.LoadInitialMessages(
+                +ChatCommand.LoadMessagesFromCache(
                     streamName = event.streamName,
                     topicName = event.topicName,
-                    anchor = ANCHOR_FOR_INITIAL_MESSAGES,
+                )
+            }
+            commands {
+                +ChatCommand.LoadMessagesFromNetwork(
+                    streamName = event.streamName,
+                    topicName = event.topicName,
+                    anchor = paginationInfoHolder.newestAnchor,
                     numAfter = COUNT_OF_MESSAGE_TO_DOWNLOAD,
                     numBefore = 2 * COUNT_OF_MESSAGE_TO_DOWNLOAD
                 )
@@ -161,12 +184,12 @@ class ChatReducer @Inject constructor(
         is ChatEvent.Ui.ReloadData -> {
             state { ChatState.Loading }
             commands {
-                +ChatCommand.LoadInitialMessages(
+                +ChatCommand.LoadMessagesFromNetwork(
                     streamName = event.streamName,
                     topicName = event.topicName,
-                    anchor = ANCHOR_FOR_INITIAL_MESSAGES,
+                    anchor = paginationInfoHolder.newestAnchor,
                     numAfter = COUNT_OF_MESSAGE_TO_DOWNLOAD,
-                    numBefore = 2 * COUNT_OF_MESSAGE_TO_DOWNLOAD
+                    numBefore = COUNT_OF_MESSAGE_TO_DOWNLOAD
                 )
             }
         }
@@ -271,6 +294,50 @@ class ChatReducer @Inject constructor(
             }
             Unit
         }
+
+        is ChatEvent.Ui.ClosingChat -> {
+            commands {
+                +ChatCommand.SaveMessagesInCache(
+                    streamName = event.streamName,
+                    topicName = event.topicName,
+                    messages = getMessagesForCaching()
+                )
+            }
+        }
+    }
+
+    private fun getMessagesForCaching(): List<Message> {
+        val messagesUi = delegateItemList.value.filterIsInstance<MessageDelegateItem>().takeLast(LIMIT_OF_MESSAGES_FOR_CACHING)
+        val messages = messagesUi.map { messageDelegateItem ->
+            when(messageDelegateItem) {
+                is ReceivedMessageDelegateItem -> {
+                    Message(
+                        id = messageDelegateItem.id,
+                        userId = messageDelegateItem.value.userId,
+                        avatarUrl = messageDelegateItem.value.avatarUrl,
+                        message = messageDelegateItem.value.textMessage,
+                        userName = messageDelegateItem.value.userName,
+                        dateInUTCSeconds = messageDelegateItem.value.dateInUTCSeconds,
+                        reactions = messageDelegateItem.value.reactionList,
+                    )
+                }
+                is SendMessageDelegateItem -> {
+                    Message(
+                        id = messageDelegateItem.id,
+                        userId = messageDelegateItem.value.userId,
+                        avatarUrl = "",
+                        message = messageDelegateItem.value.textMessage,
+                        userName = "",
+                        dateInUTCSeconds = messageDelegateItem.value.dateInUTCSeconds,
+                        reactions = messageDelegateItem.value.reactionList,
+                    )
+                }
+                else -> {
+                    throw IllegalStateException("MessageDelegateItem should be either ReceivedMessageDelegateItem or SendMessageDelegateItem")
+                }
+            }
+        }
+        return messages
     }
 
     private fun handlePagingNewMessages(
@@ -350,7 +417,8 @@ class ChatReducer @Inject constructor(
                     value = SendMessageModel(
                         userId = message.userId,
                         textMessage = message.message,
-                        reactionList = message.reactions
+                        reactionList = message.reactions,
+                        dateInUTCSeconds = message.dateInUTCSeconds
                     )
                 )
                 delegateMessagesList.add(delegateMessage)
@@ -362,7 +430,8 @@ class ChatReducer @Inject constructor(
                         avatarUrl = message.avatarUrl,
                         textMessage = message.message,
                         reactionList = message.reactions,
-                        userName = message.userName
+                        userName = message.userName,
+                        dateInUTCSeconds = message.dateInUTCSeconds
                     )
                 )
                 delegateMessagesList.add(delegateMessage)
@@ -400,7 +469,7 @@ class ChatReducer @Inject constructor(
     ) {
         reactionEventList.forEach { reactionEvent ->
             val message = delegateItemList.value.find { it.id() == reactionEvent.messageId }
-                ?: throw IllegalArgumentException("Invalid messageId ${reactionEvent.messageId}")
+                ?: return
             val (oldMessage, messageIndex) =
                 (message as MessageDelegateItem) to delegateItemList.value.indexOf(message)
             val reactionWithSimilarEmojiCode = oldMessage.reactionList.find { reaction ->
@@ -590,7 +659,7 @@ class ChatReducer @Inject constructor(
     }
 
     companion object {
-        private const val COUNT_OF_MESSAGE_TO_DOWNLOAD = 20
-        private const val ANCHOR_FOR_INITIAL_MESSAGES = "first_unread"
+        private const val COUNT_OF_MESSAGE_TO_DOWNLOAD = 25
+        private const val LIMIT_OF_MESSAGES_FOR_CACHING = 50
     }
 }

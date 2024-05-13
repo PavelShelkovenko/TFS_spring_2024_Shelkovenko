@@ -1,8 +1,9 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.di.modules.core
 
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.ZulipChatRepository
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.ZulipStreamRepository
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.ZulipUserRepository
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.repository.ChatRepositoryImpl
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.repository.StreamRepositoryImpl
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.repository.UserRepositoryImpl
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.di.scopes.ApplicationScope
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.repository.ChatRepository
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.repository.StreamRepository
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.repository.UserRepository
@@ -12,12 +13,15 @@ import dagger.Module
 @Module
 interface DomainModule {
 
+    @ApplicationScope
     @Binds
-    fun bindUserRepository(impl: ZulipUserRepository): UserRepository
+    fun bindUserRepository(impl: UserRepositoryImpl): UserRepository
 
+    @ApplicationScope
     @Binds
-    fun bindStreamRepository(impl: ZulipStreamRepository): StreamRepository
+    fun bindStreamRepository(impl: StreamRepositoryImpl): StreamRepository
 
+    @ApplicationScope
     @Binds
-    fun bindChatRepository(impl: ZulipChatRepository): ChatRepository
+    fun bindChatRepository(impl: ChatRepositoryImpl): ChatRepository
 }

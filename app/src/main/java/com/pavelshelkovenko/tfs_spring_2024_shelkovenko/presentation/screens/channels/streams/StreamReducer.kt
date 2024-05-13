@@ -25,21 +25,26 @@ class StreamReducer : ScreenDslReducer<
 
     override fun Result.internal(event: StreamEvent.Internal) = when (event) {
 
-        is StreamEvent.Internal.DataLoaded -> state {
-            when (event.streamDestination) {
-                StreamDestination.ALL -> {
-                    allStreamsListCached.value = event.streams.toDelegateList()
-                    StreamState.Content(
-                        allStreamsList = allStreamsListCached.value,
-                        subscribedStreamsList = subscribedStreamsListCached.value
-                    )
-                }
-                StreamDestination.SUBSCRIBED -> {
-                    subscribedStreamsListCached.value = event.streams.toDelegateList()
-                    StreamState.Content(
-                        allStreamsList = allStreamsListCached.value,
-                        subscribedStreamsList = subscribedStreamsListCached.value
-                    )
+        is StreamEvent.Internal.DataLoaded -> {
+            state {
+                when (event.streamDestination) {
+                    StreamDestination.ALL -> {
+                        val expandedList = getLoadedExpandedDelegateList(allStreamsListCached.value, event.streams)
+                        allStreamsListCached.value = expandedList
+                        StreamState.Content(
+                            allStreamsList = expandedList,
+                            subscribedStreamsList = subscribedStreamsListCached.value
+                        )
+                    }
+
+                    StreamDestination.SUBSCRIBED -> {
+                        val expandedList = getLoadedExpandedDelegateList(subscribedStreamsListCached.value, event.streams)
+                        subscribedStreamsListCached.value = expandedList
+                        StreamState.Content(
+                            allStreamsList = allStreamsListCached.value,
+                            subscribedStreamsList = expandedList
+                        )
+                    }
                 }
             }
         }
@@ -47,12 +52,44 @@ class StreamReducer : ScreenDslReducer<
         is StreamEvent.Internal.Error -> state {
             StreamState.Error(errorMessage = event.throwable.message.toString())
         }
+
+        is StreamEvent.Internal.MinorError -> effects {
+            +StreamEffect.MinorError(event.errorMessageId)
+        }
+
+        is StreamEvent.Internal.DataLoadedFromCache -> {
+            if (event.streams.isEmpty()) {
+                state { StreamState.Loading }
+            } else {
+                when (event.streamDestination) {
+                    StreamDestination.ALL -> {
+                        allStreamsListCached.value = event.streams.toDelegateList()
+                        state {
+                            StreamState.Content(
+                                allStreamsList = allStreamsListCached.value,
+                                subscribedStreamsList = subscribedStreamsListCached.value
+                            )
+                        }
+                    }
+
+                    StreamDestination.SUBSCRIBED -> {
+                        subscribedStreamsListCached.value = event.streams.toDelegateList()
+                        state {
+                            StreamState.Content(
+                                allStreamsList = allStreamsListCached.value,
+                                subscribedStreamsList = subscribedStreamsListCached.value
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 
     override fun Result.ui(event: StreamEvent.Ui) = when (event) {
 
         is StreamEvent.Ui.StartProcess -> {
-            state { StreamState.Loading }
+            commands { +StreamCommand.LoadDataFromCache(event.streamDestination) }
             commands { +StreamCommand.LoadData(event.streamDestination) }
         }
 
@@ -116,6 +153,34 @@ class StreamReducer : ScreenDslReducer<
         }
     }
 
+    private fun getLoadedExpandedDelegateList(
+        streamList: List<DelegateItem>,
+        streamListFromNetwork: List<Stream>,
+    ): List<DelegateItem> {
+        val expandedStreamsId = streamList
+            .filterIsInstance<StreamDelegateItem>()
+            .filter { it.value.isExpanded }
+            .map { it.id }
+        val expandedList = mutableListOf<DelegateItem>()
+        streamListFromNetwork.forEach { stream ->
+            if (stream.id in expandedStreamsId) {
+                expandedList.add(
+                    StreamDelegateItem(
+                        id = stream.id,
+                        value = stream.copy(isExpanded = true)
+                    )
+                )
+                for (topic in stream.topicsList) {
+                    val topicDelegateItem =
+                        TopicDelegateItem(id = generateRandomId(), value = topic)
+                    expandedList.add(topicDelegateItem)
+                }
+            } else {
+                expandedList.add(StreamDelegateItem(id = stream.id, value = stream))
+            }
+        }
+        return expandedList
+    }
 
     private fun handleStreamClick(
         listWhereHandleStreamClick: List<DelegateItem>,

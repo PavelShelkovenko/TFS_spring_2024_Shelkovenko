@@ -7,5 +7,6 @@ data class ReceivedMessageModel(
     val avatarUrl: String,
     val userName: String,
     val textMessage: String,
-    val reactionList: List<Reaction>
+    val reactionList: List<Reaction>,
+    val dateInUTCSeconds: Int,
 )

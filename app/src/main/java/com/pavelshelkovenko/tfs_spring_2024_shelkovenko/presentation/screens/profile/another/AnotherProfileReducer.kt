@@ -13,25 +13,37 @@ class AnotherProfileReducer : ScreenDslReducer<
     (AnotherProfileEvent.Ui::class, AnotherProfileEvent.Internal::class) {
 
     override fun Result.internal(event: AnotherProfileEvent.Internal) = when (event) {
-        is AnotherProfileEvent.Internal.DataLoaded -> state {
+        is AnotherProfileEvent.Internal.DataLoadedFromNetwork -> state {
             AnotherProfileState.Content(anotherUser = event.user)
         }
 
         is AnotherProfileEvent.Internal.Error -> state {
-            AnotherProfileState.Error(errorMessage = event.throwable.message.toString())
+            AnotherProfileState.Error(errorMessage = event.errorMessage)
+        }
+
+        is AnotherProfileEvent.Internal.DataLoadedFromCache -> {
+            if (event.user == null) {
+                state { AnotherProfileState.Loading }
+            } else {
+                state { AnotherProfileState.Content(anotherUser = event.user) }
+            }
+        }
+
+        is AnotherProfileEvent.Internal.MinorError -> {
+            effects { +AnotherProfileEffect.MinorError(errorMessageId = event.errorMessageId) }
         }
     }
 
     override fun Result.ui(event: AnotherProfileEvent.Ui) = when (event) {
 
         is AnotherProfileEvent.Ui.StartProcess -> {
-            state { AnotherProfileState.Loading }
-            commands { +AnotherProfileCommand.LoadData(event.userId) }
+            commands { +AnotherProfileCommand.LoadDataFromCache(userId = event.userId) }
+            commands { +AnotherProfileCommand.LoadDataFromNetwork(userId = event.userId) }
         }
 
         is AnotherProfileEvent.Ui.ReloadData -> {
             state { AnotherProfileState.Loading }
-            commands { +AnotherProfileCommand.LoadData(event.userId) }
+            commands { +AnotherProfileCommand.LoadDataFromNetwork(userId = event.userId) }
         }
     }
 }

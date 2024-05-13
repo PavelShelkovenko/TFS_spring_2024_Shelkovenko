@@ -6,6 +6,6 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.di.components.DaggerAppl
 class App: Application() {
 
     val appComponent by lazy {
-        DaggerApplicationComponent.factory().create(this)
+        DaggerApplicationComponent.factory().create(this@App)
     }
 }

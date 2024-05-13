@@ -2,10 +2,9 @@ package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.ch
 
 import android.content.Context
 import android.os.Bundle
-import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
-import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
@@ -16,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.MyUserId
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.FragmentChatBinding
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.base.ElmBaseFragment
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.base.delegate_adapter.MainAdapter
@@ -25,7 +23,9 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.cha
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.message.reaction.EmojiFactory
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.message.received_message.ReceivedMessageAdapter
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.message.send_message.SendMessageAdapter
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.MyUserId
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.getApplication
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.showErrorToast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -52,11 +52,11 @@ class ChatFragment :
     lateinit var emojiFactory: EmojiFactory
 
     override fun onAttach(context: Context) {
-        super.onAttach(context)
         context.getApplication
             .appComponent
             .chatComponent()
             .inject(this)
+        super.onAttach(context)
     }
 
     override val store: Store<ChatEvent, ChatEffect, ChatState> by elmStoreWithRenderer(
@@ -104,12 +104,15 @@ class ChatFragment :
             streamName.text = args.streamName
             topicName.text = "Topic: ${args.topicName}"
         }
+
+        addCallbackToOnBackPressed()
     }
 
     override fun handleEffect(effect: ChatEffect) {
         when(effect) {
-            is ChatEffect.MinorError -> { showErrorToast(effect.errorMessageId) }
+            is ChatEffect.MinorError -> { showErrorToast(effect.errorMessageId, requireActivity()) }
             is ChatEffect.NewMessageReceived -> { scrollToLastMessage() }
+            is ChatEffect.CloseChat -> { findNavController().popBackStack() }
         }
     }
 
@@ -188,8 +191,8 @@ class ChatFragment :
                 val lastVisibleItemPosition = linearLayoutManager.findLastVisibleItemPosition()
                 val firstVisibleItemPosition = linearLayoutManager.findFirstVisibleItemPosition()
 
-                if (totalItemCount >= 40) {
-                    if (lastVisibleItemPosition + 10 >= totalItemCount) {
+                if (totalItemCount >= 25) {
+                    if (lastVisibleItemPosition + 5 >= totalItemCount) {
                         store.accept(
                             ChatEvent.Ui.LoadPagingNewerMessages(
                                 streamName = args.streamName,
@@ -197,7 +200,7 @@ class ChatFragment :
                             )
                         )
                     }
-                    if (firstVisibleItemPosition <= 10) {
+                    if (firstVisibleItemPosition <= 5) {
                         store.accept(
                             ChatEvent.Ui.LoadPagingOlderMessages(
                                 streamName = args.streamName,
@@ -264,7 +267,12 @@ class ChatFragment :
                 )
             }
             backButton.setOnClickListener {
-                findNavController().popBackStack()
+               store.accept(
+                   ChatEvent.Ui.ClosingChat(
+                       streamName = args.streamName,
+                       topicName = args.topicName
+                   )
+               )
             }
             sendMessageButton.setOnClickListener {
                 if (binding.messageField.text.trim().toString() != "") {
@@ -275,7 +283,7 @@ class ChatFragment :
                             topicName = args.topicName
                         )
                     )
-                    binding.messageField.setText("")
+                    binding.messageField.text.clear()
                     scrollToLastMessage()
                 }
             }
@@ -304,6 +312,24 @@ class ChatFragment :
         bottomSheetDialog.show()
     }
 
+    private fun addCallbackToOnBackPressed() {
+        requireActivity()
+            .onBackPressedDispatcher
+            .addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    store.accept(
+                        ChatEvent.Ui.ClosingChat(
+                            streamName = args.streamName,
+                            topicName = args.topicName
+                        )
+                    )
+                    if (isEnabled) {
+                        isEnabled = false
+                        requireActivity().onBackPressed()
+                    }
+                }
+            })
+    }
 
     private fun scrollToLastMessage() {
         lifecycleScope.launch {
@@ -327,13 +353,6 @@ class ChatFragment :
             sendMessageButton.isVisible = true
             sendFileButton.isVisible = false
         }
-    }
-
-    private fun showErrorToast(errorMessageId: Int) {
-        val errorMessage = resources.getString(errorMessageId)
-        val toast = Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT)
-        toast.setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL, 0, 0)
-        toast.show()
     }
 
 }

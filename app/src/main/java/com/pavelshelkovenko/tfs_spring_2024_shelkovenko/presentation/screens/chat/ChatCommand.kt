@@ -1,13 +1,20 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat
 
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Message
+
 sealed interface ChatCommand {
 
-    data class LoadInitialMessages(
+    data class LoadMessagesFromNetwork(
         val streamName: String,
         val topicName: String,
-        val anchor: String = "first_unread",
+        val anchor: String,
         val numBefore: Int,
         val numAfter: Int,
+    ): ChatCommand
+
+    data class LoadMessagesFromCache(
+        val streamName: String,
+        val topicName: String,
     ): ChatCommand
 
     data class LoadPagingNewerMessages(
@@ -59,4 +66,9 @@ sealed interface ChatCommand {
         val lastEventId: String,
     ): ChatCommand
 
+    data class SaveMessagesInCache(
+        val messages: List<Message>,
+        val streamName: String,
+        val topicName: String
+    ): ChatCommand
 }
