@@ -1,0 +1,45 @@
+{
+  "msg": "",
+  "result": "success",
+  "subscriptions": [
+    {
+      "audible_notifications": true,
+      "color": "#e79ab5",
+      "creator_id": null,
+      "description": "A Scandinavian country",
+      "desktop_notifications": true,
+      "invite_only": false,
+      "is_muted": false,
+      "name": "Denmark",
+      "pin_to_top": false,
+      "push_notifications": false,
+      "stream_id": 1,
+      "subscribers": [
+        7,
+        10,
+        11,
+        12,
+        14
+      ]
+    },
+    {
+      "audible_notifications": true,
+      "color": "#e79ab5",
+      "creator_id": 8,
+      "description": "Located in the United Kingdom",
+      "desktop_notifications": true,
+      "invite_only": false,
+      "is_muted": false,
+      "name": "Scotland",
+      "pin_to_top": false,
+      "push_notifications": false,
+      "stream_id": 3,
+      "subscribers": [
+        7,
+        11,
+        12,
+        14
+      ]
+    }
+  ]
+}

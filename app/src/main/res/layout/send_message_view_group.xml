@@ -5,7 +5,7 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/textMessage"
+        android:id="@+id/send_text_message"
         android:paddingHorizontal="4dp"
         android:paddingBottom="4dp"
         android:layout_height="wrap_content"
@@ -13,7 +13,7 @@
         android:textColor="@color/white"/>
 
     <com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.custom_views.FlexBoxLayout
-        android:id="@+id/flex_layout"
+        android:id="@+id/send_flex_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:horizontalContentPadding="8dp"

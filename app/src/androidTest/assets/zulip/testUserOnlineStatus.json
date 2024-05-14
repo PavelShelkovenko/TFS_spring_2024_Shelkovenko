@@ -1,0 +1,14 @@
+{
+  "msg": "",
+  "presence": {
+    "aggregated": {
+      "status": "active",
+      "timestamp": 1532697622
+    },
+    "website": {
+      "status": "active",
+      "timestamp": 1532697622
+    }
+  },
+  "result": "success"
+}

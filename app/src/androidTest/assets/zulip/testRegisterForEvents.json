@@ -1,0 +1,9 @@
+{
+  "result": "success",
+  "msg": "",
+  "queue_id": "b86a6b5a-20d1-4e10-a331-200372327e42",
+  "zulip_version": "9.0-dev-2025-gceebe467d4",
+  "zulip_feature_level": 254,
+  "zulip_merge_base": "9.0-dev-1956-gb298d08fda",
+  "last_event_id": -1
+}

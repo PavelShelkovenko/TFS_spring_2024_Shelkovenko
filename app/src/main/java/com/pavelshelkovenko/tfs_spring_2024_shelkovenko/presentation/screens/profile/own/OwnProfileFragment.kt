@@ -62,38 +62,38 @@ class OwnProfileFragment :
                 is OwnProfileState.Content -> {
                     shimmerContainer.isVisible = false
                     errorContainer.isVisible = false
-                    userAvatarImage.isVisible = true
-                    userName.isVisible = true
-                    userOnlineStatus.isVisible = true
+                    ownUserAvatarImage.isVisible = true
+                    ownUserName.isVisible = true
+                    ownUserOnlineStatus.isVisible = true
                     shimmerContainer.stopShimmer()
-                    userName.text = state.ownUser.name
-                    userOnlineStatus.setColoredTextStatus(status = state.ownUser.onlineStatus)
-                    Glide.with(root).load(state.ownUser.avatarUrl).into(userAvatarImage)
+                    ownUserName.text = state.ownUser.name
+                    ownUserOnlineStatus.setColoredTextStatus(status = state.ownUser.onlineStatus)
+                    Glide.with(root).load(state.ownUser.avatarUrl).into(ownUserAvatarImage)
                 }
 
                 is OwnProfileState.Error -> {
                     errorContainer.isVisible = true
                     shimmerContainer.isVisible = false
-                    userAvatarImage.isVisible = false
-                    userName.isVisible = false
-                    userOnlineStatus.isVisible = false
+                    ownUserAvatarImage.isVisible = false
+                    ownUserName.isVisible = false
+                    ownUserOnlineStatus.isVisible = false
                     shimmerContainer.stopShimmer()
                 }
 
                 is OwnProfileState.Initial -> {
                     errorContainer.isVisible = false
                     shimmerContainer.isVisible = false
-                    userAvatarImage.isVisible = false
-                    userName.isVisible = false
-                    userOnlineStatus.isVisible = false
+                    ownUserAvatarImage.isVisible = false
+                    ownUserName.isVisible = false
+                    ownUserOnlineStatus.isVisible = false
                 }
 
                 is OwnProfileState.Loading -> {
                     shimmerContainer.isVisible = true
                     errorContainer.isVisible = false
-                    userAvatarImage.isVisible = false
-                    userName.isVisible = false
-                    userOnlineStatus.isVisible = false
+                    ownUserAvatarImage.isVisible = false
+                    ownUserName.isVisible = false
+                    ownUserOnlineStatus.isVisible = false
                     shimmerContainer.startShimmer()
                 }
             }

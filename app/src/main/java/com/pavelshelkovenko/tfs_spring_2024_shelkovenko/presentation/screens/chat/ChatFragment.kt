@@ -159,6 +159,16 @@ class ChatFragment :
         registerForEventsJob?.cancel()
     }
 
+    override fun onStop() {
+        store.accept(
+            ChatEvent.Ui.ClosingChat(
+                streamName = args.streamName,
+                topicName = args.topicName
+            )
+        )
+        super.onStop()
+    }
+
 
     private fun registerForEvents() {
         registerForEventsJob = CoroutineScope(Dispatchers.IO).launch {

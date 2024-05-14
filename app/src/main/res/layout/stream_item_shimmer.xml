@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/stream_container"
+    android:id="@+id/stream_container_shimmer"
     android:layout_width="match_parent"
     android:layout_height="60dp"
     android:background="@color/light_black">
 
     <TextView
-        android:id="@+id/stream_name"
+        android:id="@+id/stream_name_shimmer"
         android:layout_width="130dp"
         android:layout_height="20dp"
         android:layout_marginStart="12dp"
@@ -26,7 +26,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
-            android:id="@+id/close_topics_button"
+            android:id="@+id/close_topics_button_shimmer"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginEnd="8dp"
@@ -37,7 +37,7 @@
             app:tint="@color/shimmerColor"/>
 
         <ImageButton
-            android:id="@+id/open_topics_button"
+            android:id="@+id/open_topics_button_shimmer"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginEnd="8dp"
@@ -49,7 +49,7 @@
     </FrameLayout>
 
     <View
-        android:id="@+id/divider"
+        android:id="@+id/divider_shimmer"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/gray"

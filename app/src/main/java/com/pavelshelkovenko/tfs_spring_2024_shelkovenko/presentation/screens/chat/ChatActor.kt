@@ -1,6 +1,5 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat
 
-import android.util.Log
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.RegistrationForEventsData
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.repository.ChatRepository
@@ -39,8 +38,8 @@ class ChatActor(
                     )
                 }.onSuccess { messages ->
                     emit(ChatEvent.Internal.LoadMessagesFromCache(messages = messages))
-                }.onFailure { error ->
-                    emit(ChatEvent.Internal.Error(throwable = error))
+                }.onFailure {
+                    emit(ChatEvent.Internal.MinorError(errorMessageId = R.string.some_error_occurred))
                 }
             }
 
@@ -138,8 +137,6 @@ class ChatActor(
                             )
                         )
                     )
-                }.onFailure { error ->
-                    Log.d("ChatActor", "${error.message}")
                 }
             }
 
@@ -158,8 +155,7 @@ class ChatActor(
                     // Небольшая задержка для того, чтобы не обработать один и тот же эвент два раза
                     delay(100)
                     emit(ChatEvent.Internal.GetMessageLongPollingData)
-                }.onFailure { error ->
-                    Log.d("ChatActor", "${error.message}")
+                }.onFailure {
                     emit(ChatEvent.Internal.GetMessageLongPollingData)
                 }
             }
@@ -179,8 +175,7 @@ class ChatActor(
                     // Небольшая задержка для того, чтобы не обработать один и тот же эвент два раза
                     delay(100)
                     emit(ChatEvent.Internal.GetReactionLongPollingData)
-                }.onFailure { error ->
-                    Log.d("ChatActor", "${error.message}")
+                }.onFailure {
                     emit(ChatEvent.Internal.GetReactionLongPollingData)
                 }
 
@@ -195,8 +190,6 @@ class ChatActor(
                     )
                 }.onSuccess {
                     emit(ChatEvent.Internal.CachedMessagesSaved)
-                }.onFailure { error ->
-                    Log.d("ChatActor", "${error.message}")
                 }
             }
         }

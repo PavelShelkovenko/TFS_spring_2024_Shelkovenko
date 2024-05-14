@@ -40,15 +40,22 @@ class UserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getOwnProfileFromNetwork(): User {
-        val userStatus =
+        val userOnlineStatus =
             zulipApi.getUserPresence(MyUserId.MY_USER_ID.toString())
                 .presence
                 .aggregated
                 .userOnlineStatusDto
                 .toUserOnlineStatusDomain()
-        val ownUserDto = zulipApi.getUser(MyUserId.MY_USER_ID).user
-        userDao.insert(ownUserDto.toUserDbo(userStatus))
-        return ownUserDto.toUserDomain(userStatus)
+        val ownUserResponse = zulipApi.getOwnProfile()
+        val ownUser = User(
+            id = ownUserResponse.userId,
+            name = ownUserResponse.userName,
+            email = ownUserResponse.email,
+            onlineStatus = userOnlineStatus,
+            avatarUrl = ownUserResponse.avatarUrl
+        )
+        userDao.insert(ownUser.toUserDbo())
+        return ownUser
     }
 
     override suspend fun getAnotherUserFromNetwork(userId: Int): User {

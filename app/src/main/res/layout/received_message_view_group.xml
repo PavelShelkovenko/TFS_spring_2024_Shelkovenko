@@ -5,7 +5,7 @@
     android:layout_height="match_parent">
 
     <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/user_avatar_tv"
+        android:id="@+id/received_user_avatar"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:src="@drawable/ic_launcher_background"
@@ -14,7 +14,7 @@
         app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CircularAvatarShape"/>
 
     <TextView
-        android:id="@+id/user_name_tv"
+        android:id="@+id/received_user_name"
         android:paddingTop="4dp"
         android:paddingHorizontal="4dp"
         android:layout_height="wrap_content"
@@ -22,7 +22,7 @@
         android:textColor="@color/green"/>
 
     <TextView
-        android:id="@+id/textMessage"
+        android:id="@+id/received_text_message"
         android:paddingHorizontal="4dp"
         android:paddingBottom="4dp"
         android:layout_height="wrap_content"
@@ -30,7 +30,7 @@
         android:textColor="@color/white"/>
 
     <com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.custom_views.FlexBoxLayout
-        android:id="@+id/flex_layout"
+        android:id="@+id/received_flex_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:horizontalContentPadding="8dp"

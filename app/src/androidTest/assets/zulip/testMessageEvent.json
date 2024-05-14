@@ -1,0 +1,33 @@
+{
+  "result": "success",
+  "msg": "",
+  "events": [
+    {
+      "type": "message",
+      "message": {
+        "id": 438567945,
+        "sender_id": 708822,
+        "content": "hello",
+        "recipient_id": 1255815,
+        "timestamp": 1715690603,
+        "client": "okhttp",
+        "subject": "myTopic",
+        "topic_links": [],
+        "is_me_message": false,
+        "reactions": [],
+        "submessages": [],
+        "sender_full_name": "Павел Шелковенко",
+        "sender_email": "user708822@tinkoff-android-spring-2024.zulipchat.com",
+        "sender_realm_str": "tinkoff-android-spring-2024",
+        "display_recipient": "another channel",
+        "type": "stream",
+        "stream_id": 433633,
+        "avatar_url": "https://zulip-avatars.s3.amazonaws.com/63414/9e5d147143cdc4f9d5b88e649a7185376201b312?version=2",
+        "content_type": "text/x-markdown"
+      },
+      "flags": [],
+      "id": 0
+    }
+  ],
+  "queue_id": "b86a6b5a-20d1-4e10-a331-200372327e42"
+}
