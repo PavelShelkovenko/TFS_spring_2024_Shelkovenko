@@ -47,7 +47,7 @@ class ChatFragmentTest : TestCase() {
             }
         })
         ChatScreen {
-            step("Проверяем, что запрос на сервер был заменен на тестовый") {
+            step("Проверяем, что были отправлены нужные запросы на сервер") {
                 verify(1, WireMock.getRequestedFor(MockZulip.urlPatternForMessages))
             }
             step("Проверяем, что отображаются экран чата") {
@@ -101,43 +101,8 @@ class ChatFragmentTest : TestCase() {
     реализация LongPolling'а
      */
 
-//    @Test
-//    fun testClickReaction() = run {
-//        val fragmentArgs = bundleOf("streamName" to "another channel", "topicName" to "myTopic")
-//        val navController = TestNavHostController(ApplicationProvider.getApplicationContext())
-//        launchFragmentInContainer<ChatFragment>(fragmentArgs = fragmentArgs, instantiate = {
-//            ChatFragment().also { fragment ->
-//                fragment.viewLifecycleOwnerLiveData.observeForever { viewLifecycleOwner ->
-//                    if (viewLifecycleOwner != null) {
-//                        navController.setGraph(R.navigation.app_navigation)
-//                        Navigation.setViewNavController(fragment.requireView(), navController)
-//                    }
-//                }
-//            }
-//        })
-//        ChatScreen {
-//            step("Проверяем нажатие на свою реакцию") {
-//                chatRecycler {
-//                    lastChild<ChatScreen.KSendMessage> {
-//                        flexBox.clickByPosition(0)
-//                    }
-//                }
-//            }
-//            step("trst") {
-//                chatRecycler.lastChild<ChatScreen.KSendMessage> {
-//                    flexBox.hasChildrenCount(0)
-//                }
-//            }
-//        }
-//    }
-
     @Test
     fun testSendingMessage() = run {
-//        rule.wiremockRule.zulip {
-//            stubTestMessages()
-//            stubRegisterEvent()
-//            stubMessageEvent()
-//        }
         val fragmentArgs = bundleOf("streamName" to "another channel", "topicName" to "myTopic")
         val navController = TestNavHostController(ApplicationProvider.getApplicationContext())
         launchFragmentInContainer<ChatFragment>(fragmentArgs = fragmentArgs, instantiate = {

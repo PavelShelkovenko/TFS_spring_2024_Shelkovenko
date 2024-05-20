@@ -13,6 +13,7 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.cha
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.message.send_message.SendMessageDelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.message.send_message.SendMessageModel
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.MyUserId
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.NoAction
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.generateRandomId
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.getFormattedDate
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -197,7 +198,7 @@ class ChatReducer @Inject constructor(
 
         is ChatEvent.Ui.LoadPagingNewerMessages -> {
             if (paginationInfoHolder.isLoadingPagingData || paginationInfoHolder.hasLoadedNewestMessage) {
-                Unit
+                NoAction
             } else {
                 commands {
                     +ChatCommand.LoadPagingNewerMessages(
@@ -214,7 +215,7 @@ class ChatReducer @Inject constructor(
 
         is ChatEvent.Ui.LoadPagingOlderMessages -> {
             if (paginationInfoHolder.isLoadingPagingData || paginationInfoHolder.hasLoadedOldestMessage) {
-                Unit
+                NoAction
             } else {
                 commands {
                     +ChatCommand.LoadPagingOlderMessages(
