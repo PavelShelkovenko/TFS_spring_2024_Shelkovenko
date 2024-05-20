@@ -13,8 +13,11 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.base.delega
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.channels.streams.adapter.StreamDelegateItem
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
 import java.util.concurrent.CancellationException
 import kotlin.random.Random
+
+typealias NoAction = Unit
 
 fun Float.toDp(context: Context) = TypedValue.applyDimension(
     TypedValue.COMPLEX_UNIT_DIP, this, context.resources.displayMetrics
@@ -45,7 +48,7 @@ inline fun <T> runCatchingNonCancellation(block: () -> T): Result<T> {
 }
 
 fun getFormattedDate(dateOfMessageInSeconds: Int): String {
-    val formatter = SimpleDateFormat("dd MMMM")
+    val formatter = SimpleDateFormat("dd MMMM", Locale.getDefault())
     val calendar = Calendar.getInstance()
     calendar.timeInMillis = dateOfMessageInSeconds * 1000L
     return formatter.format(calendar.time)

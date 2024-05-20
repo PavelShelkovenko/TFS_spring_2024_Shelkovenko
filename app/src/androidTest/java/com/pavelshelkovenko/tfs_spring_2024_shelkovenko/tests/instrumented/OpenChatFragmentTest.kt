@@ -36,13 +36,18 @@ class OpenChatFragmentTest: TestCase() {
                 }
                 Assert.assertEquals(2, streamsRecycler.getSize())
             }
-            step("Открываем список стримов, и проверяем их видимость") {
+            step("Открываем список стримов") {
                 streamsRecycler {
                     childAt<StreamInfoScreen.KStream>(0) {
                         openTopicsButton.isDisplayed()
                         openTopicsButton.click()
                     }
                 }
+            }
+            step("Проверяем видимость списка стримов") {
+                streamsRecycler.isDisplayed()
+            }
+            step("Проверяем количество стримов") {
                 Assert.assertEquals(5, streamsRecycler.getSize())
             }
             step("Открываем экран чата и проверяем, что правильно передались аргументы") {

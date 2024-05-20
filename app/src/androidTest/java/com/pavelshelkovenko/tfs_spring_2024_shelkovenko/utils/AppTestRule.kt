@@ -18,9 +18,7 @@ class AppTestRule<T : Activity>(
     private val configuration: Application.() -> Unit
 ) : TestRule {
 
-    val wiremockRule = WireMockRule(
-        wireMockConfig(), false
-    ) // default: localhost:8080
+    val wiremockRule = WireMockRule(wireMockConfig(), false)
     val activityScenarioRule = ActivityScenarioRule<T>(startActivityIntent)
     private val intentsRule = IntentsRule()
 

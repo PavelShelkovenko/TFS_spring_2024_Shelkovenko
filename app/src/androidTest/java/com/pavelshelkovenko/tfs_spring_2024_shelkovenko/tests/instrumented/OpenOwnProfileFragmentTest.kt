@@ -36,7 +36,7 @@ class OpenOwnProfileFragmentTest: TestCase() {
             step("Переходим на OwnProfileFragment") {
                 bottomNavigationView.setSelectedItem(R.id.ownProfileFragment)
             }
-            step("Проверяем, что запрос на сервер был заменен на тестовый") {
+            step("Проверяем, что были отправлены нужные запросы на сервер") {
                 WireMock.verify(1, WireMock.getRequestedFor(MockZulip.urlPatterForOwnProfile))
                 WireMock.verify(1, WireMock.getRequestedFor(MockZulip.urlPatterForUserOnlineStatus))
                 WireMock.verify(1, WireMock.getRequestedFor(MockZulip.urlPatternForSubscribedStreams))
