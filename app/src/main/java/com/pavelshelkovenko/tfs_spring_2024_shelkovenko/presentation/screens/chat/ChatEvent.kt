@@ -73,7 +73,7 @@ sealed interface ChatEvent {
 
         data class LoadPagingOlderMessages(val messages: List<Message>) : Internal
 
-        data class Error(val throwable: Throwable) : Internal
+        data class Error(val errorMessageId: Int) : Internal
 
         data class MinorError(val errorMessageId: Int) : Internal
 

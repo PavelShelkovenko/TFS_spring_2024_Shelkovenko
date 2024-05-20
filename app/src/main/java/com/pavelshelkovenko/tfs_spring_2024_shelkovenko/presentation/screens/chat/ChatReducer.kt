@@ -1,6 +1,5 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat
 
-import android.util.Log
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Message
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Reaction
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.Operation
@@ -32,7 +31,6 @@ class ChatReducer @Inject constructor(
         ChatCommand>
     (ChatEvent.Ui::class, ChatEvent.Internal::class) {
 
-
     private var delegateItemList = MutableStateFlow<List<DelegateItem>>(emptyList())
 
     override fun Result.internal(event: ChatEvent.Internal) = when (event) {
@@ -40,8 +38,12 @@ class ChatReducer @Inject constructor(
             val messagesUi = convertMessagesToDelegateItemWithDate(event.messages)
             delegateItemList.value = messagesUi
             paginationInfoHolder.apply {
-                oldestAnchor = getFirstMessageDelegateItem().id().toString()
-                newestAnchor = getLastMessageDelegateItem().id().toString()
+                oldestAnchor = try {
+                    getFirstMessageDelegateItem().id().toString()
+                } catch (e: Exception) { return@apply }
+                newestAnchor = try {
+                    getLastMessageDelegateItem().id().toString()
+                } catch (e: Exception) { return@apply }
             }
             state { ChatState.Content(messages = messagesUi) }
         }
@@ -59,7 +61,7 @@ class ChatReducer @Inject constructor(
         }
 
         is ChatEvent.Internal.Error -> {
-            state { ChatState.Error(errorMessage = event.throwable.message.toString()) }
+            state { ChatState.Error(errorMessageId = event.errorMessageId) }
         }
 
         is ChatEvent.Internal.MinorError -> {
@@ -116,7 +118,6 @@ class ChatReducer @Inject constructor(
         }
 
         is ChatEvent.Internal.LoadPagingNewerMessages -> {
-            Log.d("TAG", "messages = ${event.messages}")
             handlePagingNewMessages(
                 messages = event.messages,
                 onUpdateState = { newDelegateItemsList ->
@@ -189,13 +190,15 @@ class ChatReducer @Inject constructor(
                     topicName = event.topicName,
                     anchor = paginationInfoHolder.newestAnchor,
                     numAfter = COUNT_OF_MESSAGE_TO_DOWNLOAD,
-                    numBefore = COUNT_OF_MESSAGE_TO_DOWNLOAD
+                    numBefore = 2 * COUNT_OF_MESSAGE_TO_DOWNLOAD
                 )
             }
         }
 
         is ChatEvent.Ui.LoadPagingNewerMessages -> {
-            if (!(paginationInfoHolder.isLoadingPagingData) && !(paginationInfoHolder.hasLoadedNewestMessage)) {
+            if (paginationInfoHolder.isLoadingPagingData || paginationInfoHolder.hasLoadedNewestMessage) {
+                Unit
+            } else {
                 commands {
                     +ChatCommand.LoadPagingNewerMessages(
                         streamName = event.streamName,
@@ -207,11 +210,12 @@ class ChatReducer @Inject constructor(
                 }
                 paginationInfoHolder.isLoadingPagingData = true
             }
-            Unit
         }
 
         is ChatEvent.Ui.LoadPagingOlderMessages -> {
-            if (!(paginationInfoHolder.isLoadingPagingData) && !(paginationInfoHolder.hasLoadedOldestMessage)) {
+            if (paginationInfoHolder.isLoadingPagingData || paginationInfoHolder.hasLoadedOldestMessage) {
+                Unit
+            } else {
                 commands {
                     +ChatCommand.LoadPagingOlderMessages(
                         streamName = event.streamName,
@@ -223,7 +227,6 @@ class ChatReducer @Inject constructor(
                 }
                 paginationInfoHolder.isLoadingPagingData = true
             }
-            Unit
         }
 
         is ChatEvent.Ui.RemoveReaction -> {
@@ -266,33 +269,28 @@ class ChatReducer @Inject constructor(
         }
 
         is ChatEvent.Ui.OnEmojiClick -> {
-            val message = delegateItemList.value.find { it.id() == event.messageId }
-            if (message != null) {
-                val reactionWithSimilarEmojiCode =
-                    (message as MessageDelegateItem).reactionList.find { reaction ->
-                        reaction.emojiCode == event.emojiCode
+            handleEmojiClick(
+                messageId = event.messageId,
+                emojiCode = event.emojiCode,
+                onRemoveReaction = {
+                    commands {
+                        +ChatCommand.RemoveReaction(
+                            messageId = event.messageId,
+                            emojiCode = event.emojiCode,
+                            emojiName = event.emojiName
+                        )
                     }
-                reactionWithSimilarEmojiCode?.let { reaction ->
-                    if (reaction.userId == MyUserId.MY_USER_ID) {
-                        commands {
-                            +ChatCommand.RemoveReaction(
-                                messageId = event.messageId,
-                                emojiCode = event.emojiCode,
-                                emojiName = event.emojiName
-                            )
-                        }
-                    } else {
-                        commands {
-                            +ChatCommand.SendReaction(
-                                messageId = event.messageId,
-                                emojiCode = event.emojiCode,
-                                emojiName = event.emojiName
-                            )
-                        }
+                },
+                onSendReaction = {
+                    commands {
+                        +ChatCommand.SendReaction(
+                            messageId = event.messageId,
+                            emojiCode = event.emojiCode,
+                            emojiName = event.emojiName
+                        )
                     }
                 }
-            }
-            Unit
+            )
         }
 
         is ChatEvent.Ui.ClosingChat -> {
@@ -302,6 +300,28 @@ class ChatReducer @Inject constructor(
                     topicName = event.topicName,
                     messages = getMessagesForCaching()
                 )
+            }
+        }
+    }
+
+    private fun handleEmojiClick(
+        messageId: Int,
+        emojiCode: String,
+        onRemoveReaction: () -> Unit,
+        onSendReaction: () -> Unit,
+    ) {
+        val message = delegateItemList.value.find { it.id() == messageId }
+        if (message != null) {
+            val reactionWithSimilarEmojiCode =
+                (message as MessageDelegateItem).reactionList.find { reaction ->
+                    reaction.emojiCode == emojiCode
+                }
+            reactionWithSimilarEmojiCode?.let { reaction ->
+                if (reaction.userId == MyUserId.MY_USER_ID) {
+                    onRemoveReaction()
+                } else {
+                    onSendReaction()
+                }
             }
         }
     }
@@ -345,14 +365,20 @@ class ChatReducer @Inject constructor(
         onUpdateState: (List<DelegateItem>) -> Unit,
     ) {
         val messagesUi = convertMessagesToDelegateItemWithDate(messages)
-        if (messagesUi.last().id() == getLastMessageDelegateItem().id()) {
-            paginationInfoHolder.hasLoadedNewestMessage = true
-        } else {
-            val listWithoutDuplicate = messagesUi.drop(1)
-            val newDelegateList = delegateItemList.value + listWithoutDuplicate
-            delegateItemList.value = newDelegateList
+        try {
+            if (messagesUi.last().id() == getLastMessageDelegateItem().id()) {
+                paginationInfoHolder.hasLoadedNewestMessage = true
+            } else {
+                val listWithoutDuplicate = messagesUi.drop(1)
+                val newDelegateList = delegateItemList.value + listWithoutDuplicate
+                delegateItemList.value = newDelegateList
+                paginationInfoHolder.newestAnchor = getLastMessageDelegateItem().id().toString()
+                onUpdateState(newDelegateList)
+            }
+        } catch (e: Exception) {
+            delegateItemList.value = messagesUi
             paginationInfoHolder.newestAnchor = getLastMessageDelegateItem().id().toString()
-            onUpdateState(newDelegateList)
+            onUpdateState(messagesUi)
         }
     }
 
@@ -363,14 +389,20 @@ class ChatReducer @Inject constructor(
         val messagesUi = convertMessagesToDelegateItemWithDate(
             messages = messages,
         )
-        if (messagesUi.first().id() == getFirstMessageDelegateItem().id()) {
-            paginationInfoHolder.hasLoadedOldestMessage = true
-        } else {
-            val listWithoutDuplicate = messagesUi.dropLast(1)
-            val newDelegateList = listWithoutDuplicate + delegateItemList.value
-            delegateItemList.value = newDelegateList
+        try {
+            if (messagesUi.first().id() == getFirstMessageDelegateItem().id()) {
+                paginationInfoHolder.hasLoadedOldestMessage = true
+            } else {
+                val listWithoutDuplicate = messagesUi.dropLast(1)
+                val newDelegateList = listWithoutDuplicate + delegateItemList.value
+                delegateItemList.value = newDelegateList
+                paginationInfoHolder.oldestAnchor = getFirstMessageDelegateItem().id().toString()
+                onUpdateState(newDelegateList)
+            }
+        } catch (e: Exception) {
+            delegateItemList.value = messagesUi
             paginationInfoHolder.oldestAnchor = getFirstMessageDelegateItem().id().toString()
-            onUpdateState(newDelegateList)
+            onUpdateState(messagesUi)
         }
     }
 
@@ -456,7 +488,7 @@ class ChatReducer @Inject constructor(
         newMessages: List<Message>,
         onUpdateState: (List<DelegateItem>) -> Unit
     ) {
-        val messagesUi = parseMessageToDelegateItem(messages = newMessages)
+        val messagesUi = convertMessagesToDelegateItemWithDate(messages = newMessages)
         val oldMessagesUi = delegateItemList.value
         val newMessagesUi = oldMessagesUi + messagesUi
         delegateItemList.value = newMessagesUi

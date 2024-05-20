@@ -18,6 +18,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "API_URL", "https://tinkoff-android-spring-2024.zulipchat.com/api/v1/")
     }
 
     buildTypes {
@@ -28,17 +29,43 @@ android {
                 "proguard-rules.pro"
             )
         }
+        debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+        }
+        flavorDimensions += "env"
+        productFlavors {
+            create("staging") {
+                dimension = "env"
+                buildConfigField("String", "API_URL", "\"http://localhost:8080\"")
+            }
+            create("development") {
+                dimension = "env"
+                buildConfigField("String", "API_URL", "\"https://tinkoff-android-spring-2024.zulipchat.com/api/v1/\"")
+            }
+        }
+
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
+
+    testOptions {
+        unitTests.all {
+            it.useJUnitPlatform()
+            it.useJUnit()
+        }
+        animationsDisabled = true
+    }
+
 }
 
 dependencies {
@@ -50,6 +77,7 @@ dependencies {
 
     // DI
     implementation(libs.dagger)
+    implementation(libs.androidx.navigation.testing)
     kapt(libs.dagger.compiler)
 
     // Room
@@ -60,8 +88,34 @@ dependencies {
     implementation(libs.glide)
     kapt(libs.glide.compiler)
 
-    // Testing
+    // Android Test Rules
+    implementation(libs.androidx.rules)
+
+    // FragmentTest
+    debugImplementation(libs.androidx.fragment.testing)
+
+    // CoroutinesTest
+    testImplementation(libs.kotlinx.coroutines.test)
+
+    // JUnit
     testImplementation(libs.junit)
+    testImplementation(libs.junit.jupiter)
     androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+
+    // Kaspresso
+    androidTestImplementation(libs.kaspresso)
+
+    // Espresso Intents
+    androidTestImplementation(libs.androidx.espresso.intents)
+
+    // Hamcrest Matchers
+    androidTestImplementation(libs.hamcrest)
+
+    // Wiremock
+    debugImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.httpclient.android)
+    androidTestImplementation(libs.wiremock) {
+        exclude(group = "org.apache.httpcomponents", module = "httpclient")
+    }
+
 }

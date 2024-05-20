@@ -25,11 +25,13 @@ class ReceivedMessageViewGroup @JvmOverloads constructor(
         setWillNotDraw(false)
         backgroundPaint.color = ResourcesCompat.getColor(resources, R.color.gray, null)
         inflate(context, R.layout.received_message_view_group, this)
-        userAvatar = findViewById(R.id.user_avatar_tv)
+        userAvatar = findViewById(R.id.received_user_avatar)
     }
 
     var userName = DEFAULT_USER_NAME
         private set
+
+
 
 
     override fun onMeasure(parentWidthMeasureSpec: Int, parentHeightMeasureSpec: Int) {

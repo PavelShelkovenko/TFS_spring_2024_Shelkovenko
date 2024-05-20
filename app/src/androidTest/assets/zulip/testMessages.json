@@ -1,0 +1,199 @@
+{
+  "result": "success",
+  "msg": "",
+  "messages": [
+    {
+      "id": 437947344,
+      "sender_id": 709775,
+      "content": "/user_uploads/63414/oSw0X1ExHDbQpciG4OPJK3Wr/IMG_20240507_175907.jpg",
+      "recipient_id": 1255815,
+      "timestamp": 1715330849,
+      "client": "okhttp",
+      "subject": "myTopic",
+      "topic_links": [],
+      "is_me_message": false,
+      "reactions": [
+        {
+          "emoji_name": "thinking",
+          "emoji_code": "1f914",
+          "reaction_type": "unicode_emoji",
+          "user": {
+            "email": "user709775@tinkoff-android-spring-2024.zulipchat.com",
+            "id": 709775,
+            "full_name": "Алексей Решетников"
+          },
+          "user_id": 709775
+        },
+        {
+          "emoji_name": "yum",
+          "emoji_code": "1f60b",
+          "reaction_type": "unicode_emoji",
+          "user": {
+            "email": "user708822@tinkoff-android-spring-2024.zulipchat.com",
+            "id": 708822,
+            "full_name": "Павел Шелковенко"
+          },
+          "user_id": 708822
+        },
+        {
+          "emoji_name": "thinking",
+          "emoji_code": "1f914",
+          "reaction_type": "unicode_emoji",
+          "user": {
+            "email": "user708822@tinkoff-android-spring-2024.zulipchat.com",
+            "id": 708822,
+            "full_name": "Павел Шелковенко"
+          },
+          "user_id": 708822
+        }
+      ],
+      "submessages": [],
+      "flags": [
+        "read"
+      ],
+      "sender_full_name": "Алексей Решетников",
+      "sender_email": "user709775@tinkoff-android-spring-2024.zulipchat.com",
+      "sender_realm_str": "tinkoff-android-spring-2024",
+      "display_recipient": "another channel",
+      "type": "stream",
+      "stream_id": 433633,
+      "avatar_url": "https://zulip-avatars.s3.amazonaws.com/63414/a6fcc9d57f63284a522bad3c0ac582035af2ee58?version=2",
+      "content_type": "text/html"
+    },
+    {
+      "id": 438110645,
+      "sender_id": 708822,
+      "content": "goo",
+      "recipient_id": 1255815,
+      "timestamp": 1715435081,
+      "client": "okhttp",
+      "subject": "myTopic",
+      "topic_links": [],
+      "is_me_message": false,
+      "reactions": [],
+      "submessages": [],
+      "flags": [
+        "read"
+      ],
+      "sender_full_name": "Павел Шелковенко",
+      "sender_email": "user708822@tinkoff-android-spring-2024.zulipchat.com",
+      "sender_realm_str": "tinkoff-android-spring-2024",
+      "display_recipient": "another channel",
+      "type": "stream",
+      "stream_id": 433633,
+      "avatar_url": "https://zulip-avatars.s3.amazonaws.com/63414/9e5d147143cdc4f9d5b88e649a7185376201b312?version=2",
+      "content_type": "text/html"
+    },
+    {
+      "id": 438110655,
+      "sender_id": 708822,
+      "content": "gg",
+      "recipient_id": 1255815,
+      "timestamp": 1715435094,
+      "client": "okhttp",
+      "subject": "myTopic",
+      "topic_links": [],
+      "is_me_message": false,
+      "reactions": [],
+      "submessages": [],
+      "flags": [
+        "read"
+      ],
+      "sender_full_name": "Павел Шелковенко",
+      "sender_email": "user708822@tinkoff-android-spring-2024.zulipchat.com",
+      "sender_realm_str": "tinkoff-android-spring-2024",
+      "display_recipient": "another channel",
+      "type": "stream",
+      "stream_id": 433633,
+      "avatar_url": "https://zulip-avatars.s3.amazonaws.com/63414/9e5d147143cdc4f9d5b88e649a7185376201b312?version=2",
+      "content_type": "text/html"
+    },
+    {
+      "id": 438110865,
+      "sender_id": 708822,
+      "content": "hhhhg",
+      "recipient_id": 1255815,
+      "timestamp": 1715435324,
+      "client": "okhttp",
+      "subject": "myTopic",
+      "topic_links": [],
+      "is_me_message": false,
+      "reactions": [],
+      "submessages": [],
+      "flags": [
+        "read"
+      ],
+      "sender_full_name": "Павел Шелковенко",
+      "sender_email": "user708822@tinkoff-android-spring-2024.zulipchat.com",
+      "sender_realm_str": "tinkoff-android-spring-2024",
+      "display_recipient": "another channel",
+      "type": "stream",
+      "stream_id": 433633,
+      "avatar_url": "https://zulip-avatars.s3.amazonaws.com/63414/9e5d147143cdc4f9d5b88e649a7185376201b312?version=2",
+      "content_type": "text/html"
+    },
+    {
+      "id": 438110866,
+      "sender_id": 708822,
+      "content": "etfghj",
+      "recipient_id": 1255815,
+      "timestamp": 1715435326,
+      "client": "okhttp",
+      "subject": "myTopic",
+      "topic_links": [],
+      "is_me_message": false,
+      "reactions": [
+        {
+          "emoji_name": "thinking",
+          "emoji_code": "1f914",
+          "reaction_type": "unicode_emoji",
+          "user": {
+            "email": "user709775@tinkoff-android-spring-2024.zulipchat.com",
+            "id": 709775,
+            "full_name": "Алексей Решетников"
+          },
+          "user_id": 709775
+        },
+        {
+          "emoji_name": "yum",
+          "emoji_code": "1f60b",
+          "reaction_type": "unicode_emoji",
+          "user": {
+            "email": "user708822@tinkoff-android-spring-2024.zulipchat.com",
+            "id": 708822,
+            "full_name": "Павел Шелковенко"
+          },
+          "user_id": 708822
+        },
+        {
+          "emoji_name": "thinking",
+          "emoji_code": "1f914",
+          "reaction_type": "unicode_emoji",
+          "user": {
+            "email": "user708822@tinkoff-android-spring-2024.zulipchat.com",
+            "id": 708822,
+            "full_name": "Павел Шелковенко"
+          },
+          "user_id": 708822
+        }
+      ],
+      "submessages": [],
+      "flags": [
+        "read"
+      ],
+      "sender_full_name": "Павел Шелковенко",
+      "sender_email": "user708822@tinkoff-android-spring-2024.zulipchat.com",
+      "sender_realm_str": "tinkoff-android-spring-2024",
+      "display_recipient": "another channel",
+      "type": "stream",
+      "stream_id": 433633,
+      "avatar_url": "https://zulip-avatars.s3.amazonaws.com/63414/9e5d147143cdc4f9d5b88e649a7185376201b312?version=2",
+      "content_type": "text/html"
+    }
+  ],
+  "found_anchor": true,
+  "found_oldest": false,
+  "found_newest": true,
+  "history_limited": false,
+  "anchor": 438110866
+}

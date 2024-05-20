@@ -2,6 +2,7 @@ package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.di.modules.core
 
 import android.content.Context
 import androidx.room.Room
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.BuildConfig
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.AppDatabase
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.dao.ChatDao
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.dao.StreamDao
@@ -56,7 +57,7 @@ class DataModule {
         okHttpClient: OkHttpClient,
     ): Retrofit = Retrofit.Builder()
         .client(okHttpClient)
-        .baseUrl(BASE_URL)
+        .baseUrl(BuildConfig.API_URL)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
@@ -100,7 +101,7 @@ class DataModule {
     companion object {
 
         //Эти константы по идее должны из BuildConfig браться
-        private const val BASE_URL = "https://tinkoff-android-spring-2024.zulipchat.com/api/v1/"
+
         private const val USERNAME = "pavel.shelkovenko@gmail.com"
         private const val PASSWORD = "PIqWnpOVj5pqafJQFefbu1Rd3yMwyQil"
     }

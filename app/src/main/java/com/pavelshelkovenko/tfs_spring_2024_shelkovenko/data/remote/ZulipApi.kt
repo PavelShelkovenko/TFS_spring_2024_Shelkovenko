@@ -12,24 +12,20 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.models.respo
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.models.response.GetUserPresenceResponse
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.models.response.GetUserResponse
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.models.response.RegisterEventsResponse
-import okhttp3.Credentials
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import org.json.JSONArray
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.create
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
-import java.util.concurrent.TimeUnit
 
 interface ZulipApi {
 
     @GET("streams")
     suspend fun getAllStreams(): GetAllStreamsResponse
+
+    @GET("users/me/subscriptions")
+    suspend fun getSubscribedStreams(): GetSubscribedStreamsResponse
 
     @GET("users/me/{stream_id}/topics")
     suspend fun getTopics(@Path("stream_id") streamId: Int): GetTopicsResponse
@@ -66,9 +62,6 @@ interface ZulipApi {
 
     @GET("users/me")
     suspend fun getOwnProfile(): GetOwnProfileResponse
-
-    @GET("users/me/subscriptions")
-    suspend fun getSubscribedStreams(): GetSubscribedStreamsResponse
 
     @POST("messages")
     suspend fun sendMessage(
@@ -116,50 +109,4 @@ interface ZulipApi {
         @Query("queue_id") queueId: String,
         @Query("last_event_id") lastEventId: String
     ): GetReactionEventResponse
-}
-
-fun ZulipApi(
-    baseUrl: String = "https://tinkoff-android-spring-2024.zulipchat.com/api/v1/",
-    okHttpClient: OkHttpClient? = null,
-): ZulipApi {
-    return retrofit(
-        baseUrl = baseUrl,
-        okHttpClient = okHttpClient
-    ).create()
-}
-
-private fun retrofit(
-    baseUrl: String,
-    okHttpClient: OkHttpClient?
-): Retrofit {
-
-    val modifiedOkHttpClient: OkHttpClient = (okHttpClient?.newBuilder() ?: OkHttpClient.Builder())
-        .connectTimeout(15, TimeUnit.SECONDS)
-        .readTimeout(15, TimeUnit.SECONDS)
-        .writeTimeout(15, TimeUnit.SECONDS)
-        .addInterceptor { chain ->
-            chain.proceed(
-                chain.request().newBuilder()
-                    .header(
-                        name = "Authorization",
-                        value = Credentials.basic(
-                            "pavel.shelkovenko@gmail.com",
-                            "PIqWnpOVj5pqafJQFefbu1Rd3yMwyQil"
-                        )
-                    )
-                    .build()
-            )
-        }
-        .addNetworkInterceptor(
-            HttpLoggingInterceptor().apply {
-                setLevel(HttpLoggingInterceptor.Level.BODY)
-            }
-        )
-        .build()
-
-    return Retrofit.Builder()
-        .baseUrl(baseUrl)
-        .addConverterFactory(GsonConverterFactory.create())
-        .client(modifiedOkHttpClient)
-        .build()
 }

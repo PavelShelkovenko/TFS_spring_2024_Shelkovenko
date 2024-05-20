@@ -1,0 +1,18 @@
+{
+  "msg": "",
+  "result": "success",
+  "topics": [
+    {
+      "max_id": 26,
+      "name": "Denmark3"
+    },
+    {
+      "max_id": 23,
+      "name": "Denmark1"
+    },
+    {
+      "max_id": 6,
+      "name": "Denmark2"
+    }
+  ]
+}

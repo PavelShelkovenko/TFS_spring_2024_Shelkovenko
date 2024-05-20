@@ -5,7 +5,7 @@
     android:layout_height="60dp">
 
     <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/user_avatar_tv"
+        android:id="@+id/user_avatar_shimmer"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginTop="10dp"
@@ -18,7 +18,7 @@
         app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CircularAvatarShape" />
 
     <TextView
-        android:id="@+id/textMessage"
+        android:id="@+id/textMessage_shimmer"
         android:layout_width="100dp"
         android:layout_height="15dp"
         android:layout_marginStart="16dp"
@@ -27,7 +27,7 @@
         android:paddingBottom="4dp"
         android:background="@drawable/shimmer_background"
         android:textColor="@color/white"
-        app:layout_constraintStart_toEndOf="@+id/user_avatar_tv"
+        app:layout_constraintStart_toEndOf="@+id/user_avatar_shimmer"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
@@ -40,8 +40,8 @@
         android:paddingHorizontal="4dp"
         android:paddingTop="4dp"
         android:textColor="@color/green"
-        app:layout_constraintStart_toEndOf="@+id/user_avatar_tv"
-        app:layout_constraintTop_toBottomOf="@+id/textMessage" />
+        app:layout_constraintStart_toEndOf="@+id/user_avatar_shimmer"
+        app:layout_constraintTop_toBottomOf="@+id/textMessage_shimmer" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

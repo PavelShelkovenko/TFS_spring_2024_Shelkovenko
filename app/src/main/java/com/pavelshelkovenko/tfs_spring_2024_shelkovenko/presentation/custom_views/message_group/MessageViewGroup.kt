@@ -26,7 +26,7 @@ abstract class MessageViewGroup @JvmOverloads constructor(
         style = Paint.Style.FILL
     }
 
-    protected var textMessage = DEFAULT_MESSAGE_TEXT
+    var textMessage = DEFAULT_MESSAGE_TEXT
         private set
 
     fun setTextMessage(newTextMessage: String) {
