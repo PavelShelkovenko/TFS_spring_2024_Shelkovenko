@@ -1,5 +1,6 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat
 
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.AccountInfo
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.Operation
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.ReactionEvent
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.ReceivedMessageEventData
@@ -7,7 +8,6 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.Rec
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.RegistrationForEventsData
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.repository.FakeCharRepositoryWithErrors
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.repository.FakeChatRepository
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.MyUserId
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.test.runTest
@@ -21,6 +21,7 @@ class ChatActorTest {
 
     private val fakeChatRepository = FakeChatRepository()
     private val fakeCharRepositoryWithErrors = FakeCharRepositoryWithErrors()
+    private val accountInfo = AccountInfo()
     private val streamName = "test stream name"
     private val topicName = "test topic name"
 
@@ -217,7 +218,7 @@ class ChatActorTest {
                             emojiName = "test emoji name",
                             operation = Operation.REMOVE,
                             messageId = 1,
-                            userId = MyUserId.MY_USER_ID
+                            userId = accountInfo.userId
                         )
                     )
                 )

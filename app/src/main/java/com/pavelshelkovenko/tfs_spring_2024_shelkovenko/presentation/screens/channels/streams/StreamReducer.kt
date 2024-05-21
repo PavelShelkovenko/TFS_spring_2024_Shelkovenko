@@ -84,6 +84,16 @@ class StreamReducer : ScreenDslReducer<
                 }
             }
         }
+
+        is StreamEvent.Internal.TopicsLoaded -> {
+            state {
+                updateStreamsStateAfterStreamClick(
+                    stream = event.stream,
+                    topics = event.topics,
+                    streamDestination = event.streamDestination
+                )
+            }
+        }
     }
 
     override fun Result.ui(event: StreamEvent.Ui) = when (event) {
@@ -108,27 +118,19 @@ class StreamReducer : ScreenDslReducer<
             }
         }
 
-        is StreamEvent.Ui.OnStreamClick -> state {
-            when (event.streamDestination) {
-                StreamDestination.ALL -> {
-                    allStreamsListCached.value = handleStreamClick(
+        is StreamEvent.Ui.OnStreamClick -> {
+            if (event.stream.value.isExpanded) {
+                state {
+                    updateStreamsStateAfterStreamClick(
                         stream = event.stream,
-                        listWhereHandleStreamClick = allStreamsListCached.value
-                    )
-                    StreamState.Content(
-                        allStreamsList = allStreamsListCached.value,
-                        subscribedStreamsList = subscribedStreamsListCached.value
+                        streamDestination = event.streamDestination
                     )
                 }
-
-                StreamDestination.SUBSCRIBED -> {
-                    subscribedStreamsListCached.value = handleStreamClick(
+            } else {
+                commands {
+                    +StreamCommand.LoadTopicsForStream(
                         stream = event.stream,
-                        listWhereHandleStreamClick = subscribedStreamsListCached.value
-                    )
-                    StreamState.Content(
-                        allStreamsList = allStreamsListCached.value,
-                        subscribedStreamsList = subscribedStreamsListCached.value
+                        streamDestination = event.streamDestination
                     )
                 }
             }
@@ -150,6 +152,38 @@ class StreamReducer : ScreenDslReducer<
                     topicId = event.topic.id
                 )
             )
+        }
+    }
+
+    private fun updateStreamsStateAfterStreamClick(
+        stream: StreamDelegateItem,
+        topics: List<Topic> = stream.value.topicsList,
+        streamDestination: StreamDestination
+    ): StreamState {
+        return when (streamDestination) {
+            StreamDestination.ALL -> {
+                allStreamsListCached.value = handleStreamClick(
+                    stream = stream,
+                    topics = topics,
+                    listWhereHandleStreamClick = allStreamsListCached.value
+                )
+                StreamState.Content(
+                    allStreamsList = allStreamsListCached.value,
+                    subscribedStreamsList = subscribedStreamsListCached.value
+                )
+            }
+
+            StreamDestination.SUBSCRIBED -> {
+                subscribedStreamsListCached.value = handleStreamClick(
+                    stream = stream,
+                    topics = topics,
+                    listWhereHandleStreamClick = subscribedStreamsListCached.value
+                )
+                StreamState.Content(
+                    allStreamsList = allStreamsListCached.value,
+                    subscribedStreamsList = subscribedStreamsListCached.value
+                )
+            }
         }
     }
 
@@ -184,19 +218,22 @@ class StreamReducer : ScreenDslReducer<
 
     private fun handleStreamClick(
         listWhereHandleStreamClick: List<DelegateItem>,
-        stream: StreamDelegateItem
+        stream: StreamDelegateItem,
+        topics: List<Topic>,
     ): List<DelegateItem> {
         val streamModel = stream.value
         val newListWithoutTopics = if (streamModel.isExpanded) {
             deleteTopics(
                 listWhereDeleteTopics = listWhereHandleStreamClick,
                 stream = stream,
+                topics = topics,
                 streamModel = streamModel
             )
         } else {
             addTopics(
                 listWhereAddTopics = listWhereHandleStreamClick,
                 stream = stream,
+                topics = topics,
                 streamModel = streamModel
             )
         }
@@ -207,6 +244,7 @@ class StreamReducer : ScreenDslReducer<
     private fun addTopics(
         listWhereAddTopics: List<DelegateItem>,
         stream: StreamDelegateItem,
+        topics: List<Topic>,
         streamModel: Stream
     ): List<DelegateItem> {
         val newList = mutableListOf<DelegateItem>()
@@ -216,10 +254,10 @@ class StreamReducer : ScreenDslReducer<
             } else {
                 val newStreamDelegateItem = StreamDelegateItem(
                     id = stream.id,
-                    value = streamModel.copy(isExpanded = true)
+                    value = streamModel.copy(isExpanded = true, topicsList = topics)
                 )
                 newList.add(newStreamDelegateItem)
-                for (topic in streamModel.topicsList) {
+                for (topic in topics) {
                     val topicDelegateItem =
                         TopicDelegateItem(id = generateRandomId(), value = topic)
                     newList.add(topicDelegateItem)
@@ -232,19 +270,19 @@ class StreamReducer : ScreenDslReducer<
     private fun deleteTopics(
         listWhereDeleteTopics: List<DelegateItem>,
         stream: StreamDelegateItem,
+        topics: List<Topic>,
         streamModel: Stream
     ): List<DelegateItem> {
         val newList = listWhereDeleteTopics.toMutableList()
         val streamIndex = newList.indexOf(stream)
-        val streamTopics = streamModel.topicsList
-        val lastTopicIndex = streamIndex + streamTopics.size
+        val lastTopicIndex = streamIndex + topics.size
         val newStreamDelegateItem = StreamDelegateItem(
             id = stream.id,
-            value = streamModel.copy(isExpanded = false)
+            value = streamModel.copy(isExpanded = false, topicsList = emptyList())
         )
         newList.removeAt(streamIndex)
         newList.add(streamIndex, newStreamDelegateItem)
-        for (i in streamTopics.indices) {
+        for (i in topics.indices) {
             newList.removeAt(lastTopicIndex - i)
         }
         return newList

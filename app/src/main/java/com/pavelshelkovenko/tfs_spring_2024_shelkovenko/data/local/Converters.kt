@@ -20,6 +20,15 @@ class Converters {
     fun toUserOnlineStatus(value: String): UserOnlineStatus = UserOnlineStatus.valueOf(value)
 
     @TypeConverter
+    fun toTopicList(topics: String): List<TopicDbo> {
+        val listType = object : TypeToken<List<TopicDbo>>() {}.type
+        return Gson().fromJson(topics, listType)
+    }
+
+    @TypeConverter
+    fun fromTopicList(list: List<TopicDbo>): String = Gson().toJson(list)
+
+    @TypeConverter
     fun fromUserOnlineStatus(status: UserOnlineStatus): String = status.name
 
     @TypeConverter
@@ -30,13 +39,4 @@ class Converters {
 
     @TypeConverter
     fun fromReactionList(list: List<ReactionDbo>): String = Gson().toJson(list)
-
-    @TypeConverter
-    fun toTopicList(reaction: String): List<TopicDbo> {
-        val listType = object : TypeToken<List<TopicDbo>>() {}.type
-        return Gson().fromJson(reaction, listType)
-    }
-
-    @TypeConverter
-    fun fromTopicList(list: List<TopicDbo>): String = Gson().toJson(list)
 }

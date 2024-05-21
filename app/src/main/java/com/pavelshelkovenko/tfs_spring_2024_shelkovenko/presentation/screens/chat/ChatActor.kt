@@ -4,6 +4,7 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.RegistrationForEventsData
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.repository.ChatRepository
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.runCatchingNonCancellation
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import vivid.money.elmslie.core.store.Actor
@@ -145,6 +146,9 @@ class ChatActor(
                         )
                     )
                 }
+                // TODO Разобраться, как отфильтровать одинаковые эвенты и убрать задержку
+                // Тут мини-задержка нужна, чтобы не обработать один и тот же эвент два раза
+                delay(100)
                 emit(ChatEvent.Internal.GetMessageLongPollingData)
             }
 
@@ -161,6 +165,9 @@ class ChatActor(
                         )
                     )
                 }
+                // TODO Разобраться, как отфильтровать одинаковые эвенты и убрать задержку
+                // Тут мини-задержка нужна, чтобы не обработать один и тот же эвент два раза
+                delay(100)
                 emit(ChatEvent.Internal.GetReactionLongPollingData)
             }
 

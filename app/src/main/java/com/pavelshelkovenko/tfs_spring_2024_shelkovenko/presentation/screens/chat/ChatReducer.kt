@@ -1,5 +1,6 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat
 
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.AccountInfo
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Message
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Reaction
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.Operation
@@ -12,7 +13,6 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.cha
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.message.received_message.ReceivedMessageModel
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.message.send_message.SendMessageDelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.message.send_message.SendMessageModel
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.MyUserId
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.NoAction
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.generateRandomId
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.getFormattedDate
@@ -22,7 +22,8 @@ import javax.inject.Inject
 
 class ChatReducer @Inject constructor(
     private val longPollingInfoHolder: LongPollingInfoHolder,
-    private val paginationInfoHolder: PaginationInfoHolder
+    private val paginationInfoHolder: PaginationInfoHolder,
+    private val accountInfo: AccountInfo,
 ) : ScreenDslReducer<
         ChatEvent,
         ChatEvent.Ui,
@@ -327,7 +328,7 @@ class ChatReducer @Inject constructor(
                     reaction.emojiCode == emojiCode
                 }
             reactionWithSimilarEmojiCode?.let { reaction ->
-                if (reaction.userId == MyUserId.MY_USER_ID) {
+                if (reaction.userId == accountInfo.userId) {
                     onRemoveReaction()
                 } else {
                     onSendReaction()
@@ -453,7 +454,7 @@ class ChatReducer @Inject constructor(
     private fun parseMessageToDelegateItem(messages: List<Message>): List<DelegateItem> {
         val delegateMessagesList = mutableListOf<DelegateItem>()
         messages.forEach { message ->
-            if (message.userId == MyUserId.MY_USER_ID) {
+            if (message.userId == accountInfo.userId) {
                 val delegateMessage = SendMessageDelegateItem(
                     id = message.id,
                     value = SendMessageModel(
@@ -605,7 +606,7 @@ class ChatReducer @Inject constructor(
                     onUpdateState = onUpdateState
                 )
             } else {
-                if (userId == MyUserId.MY_USER_ID) {
+                if (userId == accountInfo.userId) {
                     removeMyReactionFromReactionList(
                         messageWhereRemoveReaction = messageWhereRemoveReaction,
                         messageIndex = messageIndex,

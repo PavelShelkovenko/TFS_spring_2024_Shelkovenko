@@ -23,10 +23,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import vivid.money.elmslie.android.renderer.elmStoreWithRenderer
 import vivid.money.elmslie.core.store.Store
 import javax.inject.Inject
@@ -164,14 +162,12 @@ class StreamsInfoFragment :
         }
 
         binding.errorComponent.retryButton.setOnClickListener {
-            lifecycleScope.launch {
-                store.accept(
-                    StreamEvent.Ui.QueryChanged(
-                        newQuery = (parentFragment as ChannelFragment).searchQueryFlow.last(),
-                        streamDestination = getStreamDestinationFromArgs()
-                    )
+            store.accept(
+                StreamEvent.Ui.QueryChanged(
+                    newQuery = (parentFragment as ChannelFragment).searchQueryFlow.replayCache.last(),
+                    streamDestination = getStreamDestinationFromArgs()
                 )
-            }
+            )
         }
     }
 

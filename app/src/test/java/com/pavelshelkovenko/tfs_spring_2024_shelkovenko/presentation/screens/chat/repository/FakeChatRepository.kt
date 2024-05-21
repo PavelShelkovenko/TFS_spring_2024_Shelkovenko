@@ -1,5 +1,6 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.repository
 
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.AccountInfo
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Message
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.Operation
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.ReactionEvent
@@ -7,12 +8,12 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.Rec
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.ReceivedReactionEventData
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.RegistrationForEventsData
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.repository.ChatRepository
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.MyUserId
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.TestMessageGenerator
 
 class FakeChatRepository: ChatRepository {
 
     private val testMessageGenerator = TestMessageGenerator()
+    private val accountInfo = AccountInfo()
 
     override suspend fun getMessagesFromNetwork(
         streamName: String,
@@ -76,7 +77,7 @@ class FakeChatRepository: ChatRepository {
                 emojiName = "test emoji name",
                 operation = Operation.REMOVE,
                 messageId = 1,
-                userId = MyUserId.MY_USER_ID
+                userId = accountInfo.userId
             )
         )
     )

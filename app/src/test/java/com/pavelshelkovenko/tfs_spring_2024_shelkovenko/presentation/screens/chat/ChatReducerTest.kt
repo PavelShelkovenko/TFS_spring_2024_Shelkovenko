@@ -1,5 +1,6 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat
 
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.AccountInfo
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Message
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Reaction
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.Operation
@@ -11,9 +12,9 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.cha
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.message.MessageDelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.message.received_message.ReceivedMessageDelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.message.send_message.SendMessageDelegateItem
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.MyUserId
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.TestMessageGenerator
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -25,16 +26,23 @@ class ChatReducerTest {
     private val longPollingInfoHolder = LongPollingInfoHolder()
     private val paginationInfoHolder = PaginationInfoHolder()
     private val testMessageGenerator = TestMessageGenerator()
+    private val accountInfo = AccountInfo()
+    private lateinit var reducer: ChatReducer
     private val countOfMessagesToDownload = 25
     private val streamName = "test stream name"
     private val topicName = "test topic name"
+
+
+    @Before
+    fun setup() {
+        reducer = ChatReducer(longPollingInfoHolder, paginationInfoHolder, accountInfo)
+    }
 
     @Test
     fun `reduce StartProcess event should contains commands LoadMessagesFromCache AND LoadMessagesFromNetwork`() {
         // Given
         val state = ChatState.Initial
         val event = ChatEvent.Ui.StartProcess(streamName, topicName)
-        val reducer = ChatReducer(longPollingInfoHolder, paginationInfoHolder)
         // When
         val actual = reducer.reduce(event, state)
         // Then
@@ -58,7 +66,6 @@ class ChatReducerTest {
         // Given
         val state = ChatState.Initial
         val event = ChatEvent.Ui.ReloadData(streamName, topicName)
-        val reducer = ChatReducer(longPollingInfoHolder, paginationInfoHolder)
         // When
         val actual = reducer.reduce(event, state)
         // Then
@@ -87,7 +94,8 @@ class ChatReducerTest {
             paginationInfoHolder.copy(
                 isLoadingPagingData = false,
                 hasLoadedNewestMessage = false
-            )
+            ),
+            accountInfo
         )
         // When
         val actual = reducer.reduce(event, state)
@@ -113,7 +121,8 @@ class ChatReducerTest {
         val event = ChatEvent.Ui.LoadPagingNewerMessages(streamName, topicName)
         val reducer = ChatReducer(
             longPollingInfoHolder,
-            paginationInfoHolder.copy(isLoadingPagingData = true)
+            paginationInfoHolder.copy(isLoadingPagingData = true),
+            accountInfo
         )
         // When
         val actual = reducer.reduce(event, state)
@@ -130,7 +139,8 @@ class ChatReducerTest {
         val event = ChatEvent.Ui.LoadPagingNewerMessages(streamName, topicName)
         val reducer = ChatReducer(
             longPollingInfoHolder,
-            paginationInfoHolder.copy(hasLoadedNewestMessage = true)
+            paginationInfoHolder.copy(hasLoadedNewestMessage = true),
+            accountInfo
         )
         // When
         val actual = reducer.reduce(event, state)
@@ -152,10 +162,6 @@ class ChatReducerTest {
             emojiCode = messages.first().reactions.first().emojiCode,
             emojiName = messages.first().reactions.first().emojiName
         )
-        val reducer = ChatReducer(
-            longPollingInfoHolder,
-            paginationInfoHolder
-        )
         // When
         val reducerWithMessages = reducer.reduce(eventForLoadingMessage, state)
         val actual = reducer.reduce(event, reducerWithMessages.state)
@@ -176,10 +182,6 @@ class ChatReducerTest {
     fun `reduce OnEmojiClick event WHEN clicked on another reaction should contain command SendReaction`() {
         // Given
         val messages = testMessageGenerator.generateTestMessages()
-        val reducer = ChatReducer(
-            longPollingInfoHolder,
-            paginationInfoHolder
-        )
         val state = ChatState.Content(emptyList())
         val eventForLoadingMessage = ChatEvent.Internal.LoadMessagesFromNetwork(messages)
         val event = ChatEvent.Ui.OnEmojiClick(
@@ -208,7 +210,6 @@ class ChatReducerTest {
         // Given
         val state = ChatState.Content(emptyList())
         val event = ChatEvent.Internal.CachedMessagesSaved
-        val reducer = ChatReducer(longPollingInfoHolder, paginationInfoHolder)
         // When
         val actual = reducer.reduce(event, state)
         // Then
@@ -225,7 +226,6 @@ class ChatReducerTest {
         // Given
         val state = ChatState.Content(emptyList())
         val event = ChatEvent.Internal.GetReactionLongPollingData
-        val reducer = ChatReducer(longPollingInfoHolder, paginationInfoHolder)
         // When
         val actual = reducer.reduce(event, state)
         // Then
@@ -245,7 +245,6 @@ class ChatReducerTest {
         // Given
         val state = ChatState.Content(emptyList())
         val event = ChatEvent.Internal.GetMessageLongPollingData
-        val reducer = ChatReducer(longPollingInfoHolder, paginationInfoHolder)
         // When
         val actual = reducer.reduce(event, state)
         // Then
@@ -269,7 +268,6 @@ class ChatReducerTest {
         val event = ChatEvent.Internal.LoadPagingOlderMessages(
             messages = messages
         )
-        val reducer = ChatReducer(longPollingInfoHolder, paginationInfoHolder)
         // When
         val actual = reducer.reduce(event, state)
         // Then
@@ -298,7 +296,6 @@ class ChatReducerTest {
         val listOfDelegateItem = testMessageGenerator.generateTestMessageDelegateItem()
         val state = ChatState.Content(emptyList())
         val event = ChatEvent.Internal.LoadPagingNewerMessages(messages = messages)
-        val reducer = ChatReducer(longPollingInfoHolder, paginationInfoHolder)
         // When
         val actual = reducer.reduce(event, state)
         // Then
@@ -325,7 +322,6 @@ class ChatReducerTest {
         // Given
         val state = ChatState.Content(emptyList())
         val event = ChatEvent.Internal.Error(1)
-        val reducer = ChatReducer(longPollingInfoHolder, paginationInfoHolder)
         // When
         val actual = reducer.reduce(event, state)
         // Then
@@ -340,7 +336,6 @@ class ChatReducerTest {
         // Given
         val state = ChatState.Content(emptyList())
         val event = ChatEvent.Internal.MinorError(1)
-        val reducer = ChatReducer(longPollingInfoHolder, paginationInfoHolder)
         // When
         val actual = reducer.reduce(event, state)
         // Then
@@ -360,7 +355,6 @@ class ChatReducerTest {
         val listOfDelegateItem = testMessageGenerator.generateTestMessageDelegateItem()
         val state = ChatState.Content(emptyList())
         val event = ChatEvent.Internal.LoadMessagesFromCache(messages = messages)
-        val reducer = ChatReducer(longPollingInfoHolder, paginationInfoHolder)
         // When
         val actual = reducer.reduce(event, state)
         // Then
@@ -392,7 +386,6 @@ class ChatReducerTest {
         val messages = emptyList<Message>()
         val state = ChatState.Content(emptyList())
         val event = ChatEvent.Internal.LoadMessagesFromCache(messages = messages)
-        val reducer = ChatReducer(longPollingInfoHolder, paginationInfoHolder)
         // When
         val actual = reducer.reduce(event, state)
         // Then
@@ -409,7 +402,6 @@ class ChatReducerTest {
         val listOfDelegateItem = testMessageGenerator.generateTestMessageDelegateItem()
         val state = ChatState.Content(emptyList())
         val event = ChatEvent.Internal.LoadMessagesFromNetwork(messages = messages)
-        val reducer = ChatReducer(longPollingInfoHolder, paginationInfoHolder)
         // When
         val actual = reducer.reduce(event, state)
         // Then
@@ -457,7 +449,6 @@ class ChatReducerTest {
         val state = ChatState.Content(emptyList())
         val event =
             ChatEvent.Internal.RegistrationForChatEventsDataReceived(testRegistrationForEventData)
-        val reducer = ChatReducer(longPollingInfoHolder, paginationInfoHolder)
         // When
         val actual = reducer.reduce(event, state)
         // Then
@@ -502,7 +493,6 @@ class ChatReducerTest {
 
         val state = ChatState.Content(emptyList())
         val event = ChatEvent.Internal.MessageEventsDataReceived(testReceivedMessageEventData)
-        val reducer = ChatReducer(longPollingInfoHolder, paginationInfoHolder)
         // When
         val actual = reducer.reduce(event, state)
         // Then
@@ -546,7 +536,7 @@ class ChatReducerTest {
             emojiName = testMessages.first().reactions.first().emojiName,
             operation = Operation.REMOVE,
             messageId = testMessages.first().id,
-            userId = MyUserId.MY_USER_ID
+            userId = accountInfo.userId
         )
         val testReceivedReactionEventData =
             ReceivedReactionEventData(testNewLastEventId, listOf(testReactionEvent))
@@ -555,7 +545,6 @@ class ChatReducerTest {
         val event = ChatEvent.Internal.ReactionEventsDataReceived(testReceivedReactionEventData)
         val eventForLoadingMessage =
             ChatEvent.Internal.LoadMessagesFromNetwork(testMessageGenerator.generateTestMessages())
-        val reducer = ChatReducer(longPollingInfoHolder, paginationInfoHolder)
         // When
         val reducerWithMessages = reducer.reduce(eventForLoadingMessage, state)
         val actual = reducer.reduce(event, reducerWithMessages.state)
@@ -602,7 +591,6 @@ class ChatReducerTest {
         val event = ChatEvent.Internal.ReactionEventsDataReceived(testReceivedReactionEventData)
         val eventForLoadingMessage =
             ChatEvent.Internal.LoadMessagesFromNetwork(testMessages)
-        val reducer = ChatReducer(longPollingInfoHolder, paginationInfoHolder)
         // When
         val reducerWithMessages = reducer.reduce(eventForLoadingMessage, state)
         val actual = reducer.reduce(event, reducerWithMessages.state)
@@ -639,7 +627,7 @@ class ChatReducerTest {
             emojiName = testMessages.first().reactions.first().emojiName,
             operation = Operation.ADD,
             messageId = testMessages.first().id,
-            userId = MyUserId.MY_USER_ID
+            userId = accountInfo.userId
         )
         val testReceivedReactionEventData =
             ReceivedReactionEventData(testNewLastEventId, listOf(testReactionEvent))
@@ -648,7 +636,6 @@ class ChatReducerTest {
         val event = ChatEvent.Internal.ReactionEventsDataReceived(testReceivedReactionEventData)
         val eventForLoadingMessage =
             ChatEvent.Internal.LoadMessagesFromNetwork(testMessageGenerator.generateTestMessages())
-        val reducer = ChatReducer(longPollingInfoHolder, paginationInfoHolder)
         // When
         val reducerWithMessages = reducer.reduce(eventForLoadingMessage, state)
         val actual = reducer.reduce(event, reducerWithMessages.state)
@@ -684,7 +671,7 @@ class ChatReducerTest {
             emojiName = newEmojiName,
             operation = Operation.ADD,
             messageId = testMessages.first().id,
-            userId = MyUserId.MY_USER_ID
+            userId = accountInfo.userId
         )
         val testReceivedReactionEventData =
             ReceivedReactionEventData(testNewLastEventId, listOf(testReactionEvent))
@@ -693,7 +680,6 @@ class ChatReducerTest {
         val event = ChatEvent.Internal.ReactionEventsDataReceived(testReceivedReactionEventData)
         val eventForLoadingMessage =
             ChatEvent.Internal.LoadMessagesFromNetwork(testMessageGenerator.generateTestMessages())
-        val reducer = ChatReducer(longPollingInfoHolder, paginationInfoHolder)
         // When
         val reducerWithMessages = reducer.reduce(eventForLoadingMessage, state)
         val actual = reducer.reduce(event, reducerWithMessages.state)
@@ -701,7 +687,7 @@ class ChatReducerTest {
         val myReaction = testMessageGenerator.generateMyReaction()
         val anotherReaction = testMessageGenerator.generateTestReaction()
         val newReaction = Reaction(
-            MyUserId.MY_USER_ID,
+            accountInfo.userId,
             emojiCode = newEmojiCode,
             emojiName = newEmojiName,
             count = 1

@@ -10,7 +10,6 @@ data class StreamDbo(
     val id: Int,
     val streamName: String,
     val subscriptionStatus: SubscriptionStatus,
-    val topics: List<TopicDbo>,
 )
 
 enum class SubscriptionStatus {

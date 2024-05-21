@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import vivid.money.elmslie.android.renderer.elmStoreWithRenderer
 import vivid.money.elmslie.core.store.Store
 import javax.inject.Inject
@@ -147,9 +146,7 @@ class PeopleFragment :
                 clearSearchFieldText()
             }
             errorComponent.retryButton.setOnClickListener {
-                lifecycleScope.launch {
-                    store.accept(PeopleEvent.Ui.ReloadData(currentQuery = searchQueryFlow.replayCache.last()))
-                }
+                store.accept(PeopleEvent.Ui.ReloadData(currentQuery = searchQueryFlow.replayCache.last()))
             }
         }
     }

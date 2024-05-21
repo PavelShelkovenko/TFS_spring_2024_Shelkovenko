@@ -56,6 +56,22 @@ class StreamActor(
                     emit(StreamEvent.Internal.MinorError(errorMessageId = R.string.load_streams_error))
                 }
             }
+
+            is StreamCommand.LoadTopicsForStream -> flow {
+                runCatchingNonCancellation {
+                    repository.getTopicsForStream(streamId = command.stream.id)
+                }.onSuccess { topics ->
+                    emit(
+                        StreamEvent.Internal.TopicsLoaded(
+                            topics = topics,
+                            stream = command.stream,
+                            streamDestination = command.streamDestination
+                        )
+                    )
+                }.onFailure {
+                    emit(StreamEvent.Internal.MinorError(errorMessageId = R.string.load_topics_error))
+                }
+            }
         }
     }
 

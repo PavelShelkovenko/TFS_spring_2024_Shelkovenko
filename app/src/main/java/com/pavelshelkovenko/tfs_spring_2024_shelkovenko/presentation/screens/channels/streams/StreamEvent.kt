@@ -37,6 +37,12 @@ sealed interface StreamEvent {
             val streamDestination: StreamDestination
         ): Internal
 
+        data class TopicsLoaded(
+            val topics: List<Topic>,
+            val stream: StreamDelegateItem,
+            val streamDestination: StreamDestination
+        ): Internal
+
         data class Error(val throwable: Throwable): Internal
 
         data class MinorError(val errorMessageId: Int): Internal

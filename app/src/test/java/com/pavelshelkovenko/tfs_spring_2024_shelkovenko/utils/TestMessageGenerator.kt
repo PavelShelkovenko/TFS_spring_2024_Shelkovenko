@@ -1,5 +1,6 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils
 
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.AccountInfo
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Message
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Reaction
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.base.delegate_adapter.DelegateItem
@@ -14,6 +15,7 @@ class TestMessageGenerator {
 
 
     private val testUserId = 54321
+    private val accountInfo = AccountInfo()
 
     fun generateOwnTestMessage(
         reactionList: List<Reaction> = listOf(generateMyReaction(), generateTestReaction())
@@ -21,7 +23,7 @@ class TestMessageGenerator {
         id = 12345,
         avatarUrl = "my avatar",
         message = "my message",
-        userId = MyUserId.MY_USER_ID,
+        userId = accountInfo.userId,
         userName = "my user name",
         dateInUTCSeconds = 12345,
         reactions = reactionList
@@ -82,7 +84,7 @@ class TestMessageGenerator {
     )
 
     fun generateMyReaction(): Reaction = Reaction(
-        userId = MyUserId.MY_USER_ID,
+        userId = accountInfo.userId,
         emojiCode = "my emojiCode",
         emojiName = "my emojiName",
         count = 3,

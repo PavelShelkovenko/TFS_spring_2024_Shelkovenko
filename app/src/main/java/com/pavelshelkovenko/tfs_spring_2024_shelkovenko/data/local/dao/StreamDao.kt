@@ -4,7 +4,9 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.models.StreamDbo
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.models.StreamWithTopics
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.models.SubscriptionStatus
 
 @Dao
@@ -24,4 +26,8 @@ interface StreamDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(stream: StreamDbo): Long
+
+    @Transaction
+    @Query("SELECT * FROM streams WHERE id = :streamId")
+    suspend fun getStreamWithTopics(streamId: Int): StreamWithTopics
 }

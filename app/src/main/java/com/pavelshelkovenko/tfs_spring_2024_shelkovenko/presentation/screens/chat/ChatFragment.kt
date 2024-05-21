@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.AccountInfo
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.FragmentChatBinding
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.base.ElmBaseFragment
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.base.delegate_adapter.MainAdapter
@@ -23,7 +24,6 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.cha
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.message.reaction.EmojiFactory
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.message.received_message.ReceivedMessageAdapter
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.message.send_message.SendMessageAdapter
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.MyUserId
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.getApplication
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.showErrorToast
 import kotlinx.coroutines.CoroutineScope
@@ -50,6 +50,9 @@ class ChatFragment :
 
     @Inject
     lateinit var emojiFactory: EmojiFactory
+
+    @Inject
+    lateinit var accountInfo: AccountInfo
 
     override fun onAttach(context: Context) {
         context.getApplication
@@ -84,7 +87,12 @@ class ChatFragment :
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         if (savedInstanceState == null) {
-            store.accept(ChatEvent.Ui.StartProcess(streamName = args.streamName, topicName = args.topicName))
+            store.accept(
+                ChatEvent.Ui.StartProcess(
+                    streamName = args.streamName,
+                    topicName = args.topicName
+                )
+            )
         }
         requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
         initRecyclerView()
@@ -102,17 +110,25 @@ class ChatFragment :
 
         with(binding) {
             streamName.text = args.streamName
-            topicName.text = "Topic: ${args.topicName}"
+            topicName.text = requireActivity().resources.getString(R.string.topic_prefix, args.topicName)
         }
 
         addCallbackToOnBackPressed()
     }
 
     override fun handleEffect(effect: ChatEffect) {
-        when(effect) {
-            is ChatEffect.MinorError -> { showErrorToast(effect.errorMessageId, requireActivity()) }
-            is ChatEffect.NewMessageReceived -> { scrollToLastMessage() }
-            is ChatEffect.CloseChat -> { findNavController().popBackStack() }
+        when (effect) {
+            is ChatEffect.MinorError -> {
+                showErrorToast(effect.errorMessageId, requireActivity())
+            }
+
+            is ChatEffect.NewMessageReceived -> {
+                scrollToLastMessage()
+            }
+
+            is ChatEffect.CloseChat -> {
+                findNavController().popBackStack()
+            }
         }
     }
 
@@ -230,7 +246,7 @@ class ChatFragment :
         val sendMessageAdapter = chatAdapter.delegates.get(2) as SendMessageAdapter
 
         with(receivedMessageAdapter) {
-            localUserId = MyUserId.MY_USER_ID
+            localUserId = accountInfo.userId
             onMessageLongClickListener = { messageId ->
                 showEmojiBottomSheet(messageId)
             }
@@ -249,7 +265,7 @@ class ChatFragment :
         }
 
         with(sendMessageAdapter) {
-            localUserId = MyUserId.MY_USER_ID
+            localUserId = accountInfo.userId
             onMessageLongClickListener = { messageId ->
                 showEmojiBottomSheet(messageId)
             }
@@ -277,12 +293,12 @@ class ChatFragment :
                 )
             }
             backButton.setOnClickListener {
-               store.accept(
-                   ChatEvent.Ui.ClosingChat(
-                       streamName = args.streamName,
-                       topicName = args.topicName
-                   )
-               )
+                store.accept(
+                    ChatEvent.Ui.ClosingChat(
+                        streamName = args.streamName,
+                        topicName = args.topicName
+                    )
+                )
             }
             sendMessageButton.setOnClickListener {
                 if (binding.messageField.text.trim().toString() != "") {
@@ -303,7 +319,8 @@ class ChatFragment :
     private fun showEmojiBottomSheet(messageId: Int) {
         val bottomSheetDialogView = layoutInflater.inflate(R.layout.emoji_bottom_sheet, null)
         bottomSheetDialog.setContentView(bottomSheetDialogView)
-        val emojiRecyclerView = bottomSheetDialogView.findViewById<RecyclerView>(R.id.emoji_recycler_view)
+        val emojiRecyclerView =
+            bottomSheetDialogView.findViewById<RecyclerView>(R.id.emoji_recycler_view)
         emojiRecyclerView.apply {
             setHasFixedSize(true)
             adapter = emojiAdapter

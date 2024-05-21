@@ -1,6 +1,7 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.di.modules
 
 
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.AccountInfo
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.di.scopes.ChatScope
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.repository.ChatRepository
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.ChatActor
@@ -34,9 +35,11 @@ class ChatModule {
     fun provideChatReducer(
         longPollingInfoHolder: LongPollingInfoHolder,
         paginationInfoHolder: PaginationInfoHolder,
+        accountInfo: AccountInfo
     ): ChatReducer = ChatReducer(
         longPollingInfoHolder = longPollingInfoHolder,
-        paginationInfoHolder = paginationInfoHolder
+        paginationInfoHolder = paginationInfoHolder,
+        accountInfo = accountInfo,
     )
 
     @ChatScope
