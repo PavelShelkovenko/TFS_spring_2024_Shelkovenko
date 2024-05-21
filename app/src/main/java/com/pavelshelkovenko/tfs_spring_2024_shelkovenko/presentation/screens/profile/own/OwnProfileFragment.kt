@@ -77,6 +77,7 @@ class OwnProfileFragment :
                     ownUserAvatarImage.isVisible = false
                     ownUserName.isVisible = false
                     ownUserOnlineStatus.isVisible = false
+                    errorComponent.errorMessage.text = resources.getString(state.errorMessageId)
                     shimmerContainer.stopShimmer()
                 }
 

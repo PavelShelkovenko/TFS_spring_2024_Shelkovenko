@@ -1,11 +1,11 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.repository
 
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.NarrowBuilderHelper
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.dao.ChatDao
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.ZulipApi
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.NarrowBuilderHelper
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.toMessageDbo
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.toMessageDomain
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.toOperation
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.toMessageDbo
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.toMessageDomain
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.toOperation
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Message
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.ReactionEvent
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.ReceivedMessageEventData

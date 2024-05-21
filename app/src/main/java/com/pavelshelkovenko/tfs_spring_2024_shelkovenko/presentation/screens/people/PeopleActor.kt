@@ -18,7 +18,7 @@ class PeopleActor(
                 }.onSuccess { users ->
                     emit(PeopleEvent.Internal.DataLoadedFromNetwork(users = users))
                 }.onFailure {
-                    emit(PeopleEvent.Internal.MinorError(errorMessageId = R.string.some_error_occurred))
+                    emit(PeopleEvent.Internal.Error(errorMessageId = R.string.some_error_occurred))
                 }
             }
 
@@ -26,9 +26,9 @@ class PeopleActor(
                 runCatchingNonCancellation {
                     repository.getAllUsersFromCache()
                 }.onSuccess { users ->
-                    emit(PeopleEvent.Internal.DataLoadedFromNetwork(users = users))
-                }.onFailure { error ->
-                    emit(PeopleEvent.Internal.Error(errorMessage = error.message.toString()))
+                    emit(PeopleEvent.Internal.DataLoadedFromCache(users = users))
+                }.onFailure {
+                    emit(PeopleEvent.Internal.Error(errorMessageId = R.string.some_error_occurred))
                 }
             }
 
@@ -38,7 +38,7 @@ class PeopleActor(
                 }.onSuccess { users ->
                     emit(PeopleEvent.Internal.DataLoadedFromNetwork(users = users))
                 }.onFailure {
-                    emit(PeopleEvent.Internal.MinorError(errorMessageId = R.string.some_error_occurred))
+                    emit(PeopleEvent.Internal.SearchError(errorMessageId = R.string.search_error))
                 }
             }
 

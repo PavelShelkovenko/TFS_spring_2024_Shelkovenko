@@ -1,13 +1,12 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.models.dto
 
 import com.google.gson.annotations.SerializedName
-import java.io.Serializable
 
 
 data class PresenceDto(
     @SerializedName("aggregated")
     val aggregated: Aggregated,
-): Serializable
+)
 
 
 data class Aggregated(
@@ -15,7 +14,7 @@ data class Aggregated(
     val userOnlineStatusDto: UserOnlineStatusDto,
     @SerializedName("timestamp")
     val timestamp: Int,
-): Serializable
+)
 
 
 enum class UserOnlineStatusDto {

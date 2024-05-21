@@ -17,8 +17,14 @@ class AnotherProfileReducer : ScreenDslReducer<
             AnotherProfileState.Content(anotherUser = event.user)
         }
 
-        is AnotherProfileEvent.Internal.Error -> state {
-            AnotherProfileState.Error(errorMessage = event.errorMessage)
+        is AnotherProfileEvent.Internal.Error -> {
+            if (state is AnotherProfileState.Content) {
+                effects {
+                    +AnotherProfileEffect.MinorError(errorMessageId = event.errorMessageId)
+                }
+            } else {
+                state { AnotherProfileState.Error(errorMessageId =  event.errorMessageId) }
+            }
         }
 
         is AnotherProfileEvent.Internal.DataLoadedFromCache -> {
@@ -27,10 +33,7 @@ class AnotherProfileReducer : ScreenDslReducer<
             } else {
                 state { AnotherProfileState.Content(anotherUser = event.user) }
             }
-        }
-
-        is AnotherProfileEvent.Internal.MinorError -> {
-            effects { +AnotherProfileEffect.MinorError(errorMessageId = event.errorMessageId) }
+            commands { +AnotherProfileCommand.LoadDataFromNetwork(userId = event.userId) }
         }
     }
 
@@ -38,12 +41,12 @@ class AnotherProfileReducer : ScreenDslReducer<
 
         is AnotherProfileEvent.Ui.StartProcess -> {
             commands { +AnotherProfileCommand.LoadDataFromCache(userId = event.userId) }
-            commands { +AnotherProfileCommand.LoadDataFromNetwork(userId = event.userId) }
+
         }
 
         is AnotherProfileEvent.Ui.ReloadData -> {
             state { AnotherProfileState.Loading }
-            commands { +AnotherProfileCommand.LoadDataFromNetwork(userId = event.userId) }
+            commands { +AnotherProfileCommand.LoadDataFromCache(userId = event.userId) }
         }
     }
 }

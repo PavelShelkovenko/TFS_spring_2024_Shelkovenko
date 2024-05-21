@@ -3,9 +3,9 @@ package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.repository
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.dao.StreamDao
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.models.SubscriptionStatus
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.ZulipApi
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.toStreamDbo
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.toStreamDomain
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.toTopicDomain
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.toStreamDbo
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.toStreamDomain
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.toTopicDomain
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Stream
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.StreamDestination
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.repository.StreamRepository
@@ -39,8 +39,7 @@ class StreamRepositoryImpl @Inject constructor(
     override suspend fun searchStreams(
         query: String,
         streamDestination: StreamDestination
-    ): List<Stream> =
-        getStreamsByDestination(streamDestination).filter { it.name.containsQuery(query) }
+    ): List<Stream> = getStreamsByDestination(streamDestination).filter { it.name.containsQuery(query) }
 
     override suspend fun getStreamsByDestinationFromCache(streamDestination: StreamDestination): List<Stream> {
         val cachedStreams = when (streamDestination) {

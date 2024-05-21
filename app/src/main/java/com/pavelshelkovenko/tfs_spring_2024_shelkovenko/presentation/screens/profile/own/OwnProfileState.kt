@@ -8,7 +8,7 @@ sealed interface OwnProfileState {
 
     data object Loading : OwnProfileState
 
-    data class Error(val errorMessage: String) : OwnProfileState
+    data class Error(val errorMessageId: Int) : OwnProfileState
 
     data class Content(val ownUser: User) : OwnProfileState
 }

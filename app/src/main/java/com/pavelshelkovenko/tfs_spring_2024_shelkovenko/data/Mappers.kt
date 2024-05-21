@@ -1,5 +1,6 @@
-package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils
+package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data
 
+import android.graphics.Color
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.models.MessageDbo
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.models.ReactionDbo
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.models.StreamDbo
@@ -29,7 +30,7 @@ fun UserDto.toUserDomain(
     id = this.id,
     avatarUrl = this.avatarUrl,
     name = this.userName,
-    email = this.email ?: "User hide his email",
+    email = this.email ?: this.zulipEmail,
     onlineStatus = onlineStatus
 )
 
@@ -39,7 +40,7 @@ fun UserDto.toUserDbo(
     id = this.id,
     avatarUrl = this.avatarUrl,
     name = this.userName,
-    email = this.email ?: "User hide his email",
+    email = this.email ?: this.zulipEmail,
     onlineStatus = onlineStatus
 )
 
@@ -180,4 +181,26 @@ fun TopicDbo.toTopicDomain(): Topic = Topic(
     lastMessageId = this.lastMessageId,
     color = TopicColorProvider.provideColor()
 )
+
+object TopicColorProvider {
+
+    private var currentColor = TopicColor.YELLOW
+
+    fun provideColor(): Int {
+        return when(currentColor) {
+            TopicColor.GREEN -> {
+                currentColor = TopicColor.YELLOW
+                Color.argb(255,0, 128, 128)
+            }
+            TopicColor.YELLOW -> {
+                currentColor = TopicColor.GREEN
+                Color.argb(255,235, 199, 68)
+            }
+        }
+    }
+}
+
+enum class TopicColor {
+    GREEN, YELLOW
+}
 

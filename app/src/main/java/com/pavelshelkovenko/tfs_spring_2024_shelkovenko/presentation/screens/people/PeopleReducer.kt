@@ -17,19 +17,28 @@ class PeopleReducer : ScreenDslReducer<
         is PeopleEvent.Internal.DataLoadedFromNetwork -> state {
             PeopleState.Content(userList = event.users)
         }
-        is PeopleEvent.Internal.Error -> state {
-            PeopleState.Error(errorMessage = event.errorMessage)
+        is PeopleEvent.Internal.Error -> {
+            if (state is PeopleState.Content) {
+                effects { +PeopleEffect.MinorError(errorMessageId = event.errorMessageId) }
+            } else {
+                state { PeopleState.Error(errorMessageId = event.errorMessageId) }
+            }
         }
-
         is PeopleEvent.Internal.DataLoadedFromCache -> {
             if (event.users.isEmpty()) {
                 state { PeopleState.Loading }
             } else {
                 state { PeopleState.Content(userList = event.users) }
             }
+            commands { +PeopleCommand.LoadDataFromNetwork }
         }
+
         is PeopleEvent.Internal.MinorError -> {
-            effects { +PeopleEffect.MinorError(event.errorMessageId) }
+            effects { +PeopleEffect.MinorError(errorMessageId = event.errorMessageId) }
+        }
+
+        is PeopleEvent.Internal.SearchError -> {
+            state { PeopleState.Error(errorMessageId = event.errorMessageId) }
         }
     }
 
@@ -37,16 +46,13 @@ class PeopleReducer : ScreenDslReducer<
 
         is PeopleEvent.Ui.StartProcess -> {
             commands { +PeopleCommand.LoadDataFromCache }
-            commands { +PeopleCommand.LoadDataFromNetwork }
         }
 
         is PeopleEvent.Ui.ReloadData -> {
-            state { PeopleState.Loading }
-            commands { +PeopleCommand.LoadDataFromNetwork }
+            commands { +PeopleCommand.ProcessSearch(event.currentQuery) }
         }
 
         is PeopleEvent.Ui.QueryChanged -> {
-            state { PeopleState.Loading }
             commands { +PeopleCommand.ProcessSearch(event.newQuery) }
         }
     }

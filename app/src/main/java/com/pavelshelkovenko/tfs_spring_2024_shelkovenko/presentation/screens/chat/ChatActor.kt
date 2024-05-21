@@ -4,7 +4,6 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.RegistrationForEventsData
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.repository.ChatRepository
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.runCatchingNonCancellation
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import vivid.money.elmslie.core.store.Actor
@@ -26,7 +25,7 @@ class ChatActor(
                 }.onSuccess { messages ->
                     emit(ChatEvent.Internal.LoadMessagesFromNetwork(messages = messages))
                 }.onFailure {
-                    emit(ChatEvent.Internal.MinorError(errorMessageId = R.string.load_messages_error))
+                    emit(ChatEvent.Internal.Error(errorMessageId = R.string.load_messages_error))
                 }
             }
 
@@ -55,8 +54,7 @@ class ChatActor(
                 }.onSuccess { messages ->
                     emit(ChatEvent.Internal.LoadPagingNewerMessages(messages = messages))
                 }.onFailure {
-                    emit(ChatEvent.Internal.MinorError(errorMessageId = R.string.load_messages_error))
-                    delay(10000)
+                    emit(ChatEvent.Internal.PagingError(errorMessageId = R.string.load_messages_error))
                 }
                 emit(ChatEvent.Internal.LoadingPagingDataFinished)
             }
@@ -73,13 +71,7 @@ class ChatActor(
                 }.onSuccess { messages ->
                     emit(ChatEvent.Internal.LoadPagingOlderMessages(messages = messages))
                 }.onFailure {
-                    emit(ChatEvent.Internal.MinorError(errorMessageId = R.string.load_messages_error))
-                    /*
-                    Сделано для того, чтобы если пользователь пытается загрузить новые или старые
-                    сообщения при отсутствии интернета, то ему приходил Toast об отсутвии интернета
-                    только раз в 10 сек(при условии что он попытался загрузить), а не постоянно
-                     */
-                    delay(10000)
+                    emit(ChatEvent.Internal.PagingError(errorMessageId = R.string.load_messages_error))
                 }
                 emit(ChatEvent.Internal.LoadingPagingDataFinished)
             }
@@ -152,12 +144,8 @@ class ChatActor(
                             receivedMessageEventData = receivedData
                         )
                     )
-                    // Небольшая задержка для того, чтобы не обработать один и тот же эвент два раза
-                    delay(100)
-                    emit(ChatEvent.Internal.GetMessageLongPollingData)
-                }.onFailure {
-                    emit(ChatEvent.Internal.GetMessageLongPollingData)
                 }
+                emit(ChatEvent.Internal.GetMessageLongPollingData)
             }
 
             is ChatCommand.GetReactionEvents -> flow {
@@ -172,13 +160,8 @@ class ChatActor(
                             receivedReactionEventData = receivedData
                         )
                     )
-                    // Небольшая задержка для того, чтобы не обработать один и тот же эвент два раза
-                    delay(100)
-                    emit(ChatEvent.Internal.GetReactionLongPollingData)
-                }.onFailure {
-                    emit(ChatEvent.Internal.GetReactionLongPollingData)
                 }
-
+                emit(ChatEvent.Internal.GetReactionLongPollingData)
             }
 
             is ChatCommand.SaveMessagesInCache -> flow {

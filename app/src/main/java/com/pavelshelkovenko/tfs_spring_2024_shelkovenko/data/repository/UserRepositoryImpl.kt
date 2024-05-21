@@ -3,9 +3,9 @@ package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.repository
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.dao.UserDao
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.ZulipApi
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.models.dto.UserDto
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.toUserDbo
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.toUserDomain
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.toUserOnlineStatusDomain
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.toUserDbo
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.toUserDomain
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.toUserOnlineStatusDomain
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.User
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.UserOnlineStatus
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.repository.UserRepository
@@ -50,7 +50,7 @@ class UserRepositoryImpl @Inject constructor(
         val ownUser = User(
             id = ownUserResponse.userId,
             name = ownUserResponse.userName,
-            email = ownUserResponse.email,
+            email = ownUserResponse.email ?: ownUserResponse.zulipEmail,
             onlineStatus = userOnlineStatus,
             avatarUrl = ownUserResponse.avatarUrl
         )

@@ -15,11 +15,11 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.peo
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.getApplication
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.showErrorToast
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -72,13 +72,6 @@ class PeopleFragment :
         }
         firstBoot = false
         setupClickListeners()
-        /*
-        drop(1) нужен для того, чтобы мы не делали запрос в сеть лишний раз, так как onEach всегда
-        сработает 1 раз, даже если мы не поменяем текст в поиске. Случается это из-за того, что у
-        StateFlow replay = 1, так еще и addTextChangedListener на 83 строчке заэмитит значение во флоу
-        даже если в searchField ничего не поменялось.
-         */
-
         with(binding) {
             peopleRv.adapter = peopleAdapter
             searchField.addTextChangedListener { editable ->
@@ -94,6 +87,7 @@ class PeopleFragment :
         }
     }
 
+    @OptIn(FlowPreview::class)
     override fun onResume() {
         super.onResume()
         searchQueryFlow
@@ -124,10 +118,11 @@ class PeopleFragment :
                 }
 
                 is PeopleState.Error -> {
-                    shimmerContainer.stopShimmer()
                     shimmerContainer.isVisible = false
                     peopleRv.isVisible = false
                     errorContainer.isVisible = true
+                    errorComponent.errorMessage.text = resources.getText(state.errorMessageId)
+                    shimmerContainer.stopShimmer()
                 }
 
                 is PeopleState.Initial -> {
@@ -153,7 +148,7 @@ class PeopleFragment :
             }
             errorComponent.retryButton.setOnClickListener {
                 lifecycleScope.launch {
-                    store.accept(PeopleEvent.Ui.QueryChanged(newQuery = searchQueryFlow.last()))
+                    store.accept(PeopleEvent.Ui.ReloadData(currentQuery = searchQueryFlow.replayCache.last()))
                 }
             }
         }

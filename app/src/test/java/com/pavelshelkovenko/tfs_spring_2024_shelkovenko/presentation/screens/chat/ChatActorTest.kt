@@ -46,7 +46,7 @@ class ChatActorTest {
         val actual = actor.execute(ChatCommand.LoadMessagesFromCache(streamName, topicName))
         // Then
         assertEquals(
-            ChatEvent.Internal.MinorError(2131820731),
+            ChatEvent.Internal.MinorError(2131820732),
             actual.last()
         )
     }
@@ -89,7 +89,7 @@ class ChatActorTest {
         )
         // Then
         assertEquals(
-            ChatEvent.Internal.MinorError(2131820606),
+            ChatEvent.Internal.Error(2131820606),
             actual.last()
         )
     }
@@ -127,7 +127,7 @@ class ChatActorTest {
         )
         // Then
         assertEquals(
-            ChatEvent.Internal.MinorError(2131820728),
+            ChatEvent.Internal.MinorError(2131820729),
             actual.last()
         )
     }
@@ -146,7 +146,7 @@ class ChatActorTest {
         )
         // Then
         assertEquals(
-            ChatEvent.Internal.MinorError(2131820727),
+            ChatEvent.Internal.MinorError(2131820728),
             actual.last()
         )
     }
@@ -336,7 +336,7 @@ class ChatActorTest {
         )
         // Then
         assertEquals(
-            ChatEvent.Internal.MinorError(2131820606),
+            ChatEvent.Internal.PagingError(2131820606),
             actual.first()
         )
         assertEquals(
@@ -388,7 +388,7 @@ class ChatActorTest {
         )
         // Then
         assertEquals(
-            ChatEvent.Internal.MinorError(2131820606),
+            ChatEvent.Internal.PagingError(2131820606),
             actual.first()
         )
         assertEquals(

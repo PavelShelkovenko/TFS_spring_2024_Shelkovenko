@@ -79,6 +79,7 @@ class AnotherProfileFragment :
                     userAvatarImage.isVisible = false
                     userName.isVisible = false
                     userOnlineStatus.isVisible = false
+                    errorComponent.errorMessage.text = resources.getText(state.errorMessageId)
                     shimmerContainer.stopShimmer()
                 }
 

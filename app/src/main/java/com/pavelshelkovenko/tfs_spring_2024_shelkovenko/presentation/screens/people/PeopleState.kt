@@ -7,7 +7,7 @@ sealed interface PeopleState {
 
     data object Loading : PeopleState
 
-    data class Error(val errorMessage: String) : PeopleState
+    data class Error(val errorMessageId: Int) : PeopleState
 
     data class Content(val userList: List<User>) : PeopleState
 }

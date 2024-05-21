@@ -62,11 +62,20 @@ class ChatReducer @Inject constructor(
         }
 
         is ChatEvent.Internal.Error -> {
-            state { ChatState.Error(errorMessageId = event.errorMessageId) }
+            if (delegateItemList.value.isEmpty()) {
+                state { ChatState.Error(errorMessageId = event.errorMessageId) }
+            } else effects { +ChatEffect.MinorError(errorMessageId = event.errorMessageId) }
         }
 
         is ChatEvent.Internal.MinorError -> {
             effects { +ChatEffect.MinorError(errorMessageId = event.errorMessageId) }
+        }
+
+        is ChatEvent.Internal.PagingError -> {
+            if (!paginationInfoHolder.hasSentPagingError) {
+                effects { +ChatEffect.MinorError(errorMessageId = event.errorMessageId) }
+                paginationInfoHolder.hasSentPagingError = true
+            } else NoAction
         }
 
         is ChatEvent.Internal.RegistrationForChatEventsDataReceived -> {

@@ -18,8 +18,8 @@ class AnotherProfileActor(
                     getAnotherProfileUseCase.getAnotherUserFromNetwork(userId = command.userId)
                 }.onSuccess { ownUser ->
                     emit(AnotherProfileEvent.Internal.DataLoadedFromNetwork(user = ownUser))
-                }.onFailure { error ->
-                    emit(AnotherProfileEvent.Internal.Error(errorMessage = error.message.toString()))
+                }.onFailure {
+                    emit(AnotherProfileEvent.Internal.Error(errorMessageId = R.string.some_error_occurred))
                 }
             }
 
@@ -27,9 +27,9 @@ class AnotherProfileActor(
                 runCatchingNonCancellation {
                     getAnotherProfileUseCase.getAnotherUserFromCache(userId = command.userId)
                 }.onSuccess { ownUser ->
-                    emit(AnotherProfileEvent.Internal.DataLoadedFromCache(user = ownUser))
-                }.onFailure { error ->
-                    emit(AnotherProfileEvent.Internal.MinorError(errorMessageId = R.string.some_error_occurred))
+                    emit(AnotherProfileEvent.Internal.DataLoadedFromCache(user = ownUser, userId = command.userId))
+                }.onFailure {
+                    emit(AnotherProfileEvent.Internal.Error(errorMessageId = R.string.some_error_occurred))
                 }
             }
         }

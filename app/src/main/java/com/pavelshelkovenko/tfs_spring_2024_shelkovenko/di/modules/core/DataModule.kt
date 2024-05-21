@@ -3,12 +3,12 @@ package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.di.modules.core
 import android.content.Context
 import androidx.room.Room
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.BuildConfig
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.NarrowBuilderHelper
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.AppDatabase
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.dao.ChatDao
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.dao.StreamDao
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.dao.UserDao
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.ZulipApi
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.NarrowBuilderHelper
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.di.scopes.ApplicationScope
 import dagger.Module
 import dagger.Provides

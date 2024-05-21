@@ -17,10 +17,10 @@ data class ReactionEventDto(
     val userId: Int,
 )
 
-enum class OperationDto(val operationDto: String) {
+enum class OperationDto {
     @SerializedName("add")
-    ADD("add"),
+    ADD,
 
     @SerializedName("remove")
-    REMOVE("remove")
+    REMOVE
 }

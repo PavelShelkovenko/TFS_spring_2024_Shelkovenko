@@ -77,6 +77,8 @@ sealed interface ChatEvent {
 
         data class MinorError(val errorMessageId: Int) : Internal
 
+        data class PagingError(val errorMessageId: Int) : Internal
+
         data class RegistrationForChatEventsDataReceived(
             val registrationForEventsData: RegistrationForEventsData
         ) : Internal

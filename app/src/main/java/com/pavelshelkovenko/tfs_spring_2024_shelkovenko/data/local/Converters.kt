@@ -16,7 +16,6 @@ class Converters {
     @TypeConverter
     fun fromSubscriptionStatus(status: SubscriptionStatus): String = status.name
 
-
     @TypeConverter
     fun toUserOnlineStatus(value: String): UserOnlineStatus = UserOnlineStatus.valueOf(value)
 
