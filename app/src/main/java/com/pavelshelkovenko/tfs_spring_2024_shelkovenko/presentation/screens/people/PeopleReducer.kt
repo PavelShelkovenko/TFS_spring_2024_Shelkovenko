@@ -40,6 +40,10 @@ class PeopleReducer : ScreenDslReducer<
         is PeopleEvent.Internal.SearchError -> {
             state { PeopleState.Error(errorMessageId = event.errorMessageId) }
         }
+
+        is PeopleEvent.Internal.ErrorLoadingFromCache -> {
+            commands { +PeopleCommand.LoadDataFromNetwork }
+        }
     }
 
     override fun Result.ui(event: PeopleEvent.Ui) = when(event) {

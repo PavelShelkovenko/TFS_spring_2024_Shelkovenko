@@ -33,6 +33,10 @@ class OwnProfileReducer : ScreenDslReducer<
             }
             commands { +OwnProfileCommand.LoadDataFromNetwork }
         }
+
+        OwnProfileEvent.Internal.ErrorLoadingFromCache -> {
+            commands { +OwnProfileCommand.LoadDataFromNetwork }
+        }
     }
 
     override fun Result.ui(event: OwnProfileEvent.Ui) = when (event) {

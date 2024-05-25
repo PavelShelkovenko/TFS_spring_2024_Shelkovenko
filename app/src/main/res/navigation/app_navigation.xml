@@ -12,16 +12,18 @@
         tools:layout="@layout/fragment_channel" >
         <action
             android:id="@+id/action_channelFragment_to_chatFragment"
-            app:destination="@id/chatFragment" />
+            app:destination="@id/chatFragment"
+            app:popExitAnim="@anim/fade_out" />
     </fragment>
     <fragment
         android:id="@+id/peopleFragment"
         android:name="com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.people.PeopleFragment"
         android:label="fragment_people"
-        tools:layout="@layout/fragment_people" >
+        tools:layout="@layout/fragment_people">
         <action
             android:id="@+id/action_peopleFragment_to_anotherProfileFragment"
-            app:destination="@id/anotherProfileFragment" />
+            app:destination="@id/anotherProfileFragment"
+            app:popExitAnim="@anim/fade_out"/>
     </fragment>
     <fragment
         android:id="@+id/ownProfileFragment"
@@ -39,6 +41,9 @@
         <argument
             android:name="topicName"
             app:argType="string" />
+        <argument
+            android:name="streamId"
+            app:argType="integer" />
     </fragment>
     <fragment
         android:id="@+id/anotherProfileFragment"

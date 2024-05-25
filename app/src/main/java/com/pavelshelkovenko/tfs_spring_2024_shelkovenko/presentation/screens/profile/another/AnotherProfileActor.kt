@@ -29,7 +29,7 @@ class AnotherProfileActor(
                 }.onSuccess { ownUser ->
                     emit(AnotherProfileEvent.Internal.DataLoadedFromCache(user = ownUser, userId = command.userId))
                 }.onFailure {
-                    emit(AnotherProfileEvent.Internal.Error(errorMessageId = R.string.some_error_occurred))
+                    emit(AnotherProfileEvent.Internal.ErrorLoadingFromCache(userId = command.userId))
                 }
             }
         }

@@ -1,4 +1,4 @@
-package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.repository
+package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.actor.repository
 
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.AccountInfo
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Message

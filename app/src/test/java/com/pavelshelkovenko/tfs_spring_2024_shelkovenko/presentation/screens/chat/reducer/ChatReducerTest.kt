@@ -1,4 +1,4 @@
-package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat
+package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.reducer
 
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.AccountInfo
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Message
@@ -8,6 +8,13 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.Rea
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.ReceivedMessageEventData
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.ReceivedReactionEventData
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.RegistrationForEventsData
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.ChatCommand
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.ChatEffect
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.ChatEvent
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.ChatReducer
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.ChatState
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.LongPollingInfoHolder
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.PaginationInfoHolder
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.date.MessageDateTimeDelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.message.MessageDelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.message.received_message.ReceivedMessageDelegateItem
@@ -354,7 +361,11 @@ class ChatReducerTest {
         val messages = testMessageGenerator.generateTestMessages()
         val listOfDelegateItem = testMessageGenerator.generateTestMessageDelegateItem()
         val state = ChatState.Content(emptyList())
-        val event = ChatEvent.Internal.LoadMessagesFromCache(messages = messages)
+        val event = ChatEvent.Internal.LoadMessagesFromCache(
+            messages = messages,
+            streamName = streamName,
+            topicName = topicName
+        )
         // When
         val actual = reducer.reduce(event, state)
         // Then
@@ -385,7 +396,11 @@ class ChatReducerTest {
         // Given
         val messages = emptyList<Message>()
         val state = ChatState.Content(emptyList())
-        val event = ChatEvent.Internal.LoadMessagesFromCache(messages = messages)
+        val event = ChatEvent.Internal.LoadMessagesFromCache(
+            messages = messages,
+            streamName = streamName,
+            topicName = topicName
+        )
         // When
         val actual = reducer.reduce(event, state)
         // Then

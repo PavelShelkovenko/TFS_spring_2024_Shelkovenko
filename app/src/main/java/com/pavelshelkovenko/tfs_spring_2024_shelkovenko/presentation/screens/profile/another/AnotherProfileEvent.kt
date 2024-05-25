@@ -18,5 +18,7 @@ sealed interface AnotherProfileEvent {
 
         data class Error(val errorMessageId: Int) : Internal
 
+        data class ErrorLoadingFromCache(val userId: Int) : Internal
+
     }
 }

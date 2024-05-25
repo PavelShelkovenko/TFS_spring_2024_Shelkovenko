@@ -35,6 +35,10 @@ class AnotherProfileReducer : ScreenDslReducer<
             }
             commands { +AnotherProfileCommand.LoadDataFromNetwork(userId = event.userId) }
         }
+
+        is AnotherProfileEvent.Internal.ErrorLoadingFromCache -> {
+            commands { +AnotherProfileCommand.LoadDataFromNetwork(userId = event.userId) }
+        }
     }
 
     override fun Result.ui(event: AnotherProfileEvent.Ui) = when (event) {

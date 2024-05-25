@@ -14,6 +14,7 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.base.ElmBas
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.base.delegate_adapter.MainAdapter
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.channels.ChannelFragment
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.channels.ChannelFragmentDirections
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.channels.CreateStreamListener
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.channels.streams.adapter.StreamAdapter
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.channels.streams.adapter.StreamDelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.channels.topics.TopicAdapter
@@ -30,7 +31,8 @@ import vivid.money.elmslie.core.store.Store
 import javax.inject.Inject
 
 class StreamsInfoFragment :
-    ElmBaseFragment<StreamEffect, StreamState, StreamEvent>(R.layout.fragment_streams_info) {
+    ElmBaseFragment<StreamEffect, StreamState, StreamEvent>(R.layout.fragment_streams_info),
+    CreateStreamListener {
 
     private val binding: FragmentStreamsInfoBinding by viewBinding(FragmentStreamsInfoBinding::bind)
 
@@ -88,7 +90,8 @@ class StreamsInfoFragment :
                 findNavController().navigate(
                     ChannelFragmentDirections.actionChannelFragmentToChatFragment(
                         topicName = effect.topicName,
-                        streamName = effect.streamName
+                        streamName = effect.streamName,
+                        streamId = effect.streamId
                     )
                 )
             }
@@ -134,6 +137,7 @@ class StreamsInfoFragment :
                     errorContainer.isVisible = true
                     shimmerContainer.isVisible = false
                     streamsInfoRv.isVisible = false
+                    errorComponent.errorMessage.text = resources.getText(state.errorMessageId)
                 }
             }
         }
@@ -156,15 +160,15 @@ class StreamsInfoFragment :
             store.accept(
                 StreamEvent.Ui.OnTopicClick(
                     topic = topic,
-                    streamDestination = getStreamDestinationFromArgs()
+                    streamDestination = getStreamDestinationFromArgs(),
                 )
             )
         }
 
         binding.errorComponent.retryButton.setOnClickListener {
             store.accept(
-                StreamEvent.Ui.QueryChanged(
-                    newQuery = (parentFragment as ChannelFragment).searchQueryFlow.replayCache.last(),
+                StreamEvent.Ui.ReloadData(
+                    currentQuery = (parentFragment as ChannelFragment).searchQueryFlow.replayCache.last(),
                     streamDestination = getStreamDestinationFromArgs()
                 )
             )
@@ -175,6 +179,10 @@ class StreamsInfoFragment :
         return requireArguments().getSerializable(
             STREAMS_DESTINATION_KEY,
         ) as StreamDestination
+    }
+
+    override fun createStream(streamName: String) {
+        store.accept(StreamEvent.Ui.CreateStream(streamName = streamName))
     }
 
     companion object {

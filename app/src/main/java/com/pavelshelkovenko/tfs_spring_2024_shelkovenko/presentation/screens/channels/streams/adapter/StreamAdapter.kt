@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.StreamItemBinding
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Stream
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.base.delegate_adapter.DelegateAdapter
@@ -36,7 +37,7 @@ class StreamAdapter :
         fun bind(model: StreamDelegateItem) {
             val stream = model.content() as Stream
             with(binding) {
-                streamName.text = stream.name
+                streamName.text = itemView.resources.getString(R.string.stream_name_prefix, stream.name)
                 streamContainer.setOnClickListener {
                     onStreamClickListener?.invoke(model)
                 }

@@ -23,6 +23,8 @@ sealed interface PeopleEvent {
 
         data class MinorError(val errorMessageId: Int) : Internal
 
+        data object ErrorLoadingFromCache : Internal
+
         data class SearchError(val errorMessageId: Int) : Internal
     }
 }

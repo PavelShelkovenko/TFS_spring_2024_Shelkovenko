@@ -57,7 +57,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintBottom_toTopOf="@+id/topic_chooser_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/topic_name">
@@ -112,12 +112,90 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintBottom_toTopOf="@+id/edit_info_holder"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/topic_name"
         android:layout_marginTop="8dp"
         app:stackFromEnd="true"/>
+
+    <LinearLayout
+        android:id="@+id/edit_info_holder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/gray_rectangle_background"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/topic_chooser_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_edit_green_24"
+            android:layout_gravity="center"
+            android:layout_marginStart="12dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:padding="4dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Edit Message"
+                android:layout_gravity="center"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                android:padding="2dp"
+                android:layout_marginStart="4dp"/>
+
+            <TextView
+                android:id="@+id/message_content_for_edit_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:padding="2dp"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="4dp"
+                android:maxLines="1"
+                android:ellipsize="end"/>
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/cancel_edit_mode_button"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_close_green_24"
+            android:layout_gravity="center"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="14dp"/>
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/topic_chooser_button"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="8dp"
+        android:textAlignment="textStart"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -134,7 +212,7 @@
             android:id="@+id/message_field"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginHorizontal="8dp"
+            android:layout_marginEnd="8dp"
             android:layout_weight="8"
             android:background="@drawable/write_message_edit_text_background"
             android:hint="@string/write_message"
@@ -156,7 +234,7 @@
                 android:layout_height="48dp"
                 android:background="@drawable/green_circle_background"
                 android:src="@drawable/ic_send_24"
-                android:visibility="gone" />
+                android:visibility="gone"/>
 
             <ImageButton
                 android:id="@+id/send_file_button"
@@ -164,6 +242,14 @@
                 android:layout_height="48dp"
                 android:background="@android:color/transparent"
                 android:src="@drawable/ic_add_circle_outline_48" />
+
+            <ImageButton
+                android:id="@+id/edit_message_button"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/green_circle_background"
+                android:src="@drawable/ic_edit_white_24"
+                android:visibility="gone"/>
 
         </FrameLayout>
 

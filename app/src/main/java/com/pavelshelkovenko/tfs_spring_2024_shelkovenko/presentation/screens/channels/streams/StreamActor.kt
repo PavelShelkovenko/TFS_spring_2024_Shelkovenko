@@ -17,28 +17,28 @@ class StreamActor(
                     repository.searchStreams(command.query, command.streamDestination)
                 }.onSuccess { streams ->
                     emit(
-                        StreamEvent.Internal.DataLoaded(
+                        StreamEvent.Internal.DataLoadedFromNetwork(
                             streams = streams,
                             streamDestination = command.streamDestination
                         )
                     )
                 }.onFailure {
-                    emit(StreamEvent.Internal.MinorError(errorMessageId = R.string.load_streams_error))
+                    emit(StreamEvent.Internal.SearchError(errorMessageId = R.string.search_error))
                 }
             }
 
-            is StreamCommand.LoadData -> flow {
+            is StreamCommand.LoadDataFromNetwork -> flow {
                 runCatchingNonCancellation {
                     repository.getStreamsByDestination(command.streamDestination)
                 }.onSuccess { streams ->
                     emit(
-                        StreamEvent.Internal.DataLoaded(
+                        StreamEvent.Internal.DataLoadedFromNetwork(
                             streams = streams,
                             streamDestination = command.streamDestination
                         )
                     )
-                }.onFailure { error ->
-                    emit(StreamEvent.Internal.Error(throwable = error))
+                }.onFailure {
+                    emit(StreamEvent.Internal.Error(errorMessageId = R.string.load_streams_error))
                 }
             }
 
@@ -53,13 +53,13 @@ class StreamActor(
                         )
                     )
                 }.onFailure {
-                    emit(StreamEvent.Internal.MinorError(errorMessageId = R.string.load_streams_error))
+                    emit(StreamEvent.Internal.ErrorLoadingFromCache(command.streamDestination))
                 }
             }
 
             is StreamCommand.LoadTopicsForStream -> flow {
                 runCatchingNonCancellation {
-                    repository.getTopicsForStream(streamId = command.stream.id)
+                    repository.getTopicsForStreamById(streamId = command.stream.id)
                 }.onSuccess { topics ->
                     emit(
                         StreamEvent.Internal.TopicsLoaded(
@@ -70,6 +70,21 @@ class StreamActor(
                     )
                 }.onFailure {
                     emit(StreamEvent.Internal.MinorError(errorMessageId = R.string.load_topics_error))
+                }
+            }
+
+            is StreamCommand.CreateStream -> flow {
+                runCatchingNonCancellation {
+                    repository.createStream(command.streamName)
+                }.onSuccess { newStreamId ->
+                    emit(
+                        StreamEvent.Internal.StreamCreatedSuccessfully(
+                            streamName = command.streamName,
+                            newStreamId = newStreamId
+                        )
+                    )
+                }.onFailure {
+                    emit(StreamEvent.Internal.MinorError(errorMessageId = R.string.create_stream_error))
                 }
             }
         }

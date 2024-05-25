@@ -13,6 +13,8 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.StreamDest
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Topic
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.repository.StreamRepository
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.containsQuery
+import org.json.JSONArray
+import org.json.JSONObject
 import javax.inject.Inject
 
 class StreamRepositoryImpl @Inject constructor(
@@ -39,7 +41,19 @@ class StreamRepositoryImpl @Inject constructor(
     ): List<Stream> =
         getStreamsByDestination(streamDestination).filter { it.name.containsQuery(query) }
 
-    override suspend fun getTopicsForStream(streamId: Int): List<Topic> {
+    override suspend fun createStream(streamName: String): Int {
+        val jsonObjStream = JSONObject()
+        jsonObjStream.put("name", streamName)
+        val jsonArray = JSONArray()
+        jsonArray.put(jsonObjStream)
+        zulipApi.createStream(jsonArray)
+        val newStreamId = zulipApi.getStreamId(streamName).streamId
+        val newStream = zulipApi.getStreamById(newStreamId).stream
+        saveStreamsInCache(listOf(newStream.toStreamDomain()), StreamDestination.SUBSCRIBED)
+        return newStreamId
+    }
+
+    override suspend fun getTopicsForStreamById(streamId: Int): List<Topic> {
         deleteOldTopics()
         val topicsDbo = topicDao.getTopicsForStream(streamId)
         return if (topicsDbo.isNotEmpty()) {

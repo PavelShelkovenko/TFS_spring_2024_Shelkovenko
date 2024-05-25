@@ -3,6 +3,7 @@ package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils
 import android.content.Context
 import android.util.TypedValue
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import android.widget.Toast
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.App
@@ -123,6 +124,12 @@ fun showErrorToast(errorMessageId: Int, context: Context) {
     val errorMessage = context.resources.getString(errorMessageId)
     Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
 }
+
+fun View.showKeyboard() {
+    val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    imm.showSoftInput(this, 0)
+}
+
 
 
 

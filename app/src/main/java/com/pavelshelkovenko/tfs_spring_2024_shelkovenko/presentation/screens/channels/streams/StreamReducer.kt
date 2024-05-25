@@ -6,6 +6,7 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Topic
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.base.delegate_adapter.DelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.channels.streams.adapter.StreamDelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.channels.topics.TopicDelegateItem
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.NoAction
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.generateRandomId
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.toDelegateList
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,11 +26,12 @@ class StreamReducer : ScreenDslReducer<
 
     override fun Result.internal(event: StreamEvent.Internal) = when (event) {
 
-        is StreamEvent.Internal.DataLoaded -> {
+        is StreamEvent.Internal.DataLoadedFromNetwork -> {
             state {
                 when (event.streamDestination) {
                     StreamDestination.ALL -> {
-                        val expandedList = getLoadedExpandedDelegateList(allStreamsListCached.value, event.streams)
+                        val expandedList =
+                            getLoadedExpandedDelegateList(allStreamsListCached.value, event.streams)
                         allStreamsListCached.value = expandedList
                         StreamState.Content(
                             allStreamsList = expandedList,
@@ -38,7 +40,10 @@ class StreamReducer : ScreenDslReducer<
                     }
 
                     StreamDestination.SUBSCRIBED -> {
-                        val expandedList = getLoadedExpandedDelegateList(subscribedStreamsListCached.value, event.streams)
+                        val expandedList = getLoadedExpandedDelegateList(
+                            subscribedStreamsListCached.value,
+                            event.streams
+                        )
                         subscribedStreamsListCached.value = expandedList
                         StreamState.Content(
                             allStreamsList = allStreamsListCached.value,
@@ -49,8 +54,13 @@ class StreamReducer : ScreenDslReducer<
             }
         }
 
-        is StreamEvent.Internal.Error -> state {
-            StreamState.Error(errorMessage = event.throwable.message.toString())
+        is StreamEvent.Internal.Error -> {
+            if (state is StreamState.Content) {
+                effects { +StreamEffect.MinorError(errorMessageId = event.errorMessageId) }
+            } else {
+                state { StreamState.Error(errorMessageId = event.errorMessageId) }
+            }
+
         }
 
         is StreamEvent.Internal.MinorError -> effects {
@@ -83,6 +93,7 @@ class StreamReducer : ScreenDslReducer<
                     }
                 }
             }
+            commands { +StreamCommand.LoadDataFromNetwork(event.streamDestination) }
         }
 
         is StreamEvent.Internal.TopicsLoaded -> {
@@ -94,18 +105,40 @@ class StreamReducer : ScreenDslReducer<
                 )
             }
         }
+
+        is StreamEvent.Internal.StreamCreatedSuccessfully -> {
+            createNewStream(streamName = event.streamName, newStreamId = event.newStreamId)
+            state {
+                StreamState.Content(
+                    allStreamsList = allStreamsListCached.value,
+                    subscribedStreamsList = subscribedStreamsListCached.value
+                )
+            }
+        }
+
+        is StreamEvent.Internal.ErrorLoadingFromCache -> {
+            commands { +StreamCommand.LoadDataFromNetwork(event.streamDestination) }
+        }
+
+        is StreamEvent.Internal.SearchError -> {
+            state { StreamState.Error(errorMessageId = event.errorMessageId) }
+        }
     }
 
     override fun Result.ui(event: StreamEvent.Ui) = when (event) {
 
         is StreamEvent.Ui.StartProcess -> {
             commands { +StreamCommand.LoadDataFromCache(event.streamDestination) }
-            commands { +StreamCommand.LoadData(event.streamDestination) }
         }
 
         is StreamEvent.Ui.ReloadData -> {
             state { StreamState.Loading }
-            commands { +StreamCommand.LoadData(event.streamDestination) }
+            commands {
+                +StreamCommand.ProcessSearch(
+                    query = event.currentQuery,
+                    streamDestination = event.streamDestination
+                )
+            }
         }
 
         is StreamEvent.Ui.QueryChanged -> {
@@ -136,10 +169,10 @@ class StreamReducer : ScreenDslReducer<
             }
         }
 
-        is StreamEvent.Ui.OnTopicClick -> effects {
-            +StreamEffect.NavigateToChat(
-                topicName = event.topic.name,
-                streamName = findStreamNameByItsTopicIdInListSource(
+        is StreamEvent.Ui.OnTopicClick -> {
+            var errorFlag = false
+            val streamId = try {
+                findStreamIdByItsTopicId(
                     listWhereToFind = when (event.streamDestination) {
                         StreamDestination.ALL -> {
                             allStreamsListCached.value
@@ -151,8 +184,54 @@ class StreamReducer : ScreenDslReducer<
                     },
                     topicId = event.topic.id
                 )
-            )
+            } catch (_: Exception) {
+                errorFlag = true
+            }
+            val streamName = try {
+                findStreamNameByItsTopicId(
+                    listWhereToFind = when (event.streamDestination) {
+                        StreamDestination.ALL -> {
+                            allStreamsListCached.value
+                        }
+
+                        StreamDestination.SUBSCRIBED -> {
+                            subscribedStreamsListCached.value
+                        }
+                    },
+                    topicId = event.topic.id
+                )
+            } catch (_: Exception) {
+                errorFlag = true
+            }
+            if (errorFlag) {
+                NoAction
+            } else {
+                effects {
+                    +StreamEffect.NavigateToChat(
+                        topicName = event.topic.name,
+                        streamName = streamName as String,
+                        streamId = streamId as Int
+                    )
+                }
+            }
         }
+
+        is StreamEvent.Ui.CreateStream -> {
+            commands { +StreamCommand.CreateStream(event.streamName) }
+        }
+    }
+
+    private fun createNewStream(streamName: String, newStreamId: Int) {
+        val newStream = StreamDelegateItem(
+            id = newStreamId,
+            value = Stream(
+                id = newStreamId,
+                name = streamName,
+            )
+        )
+        val newSubscribedStreamsList = subscribedStreamsListCached.value.toMutableList()
+        newSubscribedStreamsList.add(newStream)
+        subscribedStreamsListCached.value = newSubscribedStreamsList
     }
 
     private fun updateStreamsStateAfterStreamClick(
@@ -288,7 +367,29 @@ class StreamReducer : ScreenDslReducer<
         return newList
     }
 
-    private fun findStreamNameByItsTopicIdInListSource(
+    private fun findStreamIdByItsTopicId(
+        listWhereToFind: List<DelegateItem>,
+        topicId: Int
+    ): Int {
+        var topicIndex: Int? = null
+        listWhereToFind.forEachIndexed { index, delegateItem ->
+            val content = delegateItem.content()
+            if (content is Topic && content.id == topicId) {
+                topicIndex = index
+            }
+        }
+        topicIndex?.let { index ->
+            for (i in index downTo 0) {
+                if (listWhereToFind[i] is StreamDelegateItem) {
+                    return (listWhereToFind[i] as StreamDelegateItem).value.id
+
+                }
+            }
+        }
+        throw IllegalStateException("Invalid stream id")
+    }
+
+    private fun findStreamNameByItsTopicId(
         listWhereToFind: List<DelegateItem>,
         topicId: Int
     ): String {
@@ -303,9 +404,11 @@ class StreamReducer : ScreenDslReducer<
             for (i in index downTo 0) {
                 if (listWhereToFind[i] is StreamDelegateItem) {
                     return (listWhereToFind[i] as StreamDelegateItem).value.name
+
                 }
             }
         }
-        throw IllegalStateException("Invalid stream")
+        throw IllegalStateException("Invalid stream name")
     }
+
 }

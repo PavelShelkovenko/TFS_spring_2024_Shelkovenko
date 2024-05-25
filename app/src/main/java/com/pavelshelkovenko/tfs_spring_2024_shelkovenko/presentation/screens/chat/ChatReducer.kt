@@ -6,6 +6,7 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Reaction
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.Operation
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.ReactionEvent
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.base.delegate_adapter.DelegateItem
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.channels.topics.TopicDelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.date.MessageDateTime
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.date.MessageDateTimeDelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.message.MessageDelegateItem
@@ -34,6 +35,8 @@ class ChatReducer @Inject constructor(
     (ChatEvent.Ui::class, ChatEvent.Internal::class) {
 
     private var delegateItemList = MutableStateFlow<List<DelegateItem>>(emptyList())
+    private var cachedEditModeState =
+        MutableStateFlow(EditModeState.provideDeactivatedEditModeState())
 
     override fun Result.internal(event: ChatEvent.Internal) = when (event) {
         is ChatEvent.Internal.LoadMessagesFromNetwork -> {
@@ -42,12 +45,21 @@ class ChatReducer @Inject constructor(
             paginationInfoHolder.apply {
                 oldestAnchor = try {
                     getFirstMessageDelegateItem().id().toString()
-                } catch (e: Exception) { return@apply }
+                } catch (e: Exception) {
+                    return@apply
+                }
                 newestAnchor = try {
                     getLastMessageDelegateItem().id().toString()
-                } catch (e: Exception) { return@apply }
+                } catch (e: Exception) {
+                    return@apply
+                }
             }
-            state { ChatState.Content(messages = messagesUi) }
+            state {
+                ChatState.Content(
+                    messages = messagesUi,
+                    editModeState = cachedEditModeState.value
+                )
+            }
         }
 
         is ChatEvent.Internal.LoadMessagesFromCache -> {
@@ -58,7 +70,33 @@ class ChatReducer @Inject constructor(
                     newestAnchor = event.messages.last().id.toString()
                 }
                 val messagesUi = convertMessagesToDelegateItemWithDate(event.messages)
-                state { ChatState.Content(messages = messagesUi) }
+                state {
+                    ChatState.Content(
+                        messages = messagesUi,
+                        editModeState = cachedEditModeState.value
+                    )
+                }
+            }
+            commands {
+                +ChatCommand.LoadMessagesFromNetwork(
+                    streamName = event.streamName,
+                    topicName = event.topicName,
+                    anchor = paginationInfoHolder.newestAnchor,
+                    numAfter = COUNT_OF_MESSAGE_TO_DOWNLOAD,
+                    numBefore = 2 * COUNT_OF_MESSAGE_TO_DOWNLOAD
+                )
+            }
+        }
+
+        is ChatEvent.Internal.ErrorLoadingFromCache -> {
+            commands {
+                +ChatCommand.LoadMessagesFromNetwork(
+                    streamName = event.streamName,
+                    topicName = event.topicName,
+                    anchor = paginationInfoHolder.newestAnchor,
+                    numAfter = COUNT_OF_MESSAGE_TO_DOWNLOAD,
+                    numBefore = 2 * COUNT_OF_MESSAGE_TO_DOWNLOAD
+                )
             }
         }
 
@@ -106,7 +144,10 @@ class ChatReducer @Inject constructor(
                 newMessages = event.receivedMessageEventData.newMessages,
                 onUpdateState = { newDelegateItemsList ->
                     state {
-                        ChatState.Content(messages = newDelegateItemsList)
+                        ChatState.Content(
+                            messages = newDelegateItemsList,
+                            editModeState = cachedEditModeState.value
+                        )
                     }
                     effects {
                         +ChatEffect.NewMessageReceived
@@ -122,7 +163,10 @@ class ChatReducer @Inject constructor(
                 reactionEventList = event.receivedReactionEventData.reactionEvents,
                 onUpdateState = { newDelegateItemsList ->
                     state {
-                        ChatState.Content(messages = newDelegateItemsList)
+                        ChatState.Content(
+                            messages = newDelegateItemsList,
+                            editModeState = cachedEditModeState.value
+                        )
                     }
                 }
             )
@@ -132,7 +176,12 @@ class ChatReducer @Inject constructor(
             handlePagingNewMessages(
                 messages = event.messages,
                 onUpdateState = { newDelegateItemsList ->
-                    state { ChatState.Content(messages = newDelegateItemsList) }
+                    state {
+                        ChatState.Content(
+                            messages = newDelegateItemsList,
+                            editModeState = cachedEditModeState.value
+                        )
+                    }
                 }
             )
         }
@@ -141,7 +190,12 @@ class ChatReducer @Inject constructor(
             handlePagingOldMessages(
                 messages = event.messages,
                 onUpdateState = { newDelegateItemsList ->
-                    state { ChatState.Content(messages = newDelegateItemsList) }
+                    state {
+                        ChatState.Content(
+                            messages = newDelegateItemsList,
+                            editModeState = cachedEditModeState.value
+                        )
+                    }
                 }
             )
         }
@@ -171,6 +225,47 @@ class ChatReducer @Inject constructor(
         ChatEvent.Internal.CachedMessagesSaved -> {
             effects { +ChatEffect.CloseChat }
         }
+
+        is ChatEvent.Internal.TopicForStreamReceived -> {
+            val topicDelegateItemList = event.topics.map { topic ->
+                TopicDelegateItem(
+                    id = topic.id,
+                    value = topic
+                )
+            }
+            effects { +ChatEffect.OpenTopicChooser(topics = topicDelegateItemList) }
+        }
+
+        is ChatEvent.Internal.MessageDeletedSuccessfully -> {
+            handleDeletingMessage(
+                messageId = event.messageId,
+                onSuccess = { updatedMessagesList ->
+                    state {
+                        ChatState.Content(
+                            messages = updatedMessagesList,
+                            editModeState = cachedEditModeState.value
+                        )
+                    }
+                }
+            )
+        }
+
+        is ChatEvent.Internal.MessageEditedSuccessfully -> {
+            cachedEditModeState.value = EditModeState.provideDeactivatedEditModeState()
+            handleEditingMessage(
+                messageId = event.messageId,
+                messageContent = event.messageContent,
+                onSuccess = { updatedMessagesList ->
+                    state {
+                        ChatState.Content(
+                            messages = updatedMessagesList,
+                            editModeState = cachedEditModeState.value
+                        )
+                    }
+                    effects { +ChatEffect.DeactivateEditingMode }
+                }
+            )
+        }
     }
 
 
@@ -180,15 +275,6 @@ class ChatReducer @Inject constructor(
                 +ChatCommand.LoadMessagesFromCache(
                     streamName = event.streamName,
                     topicName = event.topicName,
-                )
-            }
-            commands {
-                +ChatCommand.LoadMessagesFromNetwork(
-                    streamName = event.streamName,
-                    topicName = event.topicName,
-                    anchor = paginationInfoHolder.newestAnchor,
-                    numAfter = COUNT_OF_MESSAGE_TO_DOWNLOAD,
-                    numBefore = 2 * COUNT_OF_MESSAGE_TO_DOWNLOAD
                 )
             }
         }
@@ -313,6 +399,89 @@ class ChatReducer @Inject constructor(
                 )
             }
         }
+
+        is ChatEvent.Ui.OnTopicChooserClick -> {
+            commands { +ChatCommand.GetTopicsForStream(event.streamId) }
+        }
+
+        is ChatEvent.Ui.DeleteMessage -> {
+            commands { +ChatCommand.DeleteMessage(messageId = event.messageId) }
+        }
+
+        is ChatEvent.Ui.EditMessage -> {
+            commands {
+                +ChatCommand.EditMessage(
+                    messageId = event.messageId,
+                    messageContent = event.newMessageContent
+                )
+            }
+            cachedEditModeState.value = cachedEditModeState.value.copy(
+                isInEditMode = true,
+                editingMessageId = event.messageId,
+                newMessageContent = event.newMessageContent
+            )
+        }
+
+        is ChatEvent.Ui.ActivateEditingMode -> {
+            cachedEditModeState.value = cachedEditModeState.value.copy(
+                isInEditMode = true,
+                editingMessageId = event.editingMessageId,
+                oldMessageContent = event.oldMessageContent,
+                newMessageContent = event.newMessageContent
+            )
+            state {
+                ChatState.Content(
+                    messages = delegateItemList.value,
+                    editModeState = cachedEditModeState.value
+                )
+            }
+        }
+
+        is ChatEvent.Ui.DeactivateEditingMode -> {
+            cachedEditModeState.value = EditModeState.provideDeactivatedEditModeState()
+            state {
+                ChatState.Content(
+                    messages = delegateItemList.value,
+                    editModeState = cachedEditModeState.value
+                )
+            }
+            effects { +ChatEffect.DeactivateEditingMode }
+        }
+
+        is ChatEvent.Ui.SaveNewEditingMessageContent -> {
+            cachedEditModeState.value = cachedEditModeState.value.copy(
+                newMessageContent = event.newMessageContent
+            )
+            state {
+                ChatState.Content(
+                    messages = delegateItemList.value,
+                    editModeState = cachedEditModeState.value
+                )
+            }
+        }
+    }
+
+    private fun handleEditingMessage(
+        messageId: Int,
+        messageContent: String,
+        onSuccess: (List<DelegateItem>) -> Unit
+    ) {
+        val editingMessageIndex = delegateItemList.value.indexOfFirst { it.id() == messageId }
+        if (editingMessageIndex == -1) {
+            NoAction
+        } else {
+            val newList = delegateItemList.value.toMutableList()
+            val oldMessageDelegateItem = delegateItemList.value[editingMessageIndex]
+            val newMessageModel = (oldMessageDelegateItem.content() as SendMessageModel)
+                .copy(textMessage = messageContent)
+            val newMessageDelegateItem = SendMessageDelegateItem(
+                id = oldMessageDelegateItem.id() as Int,
+                value = newMessageModel
+            )
+            newList[editingMessageIndex] = newMessageDelegateItem
+            delegateItemList.value = newList
+            onSuccess(newList)
+        }
     }
 
     private fun handleEmojiClick(
@@ -338,9 +507,10 @@ class ChatReducer @Inject constructor(
     }
 
     private fun getMessagesForCaching(): List<Message> {
-        val messagesUi = delegateItemList.value.filterIsInstance<MessageDelegateItem>().takeLast(LIMIT_OF_MESSAGES_FOR_CACHING)
+        val messagesUi = delegateItemList.value.filterIsInstance<MessageDelegateItem>()
+            .takeLast(LIMIT_OF_MESSAGES_FOR_CACHING)
         val messages = messagesUi.map { messageDelegateItem ->
-            when(messageDelegateItem) {
+            when (messageDelegateItem) {
                 is ReceivedMessageDelegateItem -> {
                     Message(
                         id = messageDelegateItem.id,
@@ -352,6 +522,7 @@ class ChatReducer @Inject constructor(
                         reactions = messageDelegateItem.value.reactionList,
                     )
                 }
+
                 is SendMessageDelegateItem -> {
                     Message(
                         id = messageDelegateItem.id,
@@ -363,6 +534,7 @@ class ChatReducer @Inject constructor(
                         reactions = messageDelegateItem.value.reactionList,
                     )
                 }
+
                 else -> {
                     throw IllegalStateException("MessageDelegateItem should be either ReceivedMessageDelegateItem or SendMessageDelegateItem")
                 }
@@ -541,6 +713,24 @@ class ChatReducer @Inject constructor(
                     )
                 }
             }
+        }
+    }
+
+    private fun handleDeletingMessage(
+        messageId: Int,
+        onSuccess: (List<DelegateItem>) -> Unit
+    ) {
+        val deletedMessageIndex = delegateItemList.value.indexOfFirst { it.id() == messageId }
+        if (deletedMessageIndex == -1) {
+            NoAction
+        } else {
+            val newList = delegateItemList.value.toMutableList()
+            newList.removeAt(deletedMessageIndex)
+            if (newList.last() is MessageDateTimeDelegateItem) {
+                newList.removeLast()
+            }
+            delegateItemList.value = newList
+            onSuccess(newList)
         }
     }
 

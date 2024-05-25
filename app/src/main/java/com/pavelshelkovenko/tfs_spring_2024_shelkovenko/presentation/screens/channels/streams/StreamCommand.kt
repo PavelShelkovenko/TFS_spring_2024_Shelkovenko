@@ -5,7 +5,7 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.cha
 
 sealed interface StreamCommand {
 
-    data class LoadData(val streamDestination: StreamDestination): StreamCommand
+    data class LoadDataFromNetwork(val streamDestination: StreamDestination): StreamCommand
 
     data class LoadDataFromCache(val streamDestination: StreamDestination): StreamCommand
 
@@ -18,4 +18,6 @@ sealed interface StreamCommand {
         val query: String,
         val streamDestination: StreamDestination
     ): StreamCommand
+
+    data class CreateStream(val streamName: String): StreamCommand
 }

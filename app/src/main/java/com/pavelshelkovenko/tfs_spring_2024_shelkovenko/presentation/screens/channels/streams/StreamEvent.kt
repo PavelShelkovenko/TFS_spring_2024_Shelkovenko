@@ -19,15 +19,20 @@ sealed interface StreamEvent {
 
         data class OnTopicClick(
             val topic: Topic,
-            val streamDestination: StreamDestination
+            val streamDestination: StreamDestination,
         ): Ui
 
-        data class ReloadData(val streamDestination: StreamDestination): Ui
+        data class ReloadData(
+            val streamDestination: StreamDestination,
+            val currentQuery: String
+        ): Ui
+
+        data class CreateStream(val streamName: String): Ui
     }
 
     sealed interface Internal: StreamEvent {
 
-        data class DataLoaded(
+        data class DataLoadedFromNetwork(
             val streams: List<Stream>,
             val streamDestination: StreamDestination
         ): Internal
@@ -37,14 +42,25 @@ sealed interface StreamEvent {
             val streamDestination: StreamDestination
         ): Internal
 
+        data class ErrorLoadingFromCache(
+            val streamDestination: StreamDestination
+        ): Internal
+
         data class TopicsLoaded(
             val topics: List<Topic>,
             val stream: StreamDelegateItem,
             val streamDestination: StreamDestination
         ): Internal
 
-        data class Error(val throwable: Throwable): Internal
+        data class Error(val errorMessageId: Int): Internal
 
         data class MinorError(val errorMessageId: Int): Internal
+
+        data class StreamCreatedSuccessfully(
+            val streamName: String,
+            val newStreamId: Int
+        ): Internal
+
+        data class SearchError(val errorMessageId: Int) : Internal
     }
 }

@@ -17,17 +17,24 @@
     <string name="open_stream_topic_button">Open stream topic button</string>
     <string name="retry">Retry</string>
     <string name="some_error_occurred">Some error occurred</string>
-    <string name="load_topics_error">Some error occurred</string>
+    <string name="load_topics_error">Cannot load topics, check your internet connection</string>
+    <string name="create_stream_error">Cannot create stream, check your internet connection</string>
     <string name="search_error">Search error occurred</string>
     <string name="status_active">Active</string>
     <string name="status_idle">Idle</string>
     <string name="status_offline">Offline</string>
     <string name="send_message_error">Cannot send message, check your internet connection</string>
     <string name="send_reaction_error">Cannot send reaction</string>
+    <string name="change_topic_error">Cannot change topic for sending message</string>
     <string name="remove_reaction_error">Cannot remove reaction, check your internet connection</string>
     <string name="load_messages_error">Cannot load messages, check your internet connection</string>
     <string name="process_search_error">Cannot perform search, check your internet connection</string>
     <string name="load_streams_error">Cannot load streams, check your internet connection</string>
+    <string name="load_people_error">Cannot load other people info, check your internet connection</string>
     <string name="stream_name_prefix">#%1$s</string>
     <string name="topic_prefix">Topic: %1$s</string>
+    <string name="topic_chooser_prefix">#%1$s</string>
+    <string name="delete_message_error">Cannot delete message</string>
+    <string name="edit_message_error">Cannot edit message</string>
+    <string name="own_profile_loading_error">Cannot load own profile info</string>
 </resources>

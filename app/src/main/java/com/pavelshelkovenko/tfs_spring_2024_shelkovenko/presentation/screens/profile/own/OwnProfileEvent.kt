@@ -19,6 +19,7 @@ sealed interface OwnProfileEvent {
 
         data class Error(val errorMessageId: Int) : Internal
 
+        data object ErrorLoadingFromCache : Internal
     }
 
 }

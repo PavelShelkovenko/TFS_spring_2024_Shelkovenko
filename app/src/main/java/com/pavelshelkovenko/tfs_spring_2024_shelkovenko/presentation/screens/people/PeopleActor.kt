@@ -18,7 +18,7 @@ class PeopleActor(
                 }.onSuccess { users ->
                     emit(PeopleEvent.Internal.DataLoadedFromNetwork(users = users))
                 }.onFailure {
-                    emit(PeopleEvent.Internal.Error(errorMessageId = R.string.some_error_occurred))
+                    emit(PeopleEvent.Internal.Error(errorMessageId = R.string.load_people_error))
                 }
             }
 
@@ -28,7 +28,7 @@ class PeopleActor(
                 }.onSuccess { users ->
                     emit(PeopleEvent.Internal.DataLoadedFromCache(users = users))
                 }.onFailure {
-                    emit(PeopleEvent.Internal.Error(errorMessageId = R.string.some_error_occurred))
+                    emit(PeopleEvent.Internal.ErrorLoadingFromCache)
                 }
             }
 

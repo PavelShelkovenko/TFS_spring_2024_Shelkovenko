@@ -28,10 +28,10 @@ class OpenChatFragmentTest: TestCase() {
                 streamsRecycler.isDisplayed()
                 streamsRecycler {
                     childAt<StreamInfoScreen.KStream>(0) {
-                        streamName.hasText("Denmark")
+                        streamName.hasText("#Denmark")
                     }
                     childAt<StreamInfoScreen.KStream>(1) {
-                        streamName.hasText("Scotland")
+                        streamName.hasText("#Scotland")
                     }
                 }
                 Assert.assertEquals(2, streamsRecycler.getSize())

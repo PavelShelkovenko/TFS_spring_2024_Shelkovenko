@@ -92,6 +92,19 @@ class ChatRepositoryImpl @Inject constructor(
         )
     }
 
+    override suspend fun deleteMessageById(messageId: Int) {
+        zulipApi.deleteMessageById(messageId)
+        chatDao.deleteMessageById(messageId)
+    }
+
+    override suspend fun editMessageContent(
+        messageId: Int,
+        newMessageContent: String
+    ) {
+        zulipApi.editMessageContent(messageId, newMessageContent)
+        chatDao.updateMessage(messageId, newMessageContent)
+    }
+
     override suspend fun sendMessage(streamName: String, topicName: String, message: String) {
         zulipApi.sendMessage(
             streamName = streamName,

@@ -19,7 +19,7 @@ class OwnProfileActor(
                 }.onSuccess { ownUser ->
                     emit(OwnProfileEvent.Internal.DataLoadedFromNetwork(user = ownUser))
                 }.onFailure {
-                    emit(OwnProfileEvent.Internal.Error(errorMessageId = R.string.some_error_occurred))
+                    emit(OwnProfileEvent.Internal.Error(errorMessageId = R.string.own_profile_loading_error))
                 }
             }
 
@@ -29,7 +29,7 @@ class OwnProfileActor(
                 }.onSuccess { ownUser ->
                     emit(OwnProfileEvent.Internal.DataLoadedFromCache(user = ownUser))
                 }.onFailure {
-                    emit(OwnProfileEvent.Internal.Error(errorMessageId = R.string.some_error_occurred))
+                    emit(OwnProfileEvent.Internal.ErrorLoadingFromCache)
                 }
             }
         }

@@ -43,7 +43,6 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
                 android:background="@android:color/transparent"
                 android:src="@drawable/ic_search_24"
                 android:contentDescription="@string/search_icon" />
@@ -53,13 +52,21 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
                 android:background="@android:color/transparent"
                 android:src="@drawable/ic_close_24"
                 android:visibility="gone"
                 android:contentDescription="@string/cancel_searching_icon" />
 
         </FrameLayout>
+
+        <ImageButton
+            android:id="@+id/add_stream_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="8dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_add_24"
+            android:contentDescription="@string/search_icon" />
 
     </LinearLayout>
 

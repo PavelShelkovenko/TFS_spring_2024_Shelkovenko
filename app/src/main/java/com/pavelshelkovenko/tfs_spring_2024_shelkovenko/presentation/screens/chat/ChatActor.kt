@@ -3,6 +3,7 @@ package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.ch
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.RegistrationForEventsData
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.repository.ChatRepository
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.usecases.GetTopicsForStreamByIdUseCase
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.runCatchingNonCancellation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -10,7 +11,8 @@ import kotlinx.coroutines.flow.flow
 import vivid.money.elmslie.core.store.Actor
 
 class ChatActor(
-    private val repository: ChatRepository
+    private val repository: ChatRepository,
+    private val getTopicsForStreamByIdUseCase: GetTopicsForStreamByIdUseCase
 ) : Actor<ChatCommand, ChatEvent>() {
     override fun execute(command: ChatCommand): Flow<ChatEvent> {
         return when (command) {
@@ -37,9 +39,18 @@ class ChatActor(
                         topicName = command.topicName,
                     )
                 }.onSuccess { messages ->
-                    emit(ChatEvent.Internal.LoadMessagesFromCache(messages = messages))
+                    emit(
+                        ChatEvent.Internal.LoadMessagesFromCache(
+                            messages = messages,
+                            topicName = command.topicName,
+                            streamName = command.streamName
+                        )
+                    )
                 }.onFailure {
-                    emit(ChatEvent.Internal.MinorError(errorMessageId = R.string.some_error_occurred))
+                    emit(ChatEvent.Internal.ErrorLoadingFromCache(
+                        streamName = command.streamName,
+                        topicName = command.topicName,
+                    ))
                 }
             }
 
@@ -180,6 +191,41 @@ class ChatActor(
                     )
                 }.onSuccess {
                     emit(ChatEvent.Internal.CachedMessagesSaved)
+                }
+            }
+
+            is ChatCommand.GetTopicsForStream -> flow {
+                runCatchingNonCancellation {
+                    getTopicsForStreamByIdUseCase.invoke(command.streamId)
+                }.onSuccess { topics ->
+                    emit(ChatEvent.Internal.TopicForStreamReceived(topics = topics))
+                }.onFailure {
+                    emit(ChatEvent.Internal.MinorError(errorMessageId = R.string.change_topic_error))
+                }
+            }
+
+            is ChatCommand.DeleteMessage -> flow {
+                runCatchingNonCancellation {
+                    repository.deleteMessageById(messageId = command.messageId)
+                }.onSuccess {
+                    emit(ChatEvent.Internal.MessageDeletedSuccessfully(messageId = command.messageId))
+                }.onFailure {
+                    emit(ChatEvent.Internal.MinorError(errorMessageId = R.string.delete_message_error))
+                }
+            }
+
+            is ChatCommand.EditMessage -> flow {
+                runCatchingNonCancellation {
+                    repository.editMessageContent(command.messageId, command.messageContent)
+                }.onSuccess {
+                    emit(
+                        ChatEvent.Internal.MessageEditedSuccessfully(
+                            messageId = command.messageId,
+                            messageContent = command.messageContent
+                        )
+                    )
+                }.onFailure {
+                    emit(ChatEvent.Internal.MinorError(errorMessageId = R.string.edit_message_error))
                 }
             }
         }
