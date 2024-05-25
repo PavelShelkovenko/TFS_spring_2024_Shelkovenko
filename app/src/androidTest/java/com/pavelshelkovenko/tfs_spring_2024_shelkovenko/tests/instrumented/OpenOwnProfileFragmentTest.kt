@@ -13,7 +13,9 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.screens.profile.own.OwnP
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.AppTestRule
 import org.junit.Rule
 import org.junit.Test
-
+/**
+ * Этот тест нужно запускать на "stagingDebug" buildVariant
+ */
 class OpenOwnProfileFragmentTest: TestCase() {
 
     @get:Rule

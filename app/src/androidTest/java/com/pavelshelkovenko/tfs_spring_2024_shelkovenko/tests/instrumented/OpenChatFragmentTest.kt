@@ -11,7 +11,9 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.screens.streams.StreamIn
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
-
+/**
+ * Этот тест нужно запускать на "stagingDebug" buildVariant
+ */
 class OpenChatFragmentTest: TestCase() {
 
     @get:Rule
@@ -47,7 +49,7 @@ class OpenChatFragmentTest: TestCase() {
             step("Проверяем видимость списка стримов") {
                 streamsRecycler.isDisplayed()
             }
-            step("Проверяем количество стримов") {
+            step("Проверяем количество топиков") {
                 Assert.assertEquals(5, streamsRecycler.getSize())
             }
             step("Открываем экран чата и проверяем, что правильно передались аргументы") {
