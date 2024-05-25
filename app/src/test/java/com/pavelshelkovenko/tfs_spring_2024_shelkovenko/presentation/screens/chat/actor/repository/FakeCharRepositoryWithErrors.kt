@@ -48,6 +48,14 @@ class FakeCharRepositoryWithErrors: ChatRepository {
         throw IllegalStateException("Test error")
     }
 
+    override suspend fun deleteMessageById(messageId: Int) {
+        throw IllegalStateException("Test error")
+    }
+
+    override suspend fun editMessageContent(messageId: Int, newMessageContent: String) {
+        throw IllegalStateException("Test error")
+    }
+
     override suspend fun registerForEvents(
         streamName: String,
         topicName: String

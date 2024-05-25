@@ -57,8 +57,8 @@ class ChatActorTest {
         val actual = actor.execute(ChatCommand.LoadMessagesFromCache(streamName, topicName))
         // Then
         assertEquals(
-            ChatEvent.Internal.MinorError::class.java.name,
-            actual.last().javaClass.name
+            ChatEvent.Internal.ErrorLoadingFromCache(streamName, topicName),
+            actual.last()
         )
     }
 

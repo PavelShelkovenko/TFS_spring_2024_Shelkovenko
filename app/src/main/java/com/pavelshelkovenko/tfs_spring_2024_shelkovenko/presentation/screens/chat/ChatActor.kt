@@ -47,10 +47,12 @@ class ChatActor(
                         )
                     )
                 }.onFailure {
-                    emit(ChatEvent.Internal.ErrorLoadingFromCache(
-                        streamName = command.streamName,
-                        topicName = command.topicName,
-                    ))
+                    emit(
+                        ChatEvent.Internal.ErrorLoadingFromCache(
+                            streamName = command.streamName,
+                            topicName = command.topicName,
+                        )
+                    )
                 }
             }
 

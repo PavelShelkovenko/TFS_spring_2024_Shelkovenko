@@ -8,9 +8,10 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.Rec
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.ReceivedReactionEventData
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.RegistrationForEventsData
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.repository.ChatRepository
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.NoAction
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.TestMessageGenerator
 
-class FakeChatRepository: ChatRepository {
+class FakeChatRepository : ChatRepository {
 
     private val testMessageGenerator = TestMessageGenerator()
     private val accountInfo = AccountInfo()
@@ -40,13 +41,29 @@ class FakeChatRepository: ChatRepository {
         messages: List<Message>,
         streamName: String,
         topicName: String
-    ) = Unit
+    ) = NoAction
 
-    override suspend fun sendMessage(streamName: String, topicName: String, message: String) = Unit
+    override suspend fun sendMessage(
+        streamName: String,
+        topicName: String,
+        message: String
+    ) = NoAction
 
-    override suspend fun sendReaction(messageId: Int, emojiName: String, emojiCode: String) = Unit
+    override suspend fun sendReaction(
+        messageId: Int,
+        emojiName: String,
+        emojiCode: String
+    ) = NoAction
 
-    override suspend fun removeReaction(messageId: Int, emojiName: String, emojiCode: String) = Unit
+    override suspend fun removeReaction(
+        messageId: Int,
+        emojiName: String,
+        emojiCode: String
+    ) = NoAction
+
+    override suspend fun deleteMessageById(messageId: Int) = NoAction
+
+    override suspend fun editMessageContent(messageId: Int, newMessageContent: String) = NoAction
 
     override suspend fun registerForEvents(
         streamName: String,

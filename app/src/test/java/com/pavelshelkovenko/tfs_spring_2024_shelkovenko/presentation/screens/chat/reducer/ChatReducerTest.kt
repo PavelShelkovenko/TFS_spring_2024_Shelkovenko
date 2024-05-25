@@ -13,6 +13,7 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.cha
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.ChatEvent
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.ChatReducer
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.ChatState
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.EditModeState
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.LongPollingInfoHolder
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.PaginationInfoHolder
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.date.MessageDateTimeDelegateItem
@@ -56,13 +57,6 @@ class ChatReducerTest {
         assertEquals(
             listOf(
                 ChatCommand.LoadMessagesFromCache(streamName, topicName),
-                ChatCommand.LoadMessagesFromNetwork(
-                    streamName = streamName,
-                    topicName = topicName,
-                    anchor = paginationInfoHolder.newestAnchor,
-                    numBefore = countOfMessagesToDownload * 2,
-                    numAfter = countOfMessagesToDownload
-                )
             ),
             actual.commands
         )
@@ -94,7 +88,7 @@ class ChatReducerTest {
     @Test
     fun `reduce LoadPagingNewerMessages event should contain command LoadPagingNewerMessages`() {
         // Given
-        val state = ChatState.Content(emptyList())
+        val state = ChatState.Content(emptyList(), EditModeState.provideDeactivatedEditModeState())
         val event = ChatEvent.Ui.LoadPagingNewerMessages(streamName, topicName)
         val reducer = ChatReducer(
             longPollingInfoHolder,
@@ -124,7 +118,7 @@ class ChatReducerTest {
     @Test
     fun `reduce LoadPagingNewerMessages event WHEN isLoadingNextPage is true should not contain any commands`() {
         // Given
-        val state = ChatState.Content(emptyList())
+        val state = ChatState.Content(emptyList(), EditModeState.provideDeactivatedEditModeState())
         val event = ChatEvent.Ui.LoadPagingNewerMessages(streamName, topicName)
         val reducer = ChatReducer(
             longPollingInfoHolder,
@@ -142,7 +136,7 @@ class ChatReducerTest {
 
     @Test
     fun `reduce LoadPagingNewerMessages event WHEN hasLoadedNewestMessage is true should not contain any commands`() {
-        val state = ChatState.Content(emptyList())
+        val state = ChatState.Content(emptyList(), EditModeState.provideDeactivatedEditModeState())
         val event = ChatEvent.Ui.LoadPagingNewerMessages(streamName, topicName)
         val reducer = ChatReducer(
             longPollingInfoHolder,
@@ -162,7 +156,7 @@ class ChatReducerTest {
     fun `reduce OnEmojiClick event WHEN clicked on own reaction should contain command RemoveReaction`() {
         // Given
         val messages = testMessageGenerator.generateTestMessages()
-        val state = ChatState.Content(emptyList())
+        val state = ChatState.Content(emptyList(), EditModeState.provideDeactivatedEditModeState())
         val eventForLoadingMessage = ChatEvent.Internal.LoadMessagesFromNetwork(messages)
         val event = ChatEvent.Ui.OnEmojiClick(
             messageId = messages.first().id,
@@ -189,7 +183,7 @@ class ChatReducerTest {
     fun `reduce OnEmojiClick event WHEN clicked on another reaction should contain command SendReaction`() {
         // Given
         val messages = testMessageGenerator.generateTestMessages()
-        val state = ChatState.Content(emptyList())
+        val state = ChatState.Content(emptyList(), EditModeState.provideDeactivatedEditModeState())
         val eventForLoadingMessage = ChatEvent.Internal.LoadMessagesFromNetwork(messages)
         val event = ChatEvent.Ui.OnEmojiClick(
             messageId = messages.first().id,
@@ -215,7 +209,7 @@ class ChatReducerTest {
     @Test
     fun `reduce CachedMessageSaved event should contain effect CloseChat`() {
         // Given
-        val state = ChatState.Content(emptyList())
+        val state = ChatState.Content(emptyList(), EditModeState.provideDeactivatedEditModeState())
         val event = ChatEvent.Internal.CachedMessagesSaved
         // When
         val actual = reducer.reduce(event, state)
@@ -231,7 +225,7 @@ class ChatReducerTest {
     @Test
     fun `reduce GetReactionLongPollingData event should contain command GetReactionEvents`() {
         // Given
-        val state = ChatState.Content(emptyList())
+        val state = ChatState.Content(emptyList(), EditModeState.provideDeactivatedEditModeState())
         val event = ChatEvent.Internal.GetReactionLongPollingData
         // When
         val actual = reducer.reduce(event, state)
@@ -250,7 +244,7 @@ class ChatReducerTest {
     @Test
     fun `reduce GetMessageLongPollingData event should contain command GetMessageEvents`() {
         // Given
-        val state = ChatState.Content(emptyList())
+        val state = ChatState.Content(emptyList(), EditModeState.provideDeactivatedEditModeState())
         val event = ChatEvent.Internal.GetMessageLongPollingData
         // When
         val actual = reducer.reduce(event, state)
@@ -271,7 +265,7 @@ class ChatReducerTest {
         // Given
         val messages = testMessageGenerator.generateTestMessages()
         val listOfDelegateItem = testMessageGenerator.generateTestMessageDelegateItem()
-        val state = ChatState.Content(emptyList())
+        val state = ChatState.Content(emptyList(), EditModeState.provideDeactivatedEditModeState())
         val event = ChatEvent.Internal.LoadPagingOlderMessages(
             messages = messages
         )
@@ -301,7 +295,7 @@ class ChatReducerTest {
         // Given
         val messages = testMessageGenerator.generateTestMessages()
         val listOfDelegateItem = testMessageGenerator.generateTestMessageDelegateItem()
-        val state = ChatState.Content(emptyList())
+        val state = ChatState.Content(emptyList(), EditModeState.provideDeactivatedEditModeState())
         val event = ChatEvent.Internal.LoadPagingNewerMessages(messages = messages)
         // When
         val actual = reducer.reduce(event, state)
@@ -327,7 +321,7 @@ class ChatReducerTest {
     @Test
     fun `reduce Error event should produce error state`() {
         // Given
-        val state = ChatState.Content(emptyList())
+        val state = ChatState.Content(emptyList(), EditModeState.provideDeactivatedEditModeState())
         val event = ChatEvent.Internal.Error(1)
         // When
         val actual = reducer.reduce(event, state)
@@ -341,7 +335,7 @@ class ChatReducerTest {
     @Test
     fun `reduce MinorError event should produce MinorError effect`() {
         // Given
-        val state = ChatState.Content(emptyList())
+        val state = ChatState.Content(emptyList(), EditModeState.provideDeactivatedEditModeState())
         val event = ChatEvent.Internal.MinorError(1)
         // When
         val actual = reducer.reduce(event, state)
@@ -360,7 +354,7 @@ class ChatReducerTest {
         // Given
         val messages = testMessageGenerator.generateTestMessages()
         val listOfDelegateItem = testMessageGenerator.generateTestMessageDelegateItem()
-        val state = ChatState.Content(emptyList())
+        val state = ChatState.Content(emptyList(), EditModeState.provideDeactivatedEditModeState())
         val event = ChatEvent.Internal.LoadMessagesFromCache(
             messages = messages,
             streamName = streamName,
@@ -395,7 +389,7 @@ class ChatReducerTest {
     fun `reduce LoadMessagesFromCache event WHEN messages are empty should set state to Loading`() {
         // Given
         val messages = emptyList<Message>()
-        val state = ChatState.Content(emptyList())
+        val state = ChatState.Content(emptyList(), EditModeState.provideDeactivatedEditModeState())
         val event = ChatEvent.Internal.LoadMessagesFromCache(
             messages = messages,
             streamName = streamName,
@@ -415,7 +409,7 @@ class ChatReducerTest {
         // Given
         val messages = testMessageGenerator.generateTestMessages()
         val listOfDelegateItem = testMessageGenerator.generateTestMessageDelegateItem()
-        val state = ChatState.Content(emptyList())
+        val state = ChatState.Content(emptyList(), EditModeState.provideDeactivatedEditModeState())
         val event = ChatEvent.Internal.LoadMessagesFromNetwork(messages = messages)
         // When
         val actual = reducer.reduce(event, state)
@@ -461,7 +455,7 @@ class ChatReducerTest {
             reactionLastEventId = testReactionLastEventId
         )
 
-        val state = ChatState.Content(emptyList())
+        val state = ChatState.Content(emptyList(), EditModeState.provideDeactivatedEditModeState())
         val event =
             ChatEvent.Internal.RegistrationForChatEventsDataReceived(testRegistrationForEventData)
         // When
@@ -506,7 +500,7 @@ class ChatReducerTest {
         val testNewLastEventId = "test last event id"
         val testReceivedMessageEventData = ReceivedMessageEventData(testNewLastEventId, testMessages)
 
-        val state = ChatState.Content(emptyList())
+        val state = ChatState.Content(emptyList(), EditModeState.provideDeactivatedEditModeState())
         val event = ChatEvent.Internal.MessageEventsDataReceived(testReceivedMessageEventData)
         // When
         val actual = reducer.reduce(event, state)
