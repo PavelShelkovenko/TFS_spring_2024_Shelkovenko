@@ -60,6 +60,7 @@ sealed interface ChatEvent {
         data object DeactivateEditingMode: Ui
 
         data class SaveNewEditingMessageContent(val newMessageContent: String): Ui
+
     }
 
     sealed interface Internal : ChatEvent {

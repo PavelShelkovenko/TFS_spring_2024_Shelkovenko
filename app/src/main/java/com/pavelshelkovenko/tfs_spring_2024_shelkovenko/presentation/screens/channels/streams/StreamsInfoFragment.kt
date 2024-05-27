@@ -82,6 +82,13 @@ class StreamsInfoFragment :
             }
             .flowOn(Dispatchers.IO)
             .launchIn(lifecycleScope)
+
+        store.accept(
+            StreamEvent.Ui.ReloadData(
+                streamDestination = getStreamDestinationFromArgs(),
+                currentQuery = (parentFragment as ChannelFragment).searchQueryFlow.replayCache.last()
+            )
+        )
     }
 
     override fun handleEffect(effect: StreamEffect) {
@@ -96,7 +103,9 @@ class StreamsInfoFragment :
                 )
             }
 
-            is StreamEffect.MinorError -> { showErrorToast(effect.errorMessageId, requireActivity()) }
+            is StreamEffect.MinorError -> {
+                showErrorToast(effect.errorMessageId, requireActivity())
+            }
         }
     }
 
@@ -121,10 +130,11 @@ class StreamsInfoFragment :
                     shimmerContainer.isVisible = false
                     errorContainer.isVisible = false
                     streamsInfoRv.isVisible = true
-                    when(getStreamDestinationFromArgs()) {
+                    when (getStreamDestinationFromArgs()) {
                         StreamDestination.ALL -> {
                             mainAdapter.submitList(state.allStreamsList)
                         }
+
                         StreamDestination.SUBSCRIBED -> {
                             mainAdapter.submitList(state.subscribedStreamsList)
                         }
@@ -152,6 +162,15 @@ class StreamsInfoFragment :
                 StreamEvent.Ui.OnStreamClick(
                     stream = stream,
                     streamDestination = getStreamDestinationFromArgs()
+                )
+            )
+        }
+
+        streamAdapter.onSubscriptionClickListener = { stream: StreamDelegateItem ->
+            store.accept(
+                StreamEvent.Ui.ChangeSubscriptionStatus(
+                    stream,
+                    getStreamDestinationFromArgs()
                 )
             )
         }

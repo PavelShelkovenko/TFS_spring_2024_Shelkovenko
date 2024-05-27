@@ -1,5 +1,6 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils
 
+import android.app.Activity
 import android.content.Context
 import android.util.TypedValue
 import android.view.View
@@ -128,6 +129,11 @@ fun showErrorToast(errorMessageId: Int, context: Context) {
 fun View.showKeyboard() {
     val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     imm.showSoftInput(this, 0)
+}
+
+fun View.hideKeyboard(): Boolean {
+    val imm = context.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+    return imm.hideSoftInputFromWindow(windowToken, 0)
 }
 
 

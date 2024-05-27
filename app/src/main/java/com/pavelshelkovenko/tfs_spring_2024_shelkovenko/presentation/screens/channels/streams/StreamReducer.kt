@@ -2,6 +2,7 @@ package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.ch
 
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Stream
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.StreamDestination
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.SubscriptionStatus
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Topic
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.base.delegate_adapter.DelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.channels.streams.adapter.StreamDelegateItem
@@ -30,24 +31,18 @@ class StreamReducer : ScreenDslReducer<
             state {
                 when (event.streamDestination) {
                     StreamDestination.ALL -> {
-                        val expandedList =
-                            getLoadedExpandedDelegateList(allStreamsListCached.value, event.streams)
-                        allStreamsListCached.value = expandedList
+                        allStreamsListCached.value = event.streams.toDelegateList()
                         StreamState.Content(
-                            allStreamsList = expandedList,
+                            allStreamsList = allStreamsListCached.value,
                             subscribedStreamsList = subscribedStreamsListCached.value
                         )
                     }
 
                     StreamDestination.SUBSCRIBED -> {
-                        val expandedList = getLoadedExpandedDelegateList(
-                            subscribedStreamsListCached.value,
-                            event.streams
-                        )
-                        subscribedStreamsListCached.value = expandedList
+                        subscribedStreamsListCached.value = event.streams.toDelegateList()
                         StreamState.Content(
                             allStreamsList = allStreamsListCached.value,
-                            subscribedStreamsList = expandedList
+                            subscribedStreamsList = subscribedStreamsListCached.value
                         )
                     }
                 }
@@ -121,7 +116,29 @@ class StreamReducer : ScreenDslReducer<
         }
 
         is StreamEvent.Internal.SearchError -> {
-            state { StreamState.Error(errorMessageId = event.errorMessageId) }
+            effects { StreamEffect.MinorError(errorMessageId = event.errorMessageId) }
+            state {
+                StreamState.Content(
+                    allStreamsList = allStreamsListCached.value,
+                    subscribedStreamsList = subscribedStreamsListCached.value
+                )
+            }
+        }
+
+        is StreamEvent.Internal.SubscriptionChangedSuccessfully -> {
+            handleUpdatingSubscriptionStatus(
+                streamId = event.streamId,
+                newSubscriptionStatus = event.newSubscriptionStatus,
+                streamDestination = event.streamDestination,
+                onUpdateSuccessfully = {
+                    state {
+                        StreamState.Content(
+                            allStreamsList = allStreamsListCached.value,
+                            subscribedStreamsList = subscribedStreamsListCached.value
+                        )
+                    }
+                }
+            )
         }
     }
 
@@ -219,6 +236,31 @@ class StreamReducer : ScreenDslReducer<
         is StreamEvent.Ui.CreateStream -> {
             commands { +StreamCommand.CreateStream(event.streamName) }
         }
+
+        is StreamEvent.Ui.ChangeSubscriptionStatus -> {
+            when (event.stream.value.subscriptionStatus) {
+                SubscriptionStatus.SUBSCRIBED -> {
+                    commands {
+                        +StreamCommand.UnsubscribedFromStream(
+                            streamId = event.stream.id,
+                            streamName = event.stream.value.name,
+                            streamDestination = event.streamDestination
+                        )
+                    }
+                }
+
+                SubscriptionStatus.UNSUBSCRIBED -> {
+                    commands {
+                        +StreamCommand.SubscribedToStream(
+                            streamId = event.stream.id,
+                            streamName = event.stream.value.name,
+                            streamDestination = event.streamDestination
+                        )
+                    }
+                }
+            }
+
+        }
     }
 
     private fun createNewStream(streamName: String, newStreamId: Int) {
@@ -227,11 +269,15 @@ class StreamReducer : ScreenDslReducer<
             value = Stream(
                 id = newStreamId,
                 name = streamName,
+                subscriptionStatus = SubscriptionStatus.SUBSCRIBED
             )
         )
-        val newSubscribedStreamsList = subscribedStreamsListCached.value.toMutableList()
-        newSubscribedStreamsList.add(newStream)
-        subscribedStreamsListCached.value = newSubscribedStreamsList
+        subscribedStreamsListCached.value = subscribedStreamsListCached.value.toMutableList().apply {
+            this.add(newStream)
+        }
+        allStreamsListCached.value = allStreamsListCached.value.toMutableList().apply {
+            this.add(newStream)
+        }
     }
 
     private fun updateStreamsStateAfterStreamClick(
@@ -266,35 +312,6 @@ class StreamReducer : ScreenDslReducer<
         }
     }
 
-    private fun getLoadedExpandedDelegateList(
-        streamList: List<DelegateItem>,
-        streamListFromNetwork: List<Stream>,
-    ): List<DelegateItem> {
-        val expandedStreamsId = streamList
-            .filterIsInstance<StreamDelegateItem>()
-            .filter { it.value.isExpanded }
-            .map { it.id }
-        val expandedList = mutableListOf<DelegateItem>()
-        streamListFromNetwork.forEach { stream ->
-            if (stream.id in expandedStreamsId) {
-                expandedList.add(
-                    StreamDelegateItem(
-                        id = stream.id,
-                        value = stream.copy(isExpanded = true)
-                    )
-                )
-                for (topic in stream.topicsList) {
-                    val topicDelegateItem =
-                        TopicDelegateItem(id = generateRandomId(), value = topic)
-                    expandedList.add(topicDelegateItem)
-                }
-            } else {
-                expandedList.add(StreamDelegateItem(id = stream.id, value = stream))
-            }
-        }
-        return expandedList
-    }
-
     private fun handleStreamClick(
         listWhereHandleStreamClick: List<DelegateItem>,
         stream: StreamDelegateItem,
@@ -318,7 +335,6 @@ class StreamReducer : ScreenDslReducer<
         }
         return newListWithoutTopics
     }
-
 
     private fun addTopics(
         listWhereAddTopics: List<DelegateItem>,
@@ -411,4 +427,81 @@ class StreamReducer : ScreenDslReducer<
         throw IllegalStateException("Invalid stream name")
     }
 
+    private fun changeStreamSubscriptionInAllStreamsList(
+        streamId: Int,
+        newSubscriptionStatus: SubscriptionStatus
+    ) {
+        val oldStreamDelegateItem = try {
+            allStreamsListCached.value.first { it.id() == streamId }
+        } catch (e: Exception) {
+            return
+        }
+        val oldStreamDelegateItemIndex =
+            allStreamsListCached.value.indexOf(oldStreamDelegateItem)
+        if (oldStreamDelegateItemIndex == -1) {
+            return
+        }
+        val newStreamDelegateItem = StreamDelegateItem(
+            id = streamId,
+            value = (oldStreamDelegateItem.content() as Stream).copy(
+                subscriptionStatus = newSubscriptionStatus
+            )
+        )
+        allStreamsListCached.value =
+            allStreamsListCached.value.toMutableList().apply {
+                this[oldStreamDelegateItemIndex] = newStreamDelegateItem
+            }
+    }
+
+    private fun handleUpdatingSubscriptionStatus(
+        streamId: Int,
+        newSubscriptionStatus: SubscriptionStatus,
+        streamDestination: StreamDestination,
+        onUpdateSuccessfully: () -> Unit,
+    ) {
+        when (streamDestination) {
+            StreamDestination.ALL -> {
+                when (newSubscriptionStatus) {
+                    SubscriptionStatus.SUBSCRIBED -> {
+                        changeStreamSubscriptionInAllStreamsList(
+                            streamId = streamId,
+                            newSubscriptionStatus = SubscriptionStatus.SUBSCRIBED
+                        )
+                        onUpdateSuccessfully()
+                    }
+
+                    SubscriptionStatus.UNSUBSCRIBED -> {
+                        changeStreamSubscriptionInAllStreamsList(
+                            streamId = streamId,
+                            newSubscriptionStatus = SubscriptionStatus.UNSUBSCRIBED
+                        )
+                        onUpdateSuccessfully()
+                    }
+                }
+            }
+
+            StreamDestination.SUBSCRIBED -> {
+                when (newSubscriptionStatus) {
+                    SubscriptionStatus.SUBSCRIBED -> return
+                    SubscriptionStatus.UNSUBSCRIBED -> {
+                        val oldStreamDelegateItem = try {
+                            subscribedStreamsListCached.value.first { it.id() == streamId }
+                        } catch (e: Exception) {
+                            return
+                        }
+                        val oldStreamDelegateItemIndex =
+                            subscribedStreamsListCached.value.indexOf(oldStreamDelegateItem)
+                        if (oldStreamDelegateItemIndex == -1) {
+                            return
+                        }
+                        subscribedStreamsListCached.value =
+                            subscribedStreamsListCached.value.toMutableList().apply {
+                                this.remove(oldStreamDelegateItem)
+                            }
+                        onUpdateSuccessfully()
+                    }
+                }
+            }
+        }
+    }
 }

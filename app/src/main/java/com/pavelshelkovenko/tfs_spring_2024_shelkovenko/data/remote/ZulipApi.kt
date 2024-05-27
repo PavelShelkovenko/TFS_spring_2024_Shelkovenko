@@ -138,4 +138,14 @@ interface ZulipApi {
         @Path("message_id") messageId: Int,
         @Query("content") messageContent: String
     )
+
+    @POST("users/me/subscriptions")
+    suspend fun subscribeToStream(
+        @Query("subscriptions") subscriptions: JSONArray
+    )
+
+    @DELETE ("users/me/subscriptions")
+    suspend fun unsubscribeFromStreams(
+        @Query("subscriptions") subscriptions: String
+    )
 }

@@ -16,8 +16,20 @@ sealed interface StreamCommand {
 
     data class ProcessSearch(
         val query: String,
-        val streamDestination: StreamDestination
+        val streamDestination: StreamDestination,
     ): StreamCommand
 
     data class CreateStream(val streamName: String): StreamCommand
+
+    data class UnsubscribedFromStream(
+        val streamId: Int,
+        val streamName: String,
+        val streamDestination: StreamDestination
+    ): StreamCommand
+
+    data class SubscribedToStream(
+        val streamId: Int,
+        val streamName: String,
+        val streamDestination: StreamDestination
+    ): StreamCommand
 }

@@ -14,6 +14,7 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.databinding.FragmentChannelBinding
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.StreamDestination
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.channels.streams.StreamsInfoFragment
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.hideKeyboard
 import kotlinx.coroutines.flow.MutableStateFlow
 
 
@@ -94,15 +95,14 @@ class ChannelFragment : Fragment(R.layout.fragment_channel) {
         }
         val createStreamButton = dialog.findViewById<Button>(R.id.create_stream_button)
         createStreamButton.setOnClickListener {
+            dialog.findViewById<EditText>(R.id.stream_name_edit_text).hideKeyboard()
             val currentFragment = pagerAdapter.getCurrentFragment(binding.channelViewPager.currentItem)
             val streamName = dialog.findViewById<EditText>(R.id.stream_name_edit_text).text.trim().toString()
             (currentFragment as? StreamsInfoFragment)?.createStream(streamName)
-            dialog.hide()
+            dialog.cancel()
         }
         dialog.show()
     }
-
-
 }
 
 

@@ -1,8 +1,8 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.repository
 
+import com.google.gson.Gson
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.dao.StreamDao
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.dao.TopicDao
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.models.SubscriptionStatus
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.mappers.toStreamDbo
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.mappers.toStreamDomain
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.mappers.toTopicDbo
@@ -10,6 +10,7 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.mappers.toTopicDoma
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.ZulipApi
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Stream
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.StreamDestination
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.SubscriptionStatus
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Topic
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.repository.StreamRepository
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.containsQuery
@@ -23,7 +24,7 @@ class StreamRepositoryImpl @Inject constructor(
     private val topicDao: TopicDao,
 ) : StreamRepository {
 
-    override suspend fun getStreamsByDestination(streamDestination: StreamDestination): List<Stream> {
+    override suspend fun getStreamsByDestinationFromNetwork(streamDestination: StreamDestination): List<Stream> {
         val streamsDto = when (streamDestination) {
             StreamDestination.ALL -> zulipApi.getAllStreams().allStreams
             StreamDestination.SUBSCRIBED -> zulipApi.getSubscribedStreams().subscribedStreams
@@ -31,15 +32,22 @@ class StreamRepositoryImpl @Inject constructor(
         val streams = streamsDto.map { streamDto ->
             streamDto.toStreamDomain()
         }
-        saveStreamsInCache(streams, streamDestination)
-        return streams.sortedBy { it.id }
+        return saveStreamsInCache(streams, streamDestination)
     }
 
     override suspend fun searchStreams(
         query: String,
         streamDestination: StreamDestination
     ): List<Stream> =
-        getStreamsByDestination(streamDestination).filter { it.name.containsQuery(query) }
+        searchStreamsInCache(
+            query = query,
+            streamDestination = streamDestination
+        ).ifEmpty {
+            searchStreamsFromNetwork(
+                query = query,
+                streamDestination = streamDestination
+            )
+        }
 
     override suspend fun createStream(streamName: String): Int {
         val jsonObjStream = JSONObject()
@@ -61,6 +69,20 @@ class StreamRepositoryImpl @Inject constructor(
         } else {
             getTopicsFromNetwork(streamId)
         }
+    }
+
+    override suspend fun subscribeToStream(streamName: String, streamId: Int) {
+        val jsonObjStream = JSONObject()
+        jsonObjStream.put("name", streamName)
+        val jsonArray = JSONArray()
+        jsonArray.put(jsonObjStream)
+        zulipApi.subscribeToStream(jsonArray)
+        streamDao.updateSubscriptionStatus(id = streamId, status = SubscriptionStatus.SUBSCRIBED)
+    }
+
+    override suspend fun unsubscribeFromStream(streamName: String, streamId: Int) {
+        zulipApi.unsubscribeFromStreams(Gson().toJson(listOf(streamName)))
+        streamDao.updateSubscriptionStatus(id = streamId, status = SubscriptionStatus.UNSUBSCRIBED)
     }
 
     override suspend fun getStreamsByDestinationFromCache(streamDestination: StreamDestination): List<Stream> {
@@ -88,7 +110,7 @@ class StreamRepositoryImpl @Inject constructor(
     private suspend fun saveStreamsInCache(
         streams: List<Stream>,
         streamDestination: StreamDestination
-    ) {
+    ): List<Stream> {
         when (streamDestination) {
             StreamDestination.ALL -> {
                 val streamsForCaching = streams.map {
@@ -97,6 +119,7 @@ class StreamRepositoryImpl @Inject constructor(
                 for (stream in streamsForCaching) {
                     streamDao.insert(stream)
                 }
+                return streamDao.getAllStreams().map { it.toStreamDomain() }
             }
 
             StreamDestination.SUBSCRIBED -> {
@@ -106,6 +129,8 @@ class StreamRepositoryImpl @Inject constructor(
                 for (stream in streamsForCaching) {
                     streamDao.insert(stream)
                 }
+                return streamDao.getSubscribedStreams(SubscriptionStatus.SUBSCRIBED.name)
+                    .map { it.toStreamDomain() }
             }
         }
     }
@@ -117,8 +142,33 @@ class StreamRepositoryImpl @Inject constructor(
     }
 
     private suspend fun getTopicsFromNetwork(streamId: Int): List<Topic> {
-        val topicsDbo = zulipApi.getTopics(streamId).topics.map { topicDto -> topicDto.toTopicDbo(streamId) }
+        val topicsDbo =
+            zulipApi.getTopics(streamId).topics.map { topicDto -> topicDto.toTopicDbo(streamId) }
         topicDao.insertAll(topics = topicsDbo)
         return topicsDbo.toTopicDomainList().sortedBy { it.id }
+    }
+
+
+    private suspend fun searchStreamsFromNetwork(
+        query: String,
+        streamDestination: StreamDestination
+    ): List<Stream> =
+        getStreamsByDestinationFromNetwork(streamDestination).filter { it.name.containsQuery(query) }
+
+
+    private suspend fun searchStreamsInCache(
+        query: String,
+        streamDestination: StreamDestination
+    ): List<Stream> {
+        val streamsFromCache = when (streamDestination) {
+            StreamDestination.ALL -> streamDao.getAllStreams().map { it.toStreamDomain() }
+            StreamDestination.SUBSCRIBED -> streamDao.getSubscribedStreams(SubscriptionStatus.SUBSCRIBED.name)
+                .map { it.toStreamDomain() }
+        }
+        return if (query.isBlank()) {
+            streamsFromCache
+        } else {
+            streamsFromCache.filter { it.name.containsQuery(query) }
+        }
     }
 }

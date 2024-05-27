@@ -6,7 +6,7 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Topic
 
 interface StreamRepository {
 
-    suspend fun getStreamsByDestination(streamDestination: StreamDestination): List<Stream>
+    suspend fun getStreamsByDestinationFromNetwork(streamDestination: StreamDestination): List<Stream>
 
     suspend fun getStreamsByDestinationFromCache(streamDestination: StreamDestination): List<Stream>
 
@@ -15,4 +15,8 @@ interface StreamRepository {
     suspend fun createStream(streamName: String): Int
 
     suspend fun getTopicsForStreamById(streamId: Int): List<Topic>
+
+    suspend fun subscribeToStream(streamName: String, streamId: Int)
+
+    suspend fun unsubscribeFromStream(streamName: String, streamId: Int)
 }

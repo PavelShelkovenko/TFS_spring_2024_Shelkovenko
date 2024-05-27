@@ -2,14 +2,17 @@ package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.mappers
 
 import android.graphics.Color
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.models.StreamDbo
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.models.SubscriptionStatus
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.models.TopicDbo
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.models.dto.StreamDto
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.models.dto.TopicDto
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Stream
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.SubscriptionStatus
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Topic
 
-fun StreamDto.toStreamDomain(): Stream = Stream(id = this.id, name = this.streamName)
+fun StreamDto.toStreamDomain(): Stream = Stream(
+    id = this.id,
+    name = this.streamName
+)
 
 fun Stream.toStreamDbo(subscriptionStatus: SubscriptionStatus): StreamDbo = StreamDbo(
     id = id,
@@ -20,6 +23,7 @@ fun Stream.toStreamDbo(subscriptionStatus: SubscriptionStatus): StreamDbo = Stre
 fun StreamDbo.toStreamDomain(): Stream = Stream(
     id = this.id,
     name = this.streamName,
+    subscriptionStatus = this.subscriptionStatus
 )
 
 fun TopicDto.toTopicDbo(streamId: Int): TopicDbo = TopicDbo(

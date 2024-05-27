@@ -4,8 +4,8 @@ import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.models.ReactionDbo
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.models.SubscriptionStatus
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.models.TopicDbo
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.SubscriptionStatus
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.UserOnlineStatus
 
 class Converters {

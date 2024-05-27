@@ -6,7 +6,7 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Topic
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.repository.StreamRepository
 
 class FakeStreamRepository: StreamRepository {
-    override suspend fun getStreamsByDestination(streamDestination: StreamDestination): List<Stream> {
+    override suspend fun getStreamsByDestinationFromNetwork(streamDestination: StreamDestination): List<Stream> {
         TODO("Not yet implemented")
     }
 

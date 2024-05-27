@@ -7,7 +7,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.models.StreamDbo
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.models.StreamWithTopics
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.models.SubscriptionStatus
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.SubscriptionStatus
 
 @Dao
 interface StreamDao {

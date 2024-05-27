@@ -17,10 +17,45 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="#general"/>
+        tools:text="#general" />
+
+    <FrameLayout
+        android:id="@+id/subscriptions_button_holder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/frameLayout"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageButton
+            android:id="@+id/unsubscribed_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="12dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/close_stream_topic_button"
+            android:src="@drawable/ic_unsubscribed_24"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/frameLayout"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageButton
+            android:id="@+id/subscribed_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="12dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/close_stream_topic_button"
+            android:src="@drawable/ic_subscribed_24"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/frameLayout"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </FrameLayout>
 
 
     <FrameLayout
+        android:id="@+id/frameLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -32,10 +67,10 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginEnd="8dp"
-            android:visibility="gone"
             android:background="@android:color/transparent"
+            android:contentDescription="@string/close_stream_topic_button"
             android:src="@drawable/ic_arrow_up_32"
-            android:contentDescription="@string/close_stream_topic_button" />
+            android:visibility="gone" />
 
         <ImageButton
             android:id="@+id/open_topics_button"
@@ -43,8 +78,8 @@
             android:layout_height="48dp"
             android:layout_marginEnd="8dp"
             android:background="@android:color/transparent"
-            android:src="@drawable/ic_arrow_down_32"
-            android:contentDescription="@string/open_stream_topic_button" />
+            android:contentDescription="@string/open_stream_topic_button"
+            android:src="@drawable/ic_arrow_down_32" />
 
     </FrameLayout>
 
@@ -53,8 +88,8 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/gray"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

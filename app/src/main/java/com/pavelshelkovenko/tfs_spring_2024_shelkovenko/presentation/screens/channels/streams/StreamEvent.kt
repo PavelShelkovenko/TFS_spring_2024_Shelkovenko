@@ -2,6 +2,7 @@ package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.ch
 
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Stream
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.StreamDestination
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.SubscriptionStatus
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Topic
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.channels.streams.adapter.StreamDelegateItem
 
@@ -28,6 +29,11 @@ sealed interface StreamEvent {
         ): Ui
 
         data class CreateStream(val streamName: String): Ui
+
+        data class ChangeSubscriptionStatus(
+            val stream: StreamDelegateItem,
+            val streamDestination: StreamDestination
+        ): Ui
     }
 
     sealed interface Internal: StreamEvent {
@@ -62,5 +68,11 @@ sealed interface StreamEvent {
         ): Internal
 
         data class SearchError(val errorMessageId: Int) : Internal
+
+        data class SubscriptionChangedSuccessfully(
+            val streamId: Int,
+            val newSubscriptionStatus: SubscriptionStatus,
+            val streamDestination: StreamDestination,
+        ): Internal
     }
 }

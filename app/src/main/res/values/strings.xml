@@ -37,4 +37,7 @@
     <string name="delete_message_error">Cannot delete message</string>
     <string name="edit_message_error">Cannot edit message</string>
     <string name="own_profile_loading_error">Cannot load own profile info</string>
+    <string name="message_copied_info">Message copied to clipboard</string>
+    <string name="subscribe_to_stream_error">Cannot subscribed to this stream</string>
+    <string name="unsubscribe_from_stream_error">Cannot unsubscribed from this stream</string>
 </resources>

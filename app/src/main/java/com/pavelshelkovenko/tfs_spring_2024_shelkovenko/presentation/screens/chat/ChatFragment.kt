@@ -541,7 +541,7 @@ class ChatFragment :
         val clipboardManager =
             requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         clipboardManager.setPrimaryClip(ClipData.newPlainText(text, text))
-        Toast.makeText(context, "Message copied to clipboard.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, context?.resources?.getString(R.string.message_copied_info), Toast.LENGTH_SHORT).show()
     }
 
 }
