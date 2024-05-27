@@ -19,7 +19,7 @@ class AnotherProfileActor(
                 }.onSuccess { ownUser ->
                     emit(AnotherProfileEvent.Internal.DataLoadedFromNetwork(user = ownUser))
                 }.onFailure {
-                    emit(AnotherProfileEvent.Internal.Error(errorMessageId = R.string.some_error_occurred))
+                    emit(AnotherProfileEvent.Internal.Error(errorMessageId = R.string.loading_another_profile_error))
                 }
             }
 

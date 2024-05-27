@@ -27,7 +27,7 @@ class StreamReducer : ScreenDslReducer<
 
     override fun Result.internal(event: StreamEvent.Internal) = when (event) {
 
-        is StreamEvent.Internal.DataLoadedFromNetwork -> {
+        is StreamEvent.Internal.DataLoaded -> {
             state {
                 when (event.streamDestination) {
                     StreamDestination.ALL -> {
@@ -54,6 +54,7 @@ class StreamReducer : ScreenDslReducer<
                 effects { +StreamEffect.MinorError(errorMessageId = event.errorMessageId) }
             } else {
                 state { StreamState.Error(errorMessageId = event.errorMessageId) }
+                effects { +StreamEffect.MinorError(errorMessageId = event.errorMessageId) }
             }
 
         }
@@ -102,7 +103,11 @@ class StreamReducer : ScreenDslReducer<
         }
 
         is StreamEvent.Internal.StreamCreatedSuccessfully -> {
-            createNewStream(streamName = event.streamName, newStreamId = event.newStreamId)
+            createNewStream(
+                streamName = event.streamName,
+                newStreamId = event.newStreamId,
+                streamDestination = event.streamDestination
+            )
             state {
                 StreamState.Content(
                     allStreamsList = allStreamsListCached.value,
@@ -116,13 +121,7 @@ class StreamReducer : ScreenDslReducer<
         }
 
         is StreamEvent.Internal.SearchError -> {
-            effects { StreamEffect.MinorError(errorMessageId = event.errorMessageId) }
-            state {
-                StreamState.Content(
-                    allStreamsList = allStreamsListCached.value,
-                    subscribedStreamsList = subscribedStreamsListCached.value
-                )
-            }
+            state { StreamState.Error(errorMessageId = event.errorMessageId) }
         }
 
         is StreamEvent.Internal.SubscriptionChangedSuccessfully -> {
@@ -150,11 +149,15 @@ class StreamReducer : ScreenDslReducer<
 
         is StreamEvent.Ui.ReloadData -> {
             state { StreamState.Loading }
-            commands {
-                +StreamCommand.ProcessSearch(
-                    query = event.currentQuery,
-                    streamDestination = event.streamDestination
-                )
+            if (event.currentQuery.isEmpty()) {
+                commands { +StreamCommand.LoadDataFromCache(event.streamDestination) }
+            } else {
+                commands {
+                    +StreamCommand.ProcessSearch(
+                        query = event.currentQuery,
+                        streamDestination = event.streamDestination
+                    )
+                }
             }
         }
 
@@ -234,7 +237,12 @@ class StreamReducer : ScreenDslReducer<
         }
 
         is StreamEvent.Ui.CreateStream -> {
-            commands { +StreamCommand.CreateStream(event.streamName) }
+            commands {
+                +StreamCommand.CreateStream(
+                    streamName = event.streamName,
+                    streamDestination = event.streamDestination
+                )
+            }
         }
 
         is StreamEvent.Ui.ChangeSubscriptionStatus -> {
@@ -263,7 +271,11 @@ class StreamReducer : ScreenDslReducer<
         }
     }
 
-    private fun createNewStream(streamName: String, newStreamId: Int) {
+    private fun createNewStream(
+        streamName: String,
+        newStreamId: Int,
+        streamDestination: StreamDestination,
+    ) {
         val newStream = StreamDelegateItem(
             id = newStreamId,
             value = Stream(
@@ -272,11 +284,17 @@ class StreamReducer : ScreenDslReducer<
                 subscriptionStatus = SubscriptionStatus.SUBSCRIBED
             )
         )
-        subscribedStreamsListCached.value = subscribedStreamsListCached.value.toMutableList().apply {
-            this.add(newStream)
-        }
-        allStreamsListCached.value = allStreamsListCached.value.toMutableList().apply {
-            this.add(newStream)
+        when(streamDestination) {
+            StreamDestination.ALL -> {
+                allStreamsListCached.value = allStreamsListCached.value.toMutableList().apply {
+                    this.add(newStream)
+                }
+            }
+            StreamDestination.SUBSCRIBED -> {
+                subscribedStreamsListCached.value = subscribedStreamsListCached.value.toMutableList().apply {
+                    this.add(newStream)
+                }
+            }
         }
     }
 

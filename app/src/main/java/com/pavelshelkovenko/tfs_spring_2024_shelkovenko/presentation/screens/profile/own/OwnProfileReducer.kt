@@ -43,7 +43,6 @@ class OwnProfileReducer : ScreenDslReducer<
 
         is OwnProfileEvent.Ui.StartProcess -> {
             commands { +OwnProfileCommand.LoadDataFromCache }
-
         }
 
         is OwnProfileEvent.Ui.ReloadData -> {

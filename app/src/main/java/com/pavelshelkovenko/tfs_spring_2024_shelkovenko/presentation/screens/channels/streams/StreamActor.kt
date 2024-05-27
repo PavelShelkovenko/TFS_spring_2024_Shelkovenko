@@ -18,13 +18,30 @@ class StreamActor(
                     repository.searchStreams(command.query, command.streamDestination)
                 }.onSuccess { streams ->
                     emit(
-                        StreamEvent.Internal.DataLoadedFromNetwork(
+                        StreamEvent.Internal.DataLoaded(
                             streams = streams,
                             streamDestination = command.streamDestination
                         )
                     )
                 }.onFailure {
-                    emit(StreamEvent.Internal.SearchError(errorMessageId = R.string.search_error))
+                    emit(StreamEvent.Internal.MinorError(errorMessageId = R.string.search_error))
+                    runCatchingNonCancellation {
+                        repository.searchStreamsInCache(
+                            query = command.query,
+                            streamDestination = command.streamDestination
+                        )
+                    }.onSuccess { streams ->
+                        if (streams.isNotEmpty()) {
+                            emit(
+                                StreamEvent.Internal.DataLoaded(
+                                    streams = streams,
+                                    streamDestination = command.streamDestination
+                                )
+                            )
+                        } else {
+                            emit(StreamEvent.Internal.SearchError(errorMessageId = R.string.search_error))
+                        }
+                    }
                 }
             }
 
@@ -33,7 +50,7 @@ class StreamActor(
                     repository.getStreamsByDestinationFromNetwork(command.streamDestination)
                 }.onSuccess { streams ->
                     emit(
-                        StreamEvent.Internal.DataLoadedFromNetwork(
+                        StreamEvent.Internal.DataLoaded(
                             streams = streams,
                             streamDestination = command.streamDestination
                         )
@@ -81,7 +98,8 @@ class StreamActor(
                     emit(
                         StreamEvent.Internal.StreamCreatedSuccessfully(
                             streamName = command.streamName,
-                            newStreamId = newStreamId
+                            newStreamId = newStreamId,
+                            streamDestination = command.streamDestination
                         )
                     )
                 }.onFailure {

@@ -38,7 +38,16 @@ class PeopleActor(
                 }.onSuccess { users ->
                     emit(PeopleEvent.Internal.DataLoadedFromNetwork(users = users))
                 }.onFailure {
-                    emit(PeopleEvent.Internal.SearchError(errorMessageId = R.string.search_error))
+                    emit(PeopleEvent.Internal.MinorError(errorMessageId = R.string.search_error))
+                    runCatchingNonCancellation {
+                        repository.searchUsersInCache(query = command.query)
+                    }.onSuccess { users ->
+                        if (users.isNotEmpty()) {
+                            emit(PeopleEvent.Internal.DataLoadedFromNetwork(users = users))
+                        } else {
+                            emit(PeopleEvent.Internal.SearchError(errorMessageId = R.string.search_error))
+                        }
+                    }
                 }
             }
 

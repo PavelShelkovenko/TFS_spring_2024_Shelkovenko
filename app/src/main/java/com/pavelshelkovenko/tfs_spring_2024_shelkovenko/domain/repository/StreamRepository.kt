@@ -12,6 +12,8 @@ interface StreamRepository {
 
     suspend fun searchStreams(query: String, streamDestination: StreamDestination): List<Stream>
 
+    suspend fun searchStreamsInCache(query: String, streamDestination: StreamDestination): List<Stream>
+
     suspend fun createStream(streamName: String): Int
 
     suspend fun getTopicsForStreamById(streamId: Int): List<Topic>

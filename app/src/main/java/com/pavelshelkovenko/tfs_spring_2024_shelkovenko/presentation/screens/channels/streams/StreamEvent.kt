@@ -28,7 +28,10 @@ sealed interface StreamEvent {
             val currentQuery: String
         ): Ui
 
-        data class CreateStream(val streamName: String): Ui
+        data class CreateStream(
+            val streamName: String,
+            val streamDestination: StreamDestination,
+        ): Ui
 
         data class ChangeSubscriptionStatus(
             val stream: StreamDelegateItem,
@@ -38,7 +41,7 @@ sealed interface StreamEvent {
 
     sealed interface Internal: StreamEvent {
 
-        data class DataLoadedFromNetwork(
+        data class DataLoaded(
             val streams: List<Stream>,
             val streamDestination: StreamDestination
         ): Internal
@@ -64,7 +67,8 @@ sealed interface StreamEvent {
 
         data class StreamCreatedSuccessfully(
             val streamName: String,
-            val newStreamId: Int
+            val newStreamId: Int,
+            val streamDestination: StreamDestination
         ): Internal
 
         data class SearchError(val errorMessageId: Int) : Internal

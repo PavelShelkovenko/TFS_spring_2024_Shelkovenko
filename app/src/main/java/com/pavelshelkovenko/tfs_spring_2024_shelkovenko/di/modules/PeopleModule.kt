@@ -1,6 +1,5 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.di.modules
 
-
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.di.scopes.PeopleScope
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.repository.UserRepository
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.people.PeopleActor

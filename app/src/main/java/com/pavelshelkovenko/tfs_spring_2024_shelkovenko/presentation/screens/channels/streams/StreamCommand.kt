@@ -19,7 +19,10 @@ sealed interface StreamCommand {
         val streamDestination: StreamDestination,
     ): StreamCommand
 
-    data class CreateStream(val streamName: String): StreamCommand
+    data class CreateStream(
+        val streamName: String,
+        val streamDestination: StreamDestination,
+    ): StreamCommand
 
     data class UnsubscribedFromStream(
         val streamId: Int,

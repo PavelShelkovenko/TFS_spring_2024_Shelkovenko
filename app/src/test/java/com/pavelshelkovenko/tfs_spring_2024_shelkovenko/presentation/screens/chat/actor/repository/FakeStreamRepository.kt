@@ -21,11 +21,26 @@ class FakeStreamRepository: StreamRepository {
         TODO("Not yet implemented")
     }
 
+    override suspend fun searchStreamsInCache(
+        query: String,
+        streamDestination: StreamDestination
+    ): List<Stream> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun createStream(streamName: String): Int {
         TODO("Not yet implemented")
     }
 
     override suspend fun getTopicsForStreamById(streamId: Int): List<Topic> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun subscribeToStream(streamName: String, streamId: Int) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun unsubscribeFromStream(streamName: String, streamId: Int) {
         TODO("Not yet implemented")
     }
 }

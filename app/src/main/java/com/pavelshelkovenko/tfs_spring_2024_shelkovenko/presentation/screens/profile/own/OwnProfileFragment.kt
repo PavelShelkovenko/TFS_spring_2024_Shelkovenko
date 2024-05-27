@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.core.view.isVisible
+import androidx.navigation.fragment.findNavController
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.bumptech.glide.Glide
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
@@ -43,10 +44,7 @@ class OwnProfileFragment :
         if (savedInstanceState == null) {
             store.accept(OwnProfileEvent.Ui.StartProcess)
         }
-
-        binding.errorComponent.retryButton.setOnClickListener {
-            store.accept(OwnProfileEvent.Ui.ReloadData)
-        }
+        setupClickListeners()
     }
 
     override fun handleEffect(effect: OwnProfileEffect) {
@@ -65,6 +63,7 @@ class OwnProfileFragment :
                     ownUserAvatarImage.isVisible = true
                     ownUserName.isVisible = true
                     ownUserOnlineStatus.isVisible = true
+                    settingsButton.isVisible = true
                     shimmerContainer.stopShimmer()
                     ownUserName.text = state.ownUser.name
                     ownUserOnlineStatus.setColoredTextStatus(status = state.ownUser.onlineStatus)
@@ -77,6 +76,7 @@ class OwnProfileFragment :
                     ownUserAvatarImage.isVisible = false
                     ownUserName.isVisible = false
                     ownUserOnlineStatus.isVisible = false
+                    settingsButton.isVisible = false
                     errorComponent.errorMessage.text = resources.getString(state.errorMessageId)
                     shimmerContainer.stopShimmer()
                 }
@@ -87,6 +87,7 @@ class OwnProfileFragment :
                     ownUserAvatarImage.isVisible = false
                     ownUserName.isVisible = false
                     ownUserOnlineStatus.isVisible = false
+                    settingsButton.isVisible = false
                 }
 
                 is OwnProfileState.Loading -> {
@@ -95,8 +96,22 @@ class OwnProfileFragment :
                     ownUserAvatarImage.isVisible = false
                     ownUserName.isVisible = false
                     ownUserOnlineStatus.isVisible = false
+                    settingsButton.isVisible = false
                     shimmerContainer.startShimmer()
                 }
+            }
+        }
+    }
+
+    private fun setupClickListeners() {
+        with(binding) {
+            settingsButton.setOnClickListener {
+                findNavController().navigate(
+                    OwnProfileFragmentDirections.actionOwnProfileFragmentToOwnSettingsFragment()
+                )
+            }
+            errorComponent.retryButton.setOnClickListener {
+                store.accept(OwnProfileEvent.Ui.ReloadData)
             }
         }
     }

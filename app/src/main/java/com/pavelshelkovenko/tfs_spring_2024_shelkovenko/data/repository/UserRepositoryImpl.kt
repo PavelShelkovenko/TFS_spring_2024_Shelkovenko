@@ -77,18 +77,9 @@ class UserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun searchUsers(query: String): List<User> =
-        searchUsersInCache(query).ifEmpty { searchUsersInNetwork(query) }
+        getAllUsersFromNetwork().filter { it.name.containsQuery(query) }
 
-
-    private suspend fun searchUsersInNetwork(query: String): List<User> {
-        return if (query.isBlank()) {
-            getAllUsersFromNetwork()
-        } else {
-            getAllUsersFromNetwork().filter { it.name.containsQuery(query) }
-        }
-    }
-
-    private suspend fun searchUsersInCache(query: String): List<User> {
+    override suspend fun searchUsersInCache(query: String): List<User> {
         val usersFromCache = getAllUsersFromCache()
         return if (query.isBlank()) {
             usersFromCache

@@ -148,4 +148,20 @@ interface ZulipApi {
     suspend fun unsubscribeFromStreams(
         @Query("subscriptions") subscriptions: String
     )
+
+    @PATCH("settings")
+    suspend fun updateOwnUserName(
+        @Query("full_name") newName: String
+    )
+
+    @PATCH("settings")
+    suspend fun updateEmailVisibility(
+        @Query("email_address_visibility") newEmailVisibility: Int
+    )
+
+    @PATCH("settings")
+    suspend fun updateInvisibleMode(
+        @Query("presence_enabled") newInvisibleModeState: Boolean
+    )
+
 }

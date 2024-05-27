@@ -53,10 +53,16 @@ class PeopleReducer : ScreenDslReducer<
         }
 
         is PeopleEvent.Ui.ReloadData -> {
-            commands { +PeopleCommand.ProcessSearch(event.currentQuery) }
+            state { PeopleState.Loading }
+            if (event.currentQuery.isEmpty()) {
+                commands { +PeopleCommand.LoadDataFromCache }
+            } else {
+                commands { +PeopleCommand.ProcessSearch(event.currentQuery) }
+            }
         }
 
         is PeopleEvent.Ui.QueryChanged -> {
+            state { PeopleState.Loading }
             commands { +PeopleCommand.ProcessSearch(event.newQuery) }
         }
     }

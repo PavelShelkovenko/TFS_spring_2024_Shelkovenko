@@ -5,6 +5,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.models.ReactionDbo
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.models.TopicDbo
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.EmailVisibility
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.SubscriptionStatus
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.UserOnlineStatus
 
@@ -39,4 +40,10 @@ class Converters {
 
     @TypeConverter
     fun fromReactionList(list: List<ReactionDbo>): String = Gson().toJson(list)
+
+    @TypeConverter
+    fun fromEmailVisibility(emailVisibility: EmailVisibility): String = emailVisibility.name
+
+    @TypeConverter
+    fun toEmailVisibility(value: String): EmailVisibility = EmailVisibility.valueOf(value)
 }

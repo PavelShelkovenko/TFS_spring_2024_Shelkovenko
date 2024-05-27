@@ -201,7 +201,12 @@ class StreamsInfoFragment :
     }
 
     override fun createStream(streamName: String) {
-        store.accept(StreamEvent.Ui.CreateStream(streamName = streamName))
+        store.accept(
+            StreamEvent.Ui.CreateStream(
+                streamName = streamName,
+                streamDestination = getStreamDestinationFromArgs()
+            )
+        )
     }
 
     companion object {

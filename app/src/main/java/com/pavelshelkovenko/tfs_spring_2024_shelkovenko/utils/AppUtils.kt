@@ -136,6 +136,8 @@ fun View.hideKeyboard(): Boolean {
     return imm.hideSoftInputFromWindow(windowToken, 0)
 }
 
+fun String.makeOnlyFirstChatCapitalize(): String = this.lowercase()
+    .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
 
 
 

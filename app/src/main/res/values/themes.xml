@@ -3,6 +3,7 @@
     <style name="Base.Theme.TFS_spring_2024_Shelkovenko" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <item name="colorPrimary">@color/gray</item>
+        <item name="colorTertiary">@color/gray</item>
         <item name="emojiDefaultAttr">@style/DefaultEmojiReactionStyle</item>
     </style>
 

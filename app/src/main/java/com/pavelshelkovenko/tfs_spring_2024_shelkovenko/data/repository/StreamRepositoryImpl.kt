@@ -39,15 +39,7 @@ class StreamRepositoryImpl @Inject constructor(
         query: String,
         streamDestination: StreamDestination
     ): List<Stream> =
-        searchStreamsInCache(
-            query = query,
-            streamDestination = streamDestination
-        ).ifEmpty {
-            searchStreamsFromNetwork(
-                query = query,
-                streamDestination = streamDestination
-            )
-        }
+        getStreamsByDestinationFromNetwork(streamDestination).filter { it.name.containsQuery(query) }
 
     override suspend fun createStream(streamName: String): Int {
         val jsonObjStream = JSONObject()
@@ -148,15 +140,7 @@ class StreamRepositoryImpl @Inject constructor(
         return topicsDbo.toTopicDomainList().sortedBy { it.id }
     }
 
-
-    private suspend fun searchStreamsFromNetwork(
-        query: String,
-        streamDestination: StreamDestination
-    ): List<Stream> =
-        getStreamsByDestinationFromNetwork(streamDestination).filter { it.name.containsQuery(query) }
-
-
-    private suspend fun searchStreamsInCache(
+    override suspend fun searchStreamsInCache(
         query: String,
         streamDestination: StreamDestination
     ): List<Stream> {

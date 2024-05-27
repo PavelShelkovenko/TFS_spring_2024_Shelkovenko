@@ -21,6 +21,8 @@ interface ApplicationComponent {
 
     fun chatComponent(): ChatComponent
 
+    fun ownSettingsComponent(): OwnSettingsComponent
+
     @Component.Factory
     interface ApplicationComponentFactory {
 

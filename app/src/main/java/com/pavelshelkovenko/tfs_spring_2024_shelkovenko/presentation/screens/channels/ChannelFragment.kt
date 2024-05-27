@@ -98,7 +98,9 @@ class ChannelFragment : Fragment(R.layout.fragment_channel) {
             dialog.findViewById<EditText>(R.id.stream_name_edit_text).hideKeyboard()
             val currentFragment = pagerAdapter.getCurrentFragment(binding.channelViewPager.currentItem)
             val streamName = dialog.findViewById<EditText>(R.id.stream_name_edit_text).text.trim().toString()
-            (currentFragment as? StreamsInfoFragment)?.createStream(streamName)
+            try {
+                (currentFragment as? StreamsInfoFragment)?.createStream(streamName)
+            } catch (_: Exception) {}
             dialog.cancel()
         }
         dialog.show()
