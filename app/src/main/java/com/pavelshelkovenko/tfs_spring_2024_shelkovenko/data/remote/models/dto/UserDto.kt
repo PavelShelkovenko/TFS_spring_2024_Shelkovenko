@@ -1,7 +1,6 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.models.dto
 
 import com.google.gson.annotations.SerializedName
-import java.io.Serializable
 
 data class UserDto(
     @SerializedName("user_id")
@@ -14,5 +13,4 @@ data class UserDto(
     val email: String?,
     @SerializedName("email")
     val zulipEmail: String,
-    //val onlineStatus: UserOnlineStatusDto?,
-): Serializable
+)

@@ -3,6 +3,7 @@ package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.ch
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.R
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.RegistrationForEventsData
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.repository.ChatRepository
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.usecases.GetTopicsForStreamByIdUseCase
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.runCatchingNonCancellation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -10,7 +11,8 @@ import kotlinx.coroutines.flow.flow
 import vivid.money.elmslie.core.store.Actor
 
 class ChatActor(
-    private val repository: ChatRepository
+    private val repository: ChatRepository,
+    private val getTopicsForStreamByIdUseCase: GetTopicsForStreamByIdUseCase
 ) : Actor<ChatCommand, ChatEvent>() {
     override fun execute(command: ChatCommand): Flow<ChatEvent> {
         return when (command) {
@@ -26,7 +28,7 @@ class ChatActor(
                 }.onSuccess { messages ->
                     emit(ChatEvent.Internal.LoadMessagesFromNetwork(messages = messages))
                 }.onFailure {
-                    emit(ChatEvent.Internal.MinorError(errorMessageId = R.string.load_messages_error))
+                    emit(ChatEvent.Internal.Error(errorMessageId = R.string.load_messages_error))
                 }
             }
 
@@ -37,9 +39,20 @@ class ChatActor(
                         topicName = command.topicName,
                     )
                 }.onSuccess { messages ->
-                    emit(ChatEvent.Internal.LoadMessagesFromCache(messages = messages))
+                    emit(
+                        ChatEvent.Internal.LoadMessagesFromCache(
+                            messages = messages,
+                            topicName = command.topicName,
+                            streamName = command.streamName
+                        )
+                    )
                 }.onFailure {
-                    emit(ChatEvent.Internal.MinorError(errorMessageId = R.string.some_error_occurred))
+                    emit(
+                        ChatEvent.Internal.ErrorLoadingFromCache(
+                            streamName = command.streamName,
+                            topicName = command.topicName,
+                        )
+                    )
                 }
             }
 
@@ -55,8 +68,7 @@ class ChatActor(
                 }.onSuccess { messages ->
                     emit(ChatEvent.Internal.LoadPagingNewerMessages(messages = messages))
                 }.onFailure {
-                    emit(ChatEvent.Internal.MinorError(errorMessageId = R.string.load_messages_error))
-                    delay(10000)
+                    emit(ChatEvent.Internal.PagingError(errorMessageId = R.string.load_messages_error))
                 }
                 emit(ChatEvent.Internal.LoadingPagingDataFinished)
             }
@@ -73,13 +85,7 @@ class ChatActor(
                 }.onSuccess { messages ->
                     emit(ChatEvent.Internal.LoadPagingOlderMessages(messages = messages))
                 }.onFailure {
-                    emit(ChatEvent.Internal.MinorError(errorMessageId = R.string.load_messages_error))
-                    /*
-                    Сделано для того, чтобы если пользователь пытается загрузить новые или старые
-                    сообщения при отсутствии интернета, то ему приходил Toast об отсутвии интернета
-                    только раз в 10 сек(при условии что он попытался загрузить), а не постоянно
-                     */
-                    delay(10000)
+                    emit(ChatEvent.Internal.PagingError(errorMessageId = R.string.load_messages_error))
                 }
                 emit(ChatEvent.Internal.LoadingPagingDataFinished)
             }
@@ -152,12 +158,11 @@ class ChatActor(
                             receivedMessageEventData = receivedData
                         )
                     )
-                    // Небольшая задержка для того, чтобы не обработать один и тот же эвент два раза
-                    delay(100)
-                    emit(ChatEvent.Internal.GetMessageLongPollingData)
-                }.onFailure {
-                    emit(ChatEvent.Internal.GetMessageLongPollingData)
                 }
+                // TODO Разобраться, как отфильтровать одинаковые эвенты и убрать задержку
+                // Тут мини-задержка нужна, чтобы не обработать один и тот же эвент два раза
+                delay(100)
+                emit(ChatEvent.Internal.GetMessageLongPollingData)
             }
 
             is ChatCommand.GetReactionEvents -> flow {
@@ -172,13 +177,11 @@ class ChatActor(
                             receivedReactionEventData = receivedData
                         )
                     )
-                    // Небольшая задержка для того, чтобы не обработать один и тот же эвент два раза
-                    delay(100)
-                    emit(ChatEvent.Internal.GetReactionLongPollingData)
-                }.onFailure {
-                    emit(ChatEvent.Internal.GetReactionLongPollingData)
                 }
-
+                // TODO Разобраться, как отфильтровать одинаковые эвенты и убрать задержку
+                // Тут мини-задержка нужна, чтобы не обработать один и тот же эвент два раза
+                delay(100)
+                emit(ChatEvent.Internal.GetReactionLongPollingData)
             }
 
             is ChatCommand.SaveMessagesInCache -> flow {
@@ -190,6 +193,41 @@ class ChatActor(
                     )
                 }.onSuccess {
                     emit(ChatEvent.Internal.CachedMessagesSaved)
+                }
+            }
+
+            is ChatCommand.GetTopicsForStream -> flow {
+                runCatchingNonCancellation {
+                    getTopicsForStreamByIdUseCase.invoke(command.streamId)
+                }.onSuccess { topics ->
+                    emit(ChatEvent.Internal.TopicForStreamReceived(topics = topics))
+                }.onFailure {
+                    emit(ChatEvent.Internal.MinorError(errorMessageId = R.string.change_topic_error))
+                }
+            }
+
+            is ChatCommand.DeleteMessage -> flow {
+                runCatchingNonCancellation {
+                    repository.deleteMessageById(messageId = command.messageId)
+                }.onSuccess {
+                    emit(ChatEvent.Internal.MessageDeletedSuccessfully(messageId = command.messageId))
+                }.onFailure {
+                    emit(ChatEvent.Internal.MinorError(errorMessageId = R.string.delete_message_error))
+                }
+            }
+
+            is ChatCommand.EditMessage -> flow {
+                runCatchingNonCancellation {
+                    repository.editMessageContent(command.messageId, command.messageContent)
+                }.onSuccess {
+                    emit(
+                        ChatEvent.Internal.MessageEditedSuccessfully(
+                            messageId = command.messageId,
+                            messageContent = command.messageContent
+                        )
+                    )
+                }.onFailure {
+                    emit(ChatEvent.Internal.MinorError(errorMessageId = R.string.edit_message_error))
                 }
             }
         }

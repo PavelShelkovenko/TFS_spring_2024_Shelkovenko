@@ -21,6 +21,10 @@ import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 
+/**
+* Этот тест нужно запускать на "stagingDebug" buildVariant
+*/
+
 class ChatFragmentTest : TestCase() {
 
     @get:Rule
@@ -34,7 +38,11 @@ class ChatFragmentTest : TestCase() {
     @Test
     fun checkingVisibilityOfChatItems() = run {
         rule.wiremockRule.zulip { stubTestMessages() }
-        val fragmentArgs = bundleOf("streamName" to "test stream", "topicName" to "test topic")
+        val fragmentArgs = bundleOf(
+            "streamName" to "test stream",
+            "topicName" to "test topic",
+            "streamId" to 1
+        )
         val navController = TestNavHostController(ApplicationProvider.getApplicationContext())
         launchFragmentInContainer<ChatFragment>(fragmentArgs = fragmentArgs, instantiate = {
             ChatFragment().also { fragment ->
@@ -89,44 +97,6 @@ class ChatFragmentTest : TestCase() {
                         flexBox.isDisplayed()
                         flexBox.hasChildrenCount(3)
                         flexBox.hasReaction("1f914", "2")
-                    }
-                }
-            }
-
-        }
-    }
-
-    /*
-    Этот тест нужно запускать на (developmentDebug) BuildVariant, так как для этого теста требуется
-    реализация LongPolling'а
-     */
-
-    @Test
-    fun testSendingMessage() = run {
-        val fragmentArgs = bundleOf("streamName" to "another channel", "topicName" to "myTopic")
-        val navController = TestNavHostController(ApplicationProvider.getApplicationContext())
-        launchFragmentInContainer<ChatFragment>(fragmentArgs = fragmentArgs, instantiate = {
-            ChatFragment().also { fragment ->
-                fragment.viewLifecycleOwnerLiveData.observeForever { viewLifecycleOwner ->
-                    if (viewLifecycleOwner != null) {
-                        navController.setGraph(R.navigation.app_navigation)
-                        Navigation.setViewNavController(fragment.requireView(), navController)
-                    }
-                }
-            }
-        })
-        ChatScreen {
-            step("Печатаем сообщение для отправки") {
-                messageField.typeText("Hello")
-            }
-            step("Нажимаем кнопку отправить") {
-                sendMessageButton.click()
-            }
-            step("Проверяем что сообщение отображается в чате") {
-                chatRecycler {
-                    lastChild<ChatScreen.KSendMessage> {
-                        message.isDisplayed()
-                        message.hasText("Hello")
                     }
                 }
             }

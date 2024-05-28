@@ -1,8 +1,9 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!-- Base application theme. -->
     <style name="Base.Theme.TFS_spring_2024_Shelkovenko" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <item name="colorPrimary">@color/gray</item>
+        <item name="colorTertiary">@color/gray</item>
         <item name="emojiDefaultAttr">@style/DefaultEmojiReactionStyle</item>
     </style>
 
@@ -26,5 +27,27 @@
 
     <style name="CustomTabTextAppearance" parent="TextAppearance.AppCompat.Medium">
         <item name="android:textSize">18sp</item>  </style>
+
+    <style name="animation">
+        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
+    </style>
+    <style name="AddStreamDialogTheme" parent="Theme.AppCompat.Dialog">
+        <item name="android:windowBackground">@drawable/dialog_background</item>
+    </style>
+
+    <style name="RoundedButtonShape">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
+    </style>
+
+    <style name="CustomButtonStyle" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">@color/green</item>
+        <item name="textColor">@color/white</item>
+        <item name="textAllCaps">false</item>
+        <item name="shapeAppearance">@style/RoundedButtonShape</item>
+    </style>
+
+
 
 </resources>

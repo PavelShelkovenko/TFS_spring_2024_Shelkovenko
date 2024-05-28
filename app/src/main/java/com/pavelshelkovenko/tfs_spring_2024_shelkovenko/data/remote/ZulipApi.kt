@@ -7,14 +7,17 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.models.respo
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.models.response.GetMessagesResponse
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.models.response.GetOwnProfileResponse
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.models.response.GetReactionEventResponse
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.models.response.GetStreamByIdResponse
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.models.response.GetSubscribedStreamsResponse
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.models.response.GetTopicsResponse
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.models.response.GetUserPresenceResponse
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.models.response.GetUserResponse
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.models.response.RegisterEventsResponse
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.models.response.StreamIdResponse
 import org.json.JSONArray
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -77,6 +80,20 @@ interface ZulipApi {
         @Query("emoji_name") emojiName: String,
         @Query("emoji_code") emojiCode: String,
     )
+    @POST("users/me/subscriptions")
+    suspend fun createStream(
+        @Query("subscriptions") subscriptions: JSONArray
+    )
+
+    @GET("get_stream_id")
+    suspend fun getStreamId(
+        @Query("stream") streamName: String,
+    ): StreamIdResponse
+
+    @GET("streams/{stream_id}")
+    suspend fun getStreamById(
+        @Path("stream_id") id: Int,
+    ): GetStreamByIdResponse
 
     @DELETE("messages/{message_id}/reactions")
     suspend fun removeReaction(
@@ -109,4 +126,42 @@ interface ZulipApi {
         @Query("queue_id") queueId: String,
         @Query("last_event_id") lastEventId: String
     ): GetReactionEventResponse
+
+
+    @DELETE("messages/{message_id}")
+    suspend fun deleteMessageById(
+        @Path("message_id") messageId: Int,
+    )
+
+    @PATCH("messages/{message_id}")
+    suspend fun editMessageContent(
+        @Path("message_id") messageId: Int,
+        @Query("content") messageContent: String
+    )
+
+    @POST("users/me/subscriptions")
+    suspend fun subscribeToStream(
+        @Query("subscriptions") subscriptions: JSONArray
+    )
+
+    @DELETE ("users/me/subscriptions")
+    suspend fun unsubscribeFromStreams(
+        @Query("subscriptions") subscriptions: String
+    )
+
+    @PATCH("settings")
+    suspend fun updateOwnUserName(
+        @Query("full_name") newName: String
+    )
+
+    @PATCH("settings")
+    suspend fun updateEmailVisibility(
+        @Query("email_address_visibility") newEmailVisibility: Int
+    )
+
+    @PATCH("settings")
+    suspend fun updateInvisibleMode(
+        @Query("presence_enabled") newInvisibleModeState: Boolean
+    )
+
 }

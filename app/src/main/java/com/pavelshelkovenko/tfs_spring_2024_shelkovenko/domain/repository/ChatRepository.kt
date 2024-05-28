@@ -42,6 +42,9 @@ interface ChatRepository {
 
     suspend fun removeReaction(messageId: Int, emojiName: String, emojiCode: String)
 
+    suspend fun deleteMessageById(messageId: Int)
+
+    suspend fun editMessageContent(messageId: Int, newMessageContent: String)
 
     suspend fun registerForEvents(
         streamName: String,

@@ -9,7 +9,7 @@ sealed interface StreamState {
 
     data object Loading : StreamState
 
-    data class Error(val errorMessage: String) : StreamState
+    data class Error(val errorMessageId: Int) : StreamState
 
     data class Content(
         val allStreamsList: List<DelegateItem>,

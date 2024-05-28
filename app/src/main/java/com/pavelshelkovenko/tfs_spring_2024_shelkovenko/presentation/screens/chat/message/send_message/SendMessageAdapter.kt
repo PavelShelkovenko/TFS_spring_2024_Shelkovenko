@@ -14,7 +14,7 @@ class SendMessageAdapter :
         SendMessageDelegateItem::class.java
     ) {
 
-    var onMessageLongClickListener: ((Int) -> Unit)? = null
+    var onMessageLongClickListener: ((Int, String) -> Unit)? = null
     var onAddIconClickListener: ((Int) -> Unit)? = null
     var onEmojiClickListener: ((Int, Reaction) -> Unit)? = null
     var localUserId: Int? = null
@@ -60,7 +60,7 @@ class SendMessageAdapter :
                     }
                 )
                 messageGroup.getTextMessageChild().setOnLongClickListener {
-                    onMessageLongClickListener?.invoke(model.id)
+                    onMessageLongClickListener?.invoke(model.id, model.value.textMessage)
                     true
                 }
             }

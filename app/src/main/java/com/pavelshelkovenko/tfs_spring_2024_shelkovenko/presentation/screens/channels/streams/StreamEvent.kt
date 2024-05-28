@@ -2,6 +2,7 @@ package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.ch
 
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Stream
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.StreamDestination
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.SubscriptionStatus
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Topic
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.channels.streams.adapter.StreamDelegateItem
 
@@ -19,10 +20,23 @@ sealed interface StreamEvent {
 
         data class OnTopicClick(
             val topic: Topic,
-            val streamDestination: StreamDestination
+            val streamDestination: StreamDestination,
         ): Ui
 
-        data class ReloadData(val streamDestination: StreamDestination): Ui
+        data class ReloadData(
+            val streamDestination: StreamDestination,
+            val currentQuery: String
+        ): Ui
+
+        data class CreateStream(
+            val streamName: String,
+            val streamDestination: StreamDestination,
+        ): Ui
+
+        data class ChangeSubscriptionStatus(
+            val stream: StreamDelegateItem,
+            val streamDestination: StreamDestination
+        ): Ui
     }
 
     sealed interface Internal: StreamEvent {
@@ -37,8 +51,32 @@ sealed interface StreamEvent {
             val streamDestination: StreamDestination
         ): Internal
 
-        data class Error(val throwable: Throwable): Internal
+        data class ErrorLoadingFromCache(
+            val streamDestination: StreamDestination
+        ): Internal
+
+        data class TopicsLoaded(
+            val topics: List<Topic>,
+            val stream: StreamDelegateItem,
+            val streamDestination: StreamDestination
+        ): Internal
+
+        data class Error(val errorMessageId: Int): Internal
 
         data class MinorError(val errorMessageId: Int): Internal
+
+        data class StreamCreatedSuccessfully(
+            val streamName: String,
+            val newStreamId: Int,
+            val streamDestination: StreamDestination
+        ): Internal
+
+        data class SearchError(val errorMessageId: Int) : Internal
+
+        data class SubscriptionChangedSuccessfully(
+            val streamId: Int,
+            val newSubscriptionStatus: SubscriptionStatus,
+            val streamDestination: StreamDestination,
+        ): Internal
     }
 }

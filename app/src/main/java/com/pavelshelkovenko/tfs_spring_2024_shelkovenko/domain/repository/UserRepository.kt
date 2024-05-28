@@ -12,9 +12,10 @@ interface UserRepository {
 
     suspend fun getOwnProfileFromCache(): User?
 
-    suspend fun getAnotherUserFromNetwork(userId: Int): User
+    suspend fun getAnotherProfileFromNetwork(userId: Int): User
 
-    suspend fun getAnotherUserFromCache(userId: Int): User?
+    suspend fun getAnotherProfileFromCache(userId: Int): User?
 
     suspend fun searchUsers(query: String): List<User>
+    suspend fun searchUsersInCache(query: String): List<User>
 }

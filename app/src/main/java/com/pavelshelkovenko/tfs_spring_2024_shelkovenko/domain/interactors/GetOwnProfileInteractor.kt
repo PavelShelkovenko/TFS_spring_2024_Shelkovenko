@@ -1,10 +1,10 @@
-package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.usecase
+package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.interactors
 
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.User
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.repository.UserRepository
 import javax.inject.Inject
 
-class GetOwnProfileUseCase @Inject constructor(
+class GetOwnProfileInteractor @Inject constructor(
     private val userRepository: UserRepository
 ) {
     suspend fun getOwnProfileFromCache(): User? {

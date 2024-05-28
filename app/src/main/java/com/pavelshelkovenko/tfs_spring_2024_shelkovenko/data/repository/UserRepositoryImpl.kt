@@ -1,15 +1,15 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.repository
 
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.AccountInfo
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.dao.UserDao
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.mappers.toUserDbo
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.mappers.toUserDomain
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.mappers.toUserOnlineStatusDomain
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.ZulipApi
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.models.dto.UserDto
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.toUserDbo
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.toUserDomain
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.toUserOnlineStatusDomain
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.User
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.UserOnlineStatus
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.repository.UserRepository
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.MyUserId
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.containsQuery
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -18,6 +18,7 @@ import javax.inject.Inject
 class UserRepositoryImpl @Inject constructor(
     private val zulipApi: ZulipApi,
     private val userDao: UserDao,
+    private val accountInfo: AccountInfo,
 ) : UserRepository {
 
     override suspend fun getAllUsersFromNetwork(): List<User> {
@@ -35,13 +36,13 @@ class UserRepositoryImpl @Inject constructor(
 
 
     override suspend fun getOwnProfileFromCache(): User? {
-        val ownProfileFromCache = userDao.getOwnUser()
+        val ownProfileFromCache = userDao.getUserById(accountInfo.userId)
         return ownProfileFromCache?.toUserDomain() ?: return null
     }
 
     override suspend fun getOwnProfileFromNetwork(): User {
         val userOnlineStatus =
-            zulipApi.getUserPresence(MyUserId.MY_USER_ID.toString())
+            zulipApi.getUserPresence(accountInfo.userId.toString())
                 .presence
                 .aggregated
                 .userOnlineStatusDto
@@ -50,7 +51,7 @@ class UserRepositoryImpl @Inject constructor(
         val ownUser = User(
             id = ownUserResponse.userId,
             name = ownUserResponse.userName,
-            email = ownUserResponse.email,
+            email = ownUserResponse.email ?: ownUserResponse.zulipEmail,
             onlineStatus = userOnlineStatus,
             avatarUrl = ownUserResponse.avatarUrl
         )
@@ -58,7 +59,7 @@ class UserRepositoryImpl @Inject constructor(
         return ownUser
     }
 
-    override suspend fun getAnotherUserFromNetwork(userId: Int): User {
+    override suspend fun getAnotherProfileFromNetwork(userId: Int): User {
         val userStatus =
             zulipApi.getUserPresence(userId.toString())
                 .presence
@@ -70,24 +71,15 @@ class UserRepositoryImpl @Inject constructor(
         return anotherUser
     }
 
-    override suspend fun getAnotherUserFromCache(userId: Int): User? {
-        val anotherUserFromCache = userDao.getAnotherUser(userId = userId)
+    override suspend fun getAnotherProfileFromCache(userId: Int): User? {
+        val anotherUserFromCache = userDao.getUserById(userId = userId)
         return anotherUserFromCache?.toUserDomain() ?: return null
     }
 
     override suspend fun searchUsers(query: String): List<User> =
-        searchUsersInCache(query).ifEmpty { searchUsersInNetwork(query) }
+        getAllUsersFromNetwork().filter { it.name.containsQuery(query) }
 
-
-    private suspend fun searchUsersInNetwork(query: String): List<User> {
-        return if (query.isBlank()) {
-            getAllUsersFromNetwork()
-        } else {
-            getAllUsersFromNetwork().filter { it.name.containsQuery(query) }
-        }
-    }
-
-    private suspend fun searchUsersInCache(query: String): List<User> {
+    override suspend fun searchUsersInCache(query: String): List<User> {
         val usersFromCache = getAllUsersFromCache()
         return if (query.isBlank()) {
             usersFromCache

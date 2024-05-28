@@ -18,4 +18,12 @@ class ChannelPagerAdapter(
         this.fragments.addAll(fragments)
         notifyDataSetChanged()
     }
+
+    fun getCurrentFragment(position: Int): Fragment? {
+        return if (position in fragments.indices) {
+            fragments[position]
+        } else {
+            null
+        }
+    }
 }

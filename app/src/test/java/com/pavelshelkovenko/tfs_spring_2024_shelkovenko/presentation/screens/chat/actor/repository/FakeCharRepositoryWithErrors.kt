@@ -1,4 +1,4 @@
-package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.repository
+package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.actor.repository
 
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Message
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.ReceivedMessageEventData
@@ -45,6 +45,14 @@ class FakeCharRepositoryWithErrors: ChatRepository {
     }
 
     override suspend fun removeReaction(messageId: Int, emojiName: String, emojiCode: String) {
+        throw IllegalStateException("Test error")
+    }
+
+    override suspend fun deleteMessageById(messageId: Int) {
+        throw IllegalStateException("Test error")
+    }
+
+    override suspend fun editMessageContent(messageId: Int, newMessageContent: String) {
         throw IllegalStateException("Test error")
     }
 

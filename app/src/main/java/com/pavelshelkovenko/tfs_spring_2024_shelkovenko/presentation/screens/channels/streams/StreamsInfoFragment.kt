@@ -14,6 +14,7 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.base.ElmBas
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.base.delegate_adapter.MainAdapter
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.channels.ChannelFragment
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.channels.ChannelFragmentDirections
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.channels.CreateStreamListener
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.channels.streams.adapter.StreamAdapter
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.channels.streams.adapter.StreamDelegateItem
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.channels.topics.TopicAdapter
@@ -23,16 +24,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import vivid.money.elmslie.android.renderer.elmStoreWithRenderer
 import vivid.money.elmslie.core.store.Store
 import javax.inject.Inject
 
 class StreamsInfoFragment :
-    ElmBaseFragment<StreamEffect, StreamState, StreamEvent>(R.layout.fragment_streams_info) {
+    ElmBaseFragment<StreamEffect, StreamState, StreamEvent>(R.layout.fragment_streams_info),
+    CreateStreamListener {
 
     private val binding: FragmentStreamsInfoBinding by viewBinding(FragmentStreamsInfoBinding::bind)
 
@@ -82,6 +82,13 @@ class StreamsInfoFragment :
             }
             .flowOn(Dispatchers.IO)
             .launchIn(lifecycleScope)
+
+        store.accept(
+            StreamEvent.Ui.ReloadData(
+                streamDestination = getStreamDestinationFromArgs(),
+                currentQuery = (parentFragment as ChannelFragment).searchQueryFlow.replayCache.last()
+            )
+        )
     }
 
     override fun handleEffect(effect: StreamEffect) {
@@ -90,12 +97,15 @@ class StreamsInfoFragment :
                 findNavController().navigate(
                     ChannelFragmentDirections.actionChannelFragmentToChatFragment(
                         topicName = effect.topicName,
-                        streamName = effect.streamName
+                        streamName = effect.streamName,
+                        streamId = effect.streamId
                     )
                 )
             }
 
-            is StreamEffect.MinorError -> { showErrorToast(effect.errorMessageId, requireActivity()) }
+            is StreamEffect.MinorError -> {
+                showErrorToast(effect.errorMessageId, requireActivity())
+            }
         }
     }
 
@@ -120,10 +130,11 @@ class StreamsInfoFragment :
                     shimmerContainer.isVisible = false
                     errorContainer.isVisible = false
                     streamsInfoRv.isVisible = true
-                    when(getStreamDestinationFromArgs()) {
+                    when (getStreamDestinationFromArgs()) {
                         StreamDestination.ALL -> {
                             mainAdapter.submitList(state.allStreamsList)
                         }
+
                         StreamDestination.SUBSCRIBED -> {
                             mainAdapter.submitList(state.subscribedStreamsList)
                         }
@@ -136,6 +147,7 @@ class StreamsInfoFragment :
                     errorContainer.isVisible = true
                     shimmerContainer.isVisible = false
                     streamsInfoRv.isVisible = false
+                    errorComponent.errorMessage.text = resources.getText(state.errorMessageId)
                 }
             }
         }
@@ -154,24 +166,31 @@ class StreamsInfoFragment :
             )
         }
 
+        streamAdapter.onSubscriptionClickListener = { stream: StreamDelegateItem ->
+            store.accept(
+                StreamEvent.Ui.ChangeSubscriptionStatus(
+                    stream,
+                    getStreamDestinationFromArgs()
+                )
+            )
+        }
+
         topicAdapter.onTopicClickListener = { topic ->
             store.accept(
                 StreamEvent.Ui.OnTopicClick(
                     topic = topic,
-                    streamDestination = getStreamDestinationFromArgs()
+                    streamDestination = getStreamDestinationFromArgs(),
                 )
             )
         }
 
         binding.errorComponent.retryButton.setOnClickListener {
-            lifecycleScope.launch {
-                store.accept(
-                    StreamEvent.Ui.QueryChanged(
-                        newQuery = (parentFragment as ChannelFragment).searchQueryFlow.last(),
-                        streamDestination = getStreamDestinationFromArgs()
-                    )
+            store.accept(
+                StreamEvent.Ui.ReloadData(
+                    currentQuery = (parentFragment as ChannelFragment).searchQueryFlow.replayCache.last(),
+                    streamDestination = getStreamDestinationFromArgs()
                 )
-            }
+            )
         }
     }
 
@@ -179,6 +198,15 @@ class StreamsInfoFragment :
         return requireArguments().getSerializable(
             STREAMS_DESTINATION_KEY,
         ) as StreamDestination
+    }
+
+    override fun createStream(streamName: String) {
+        store.accept(
+            StreamEvent.Ui.CreateStream(
+                streamName = streamName,
+                streamDestination = getStreamDestinationFromArgs()
+            )
+        )
     }
 
     companion object {

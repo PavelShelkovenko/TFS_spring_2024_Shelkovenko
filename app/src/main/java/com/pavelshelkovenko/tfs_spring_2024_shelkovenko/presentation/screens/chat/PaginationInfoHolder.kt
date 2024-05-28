@@ -4,6 +4,7 @@ data class PaginationInfoHolder(
    var isLoadingPagingData: Boolean = false,
    var hasLoadedNewestMessage: Boolean = false,
    var hasLoadedOldestMessage: Boolean = false,
+   var hasSentPagingError: Boolean = false,
    var oldestAnchor: String = "0",
    var newestAnchor: String = "first_unread"
 )

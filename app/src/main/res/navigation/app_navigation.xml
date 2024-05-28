@@ -12,22 +12,29 @@
         tools:layout="@layout/fragment_channel" >
         <action
             android:id="@+id/action_channelFragment_to_chatFragment"
-            app:destination="@id/chatFragment" />
+            app:destination="@id/chatFragment"
+            app:popExitAnim="@anim/fade_out" />
     </fragment>
     <fragment
         android:id="@+id/peopleFragment"
         android:name="com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.people.PeopleFragment"
         android:label="fragment_people"
-        tools:layout="@layout/fragment_people" >
+        tools:layout="@layout/fragment_people">
         <action
             android:id="@+id/action_peopleFragment_to_anotherProfileFragment"
-            app:destination="@id/anotherProfileFragment" />
+            app:destination="@id/anotherProfileFragment"
+            app:popExitAnim="@anim/fade_out"/>
     </fragment>
     <fragment
         android:id="@+id/ownProfileFragment"
         android:name="com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.profile.own.OwnProfileFragment"
         android:label="fragment_own_profile"
-        tools:layout="@layout/fragment_own_profile" />
+        tools:layout="@layout/fragment_own_profile" >
+        <action
+            android:id="@+id/action_ownProfileFragment_to_ownSettingsFragment"
+            app:destination="@id/ownSettingsFragment"
+            app:popExitAnim="@anim/fade_out"/>
+    </fragment>
     <fragment
         android:id="@+id/chatFragment"
         android:name="com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.chat.ChatFragment"
@@ -39,6 +46,9 @@
         <argument
             android:name="topicName"
             app:argType="string" />
+        <argument
+            android:name="streamId"
+            app:argType="integer" />
     </fragment>
     <fragment
         android:id="@+id/anotherProfileFragment"
@@ -49,4 +59,8 @@
             android:name="userId"
             app:argType="integer" />
     </fragment>
+    <fragment
+        android:id="@+id/ownSettingsFragment"
+        android:name="com.pavelshelkovenko.tfs_spring_2024_shelkovenko.presentation.screens.profile.own.settings.OwnSettingsFragment"
+        android:label="OwnSettingsFragment" />
 </navigation>

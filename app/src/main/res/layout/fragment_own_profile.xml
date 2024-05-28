@@ -7,6 +7,16 @@
     tools:context=".presentation.screens.profile.own.OwnProfileFragment"
     android:background="@color/light_black">
 
+    <ImageView
+        android:id="@+id/settings_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_settings_24"
+        android:layout_marginTop="28dp"
+        android:layout_marginEnd="28dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <com.facebook.shimmer.ShimmerFrameLayout
         android:id="@+id/shimmerContainer"
         android:layout_width="match_parent"
@@ -22,8 +32,8 @@
             android:layout_height="match_parent"
             android:layout_width="match_parent"/>
 
-    </com.facebook.shimmer.ShimmerFrameLayout>
 
+    </com.facebook.shimmer.ShimmerFrameLayout>
 
     <FrameLayout
         android:id="@+id/error_container"
@@ -31,10 +41,11 @@
         android:layout_height="match_parent"
         android:visibility="invisible">
 
-        <include layout="@layout/error_screen"
+        <include
             android:id="@+id/error_component"
-            android:layout_height="match_parent"
-            android:layout_width="match_parent"/>
+            layout="@layout/error_screen"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
     </FrameLayout>
 
@@ -44,6 +55,7 @@
         android:layout_height="150dp"
         android:contentDescription="@string/user_avatar"
         android:src="@drawable/ic_launcher_background"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"

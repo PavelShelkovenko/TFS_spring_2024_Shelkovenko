@@ -27,7 +27,7 @@ class EmojiFactory @Inject constructor() {
         Emoji("innocent", "1f607"),
         Emoji("heart_eyes", "1f60d"),
         Emoji("heart_kiss", "1f618"),
-        Emoji("kiss", "1f617"),
+        Emoji("kissing_face", "1f617"),
         Emoji("smiling_face", "263a"),
         Emoji("kiss_with_blush", "1f61a"),
         Emoji("kiss_smiling_eyes", "1f619"),

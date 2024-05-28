@@ -1,4 +1,4 @@
-package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils
+package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data
 
 import org.json.JSONArray
 import org.json.JSONObject

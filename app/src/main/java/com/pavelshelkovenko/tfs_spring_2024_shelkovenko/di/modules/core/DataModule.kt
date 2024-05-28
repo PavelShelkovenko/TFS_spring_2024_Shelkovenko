@@ -1,14 +1,16 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.di.modules.core
 
 import android.content.Context
-import androidx.room.Room
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.BuildConfig
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.AccountInfo
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.NarrowBuilderHelper
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.AppDatabase
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.dao.AccountSettingsDao
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.dao.ChatDao
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.dao.StreamDao
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.dao.TopicDao
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.dao.UserDao
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.ZulipApi
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.NarrowBuilderHelper
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.di.scopes.ApplicationScope
 import dagger.Module
 import dagger.Provides
@@ -31,13 +33,7 @@ class DataModule {
 
     @ApplicationScope
     @Provides
-    fun providesDatabase(context: Context): AppDatabase {
-        return Room.databaseBuilder(
-            context.applicationContext,
-            AppDatabase::class.java,
-            AppDatabase.DB_NAME
-        ).fallbackToDestructiveMigration().build()
-    }
+    fun providesDatabase(context: Context): AppDatabase = AppDatabase.getDatabase(context)
 
     @ApplicationScope
     @Provides
@@ -50,6 +46,14 @@ class DataModule {
     @ApplicationScope
     @Provides
     fun provideChatDao(db: AppDatabase): ChatDao = db.chatDao()
+
+    @ApplicationScope
+    @Provides
+    fun provideTopicDao(db: AppDatabase): TopicDao = db.topicDao()
+
+    @ApplicationScope
+    @Provides
+    fun provideAccountSettingsDao(db: AppDatabase): AccountSettingsDao = db.accountSettingsDao()
 
     @ApplicationScope
     @Provides
@@ -76,11 +80,11 @@ class DataModule {
 
     @ApplicationScope
     @Provides
-    fun provideInterceptor(): Interceptor = Interceptor { chain ->
+    fun provideInterceptor(accountInfo: AccountInfo): Interceptor = Interceptor { chain ->
         val request: Request = chain.request().newBuilder()
             .header(
                 "Authorization",
-                Credentials.basic(USERNAME, PASSWORD)
+                Credentials.basic(accountInfo.userEmail, accountInfo.apiKey)
             )
             .build()
         chain.proceed(request)
@@ -98,11 +102,7 @@ class DataModule {
     @Provides
     fun provideNarrowBuilderHelper(): NarrowBuilderHelper = NarrowBuilderHelper()
 
-    companion object {
-
-        //Эти константы по идее должны из BuildConfig браться
-
-        private const val USERNAME = "pavel.shelkovenko@gmail.com"
-        private const val PASSWORD = "PIqWnpOVj5pqafJQFefbu1Rd3yMwyQil"
-    }
+    @ApplicationScope
+    @Provides
+    fun provideAccountInfo(): AccountInfo = AccountInfo()
 }

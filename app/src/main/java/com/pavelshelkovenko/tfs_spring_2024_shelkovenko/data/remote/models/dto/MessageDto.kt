@@ -1,7 +1,6 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.models.dto
 
 import com.google.gson.annotations.SerializedName
-import java.io.Serializable
 
 data class MessageDto(
     @SerializedName("id")
@@ -18,4 +17,4 @@ data class MessageDto(
     val dateInUTCSeconds: Int,
     @SerializedName("reactions")
     val reactions: List<ReactionDto>,
-): Serializable
+)

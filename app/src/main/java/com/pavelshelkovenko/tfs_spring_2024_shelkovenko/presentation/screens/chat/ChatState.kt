@@ -10,5 +10,8 @@ sealed interface ChatState {
 
     data class Error(val errorMessageId: Int) : ChatState
 
-    data class Content(val messages: List<DelegateItem>) : ChatState
+    data class Content(
+        val messages: List<DelegateItem>,
+        val editModeState: EditModeState
+    ) : ChatState
 }

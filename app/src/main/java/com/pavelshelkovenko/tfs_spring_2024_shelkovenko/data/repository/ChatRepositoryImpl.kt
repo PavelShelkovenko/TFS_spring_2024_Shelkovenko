@@ -1,11 +1,12 @@
 package com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.repository
 
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.AccountInfo
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.NarrowBuilderHelper
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.local.dao.ChatDao
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.mappers.toMessageDbo
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.mappers.toMessageDomain
+import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.mappers.toOperation
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.remote.ZulipApi
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.NarrowBuilderHelper
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.toMessageDbo
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.toMessageDomain
-import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.data.utils.toOperation
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.Message
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.ReactionEvent
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.domain.models.events.ReceivedMessageEventData
@@ -18,6 +19,7 @@ class ChatRepositoryImpl @Inject constructor(
     private val zulipApi: ZulipApi,
     private val narrowBuilderHelper: NarrowBuilderHelper,
     private val chatDao: ChatDao,
+    private val accountInfo: AccountInfo,
 ) : ChatRepository {
 
     override suspend fun getMessagesFromNetwork(
@@ -36,7 +38,7 @@ class ChatRepositoryImpl @Inject constructor(
         )
         val messagesDto = response.messages
         val resultMessages = messagesDto.map { messageDto ->
-            messageDto.toMessageDomain()
+            messageDto.toMessageDomain(accountInfo)
         }
         return resultMessages
     }
@@ -90,6 +92,19 @@ class ChatRepositoryImpl @Inject constructor(
         )
     }
 
+    override suspend fun deleteMessageById(messageId: Int) {
+        zulipApi.deleteMessageById(messageId)
+        chatDao.deleteMessageById(messageId)
+    }
+
+    override suspend fun editMessageContent(
+        messageId: Int,
+        newMessageContent: String
+    ) {
+        zulipApi.editMessageContent(messageId, newMessageContent)
+        chatDao.updateMessage(messageId, newMessageContent)
+    }
+
     override suspend fun sendMessage(streamName: String, topicName: String, message: String) {
         zulipApi.sendMessage(
             streamName = streamName,
@@ -128,7 +143,7 @@ class ChatRepositoryImpl @Inject constructor(
         val newLastEventId = messageEventsDto.last().id
 
         val newMessages = messageEventsDto.map { messageEventDto ->
-            messageEventDto.message.toMessageDomain()
+            messageEventDto.message.toMessageDomain(accountInfo)
         }
 
         return ReceivedMessageEventData(

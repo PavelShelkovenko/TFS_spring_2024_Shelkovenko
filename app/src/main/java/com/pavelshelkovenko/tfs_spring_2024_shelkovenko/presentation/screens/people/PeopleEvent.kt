@@ -10,7 +10,7 @@ sealed interface PeopleEvent {
 
         data class QueryChanged(val newQuery: String): Ui
 
-        data object ReloadData : Ui
+        data class ReloadData(val currentQuery: String) : Ui
     }
 
     sealed interface Internal: PeopleEvent {
@@ -19,8 +19,12 @@ sealed interface PeopleEvent {
 
         data class DataLoadedFromCache(val users: List<User>) : Internal
 
-        data class Error(val errorMessage: String) : Internal
+        data class Error(val errorMessageId: Int) : Internal
 
         data class MinorError(val errorMessageId: Int) : Internal
+
+        data object ErrorLoadingFromCache : Internal
+
+        data class SearchError(val errorMessageId: Int) : Internal
     }
 }

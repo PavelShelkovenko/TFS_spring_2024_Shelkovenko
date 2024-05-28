@@ -13,7 +13,9 @@ import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.screens.profile.own.OwnP
 import com.pavelshelkovenko.tfs_spring_2024_shelkovenko.utils.AppTestRule
 import org.junit.Rule
 import org.junit.Test
-
+/**
+ * Этот тест нужно запускать на "stagingDebug" buildVariant
+ */
 class OpenOwnProfileFragmentTest: TestCase() {
 
     @get:Rule
@@ -39,7 +41,7 @@ class OpenOwnProfileFragmentTest: TestCase() {
             step("Проверяем, что были отправлены нужные запросы на сервер") {
                 WireMock.verify(1, WireMock.getRequestedFor(MockZulip.urlPatterForOwnProfile))
                 WireMock.verify(1, WireMock.getRequestedFor(MockZulip.urlPatterForUserOnlineStatus))
-                WireMock.verify(1, WireMock.getRequestedFor(MockZulip.urlPatternForSubscribedStreams))
+                WireMock.verify(2, WireMock.getRequestedFor(MockZulip.urlPatternForSubscribedStreams))
             }
             step("Проверяем, что полученные данные видны на экране") {
                 OwnProfileScreen {
