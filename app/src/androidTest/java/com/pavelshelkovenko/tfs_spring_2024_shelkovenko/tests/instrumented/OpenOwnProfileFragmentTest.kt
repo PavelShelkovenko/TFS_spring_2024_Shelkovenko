@@ -41,7 +41,7 @@ class OpenOwnProfileFragmentTest: TestCase() {
             step("Проверяем, что были отправлены нужные запросы на сервер") {
                 WireMock.verify(1, WireMock.getRequestedFor(MockZulip.urlPatterForOwnProfile))
                 WireMock.verify(1, WireMock.getRequestedFor(MockZulip.urlPatterForUserOnlineStatus))
-                WireMock.verify(1, WireMock.getRequestedFor(MockZulip.urlPatternForSubscribedStreams))
+                WireMock.verify(2, WireMock.getRequestedFor(MockZulip.urlPatternForSubscribedStreams))
             }
             step("Проверяем, что полученные данные видны на экране") {
                 OwnProfileScreen {
