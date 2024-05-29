@@ -129,7 +129,7 @@ class StreamRepositoryImpl @Inject constructor(
 
     private suspend fun deleteOldTopics() {
         val currentTime = System.currentTimeMillis()
-        val timeThreshold = currentTime - 5 * 60 * 1000
+        val timeThreshold = currentTime - 10 * 60 * 1000
         topicDao.deleteOldTopics(timeThreshold)
     }
 

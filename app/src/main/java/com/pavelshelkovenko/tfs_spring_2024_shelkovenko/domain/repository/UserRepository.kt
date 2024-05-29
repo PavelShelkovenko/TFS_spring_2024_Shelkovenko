@@ -17,5 +17,6 @@ interface UserRepository {
     suspend fun getAnotherProfileFromCache(userId: Int): User?
 
     suspend fun searchUsers(query: String): List<User>
+
     suspend fun searchUsersInCache(query: String): List<User>
 }

@@ -102,5 +102,9 @@ class OwnSettingsReducer : ScreenDslReducer<
                 )
             }
         }
+
+        OwnSettingsEvent.Ui.ReloadData -> {
+            commands { +OwnSettingsCommand.LoadAccountSettings }
+        }
     }
 }

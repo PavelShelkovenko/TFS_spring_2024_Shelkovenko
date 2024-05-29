@@ -49,10 +49,6 @@ class OwnSettingsFragment :
         }
         setupClickListeners()
         settingSpinnerAdapter()
-
-        //        binding.errorComponent.retryButton.setOnClickListener {
-//            store.accept(OwnSettingsEvent.Ui.ReloadData)
-//        }
     }
 
 
@@ -77,6 +73,9 @@ class OwnSettingsFragment :
                         newInvisibleModeState = invisibleModeCheckbox.isChecked
                     )
                 )
+            }
+            errorComponent.retryButton.setOnClickListener {
+                store.accept(OwnSettingsEvent.Ui.ReloadData)
             }
         }
     }
@@ -114,7 +113,8 @@ class OwnSettingsFragment :
                     emailVisibilitySpinner.isVisible = true
                     invisibleModeCheckbox.isVisible = true
                     ownUserEmail.text = state.accountSettings.email
-                    emailVisibilitySpinner.prompt = (state.accountSettings.emailVisibility.name.makeOnlyFirstChatCapitalize())
+                    emailVisibilitySpinner.prompt =
+                        (state.accountSettings.emailVisibility.name.makeOnlyFirstChatCapitalize())
                     invisibleModeCheckbox.isChecked = !state.accountSettings.isInvisibleMode
                     Glide.with(root).load(state.accountSettings.avatarUrl).into(ownUserAvatarImage)
                     if (state.isInEditingMode) {

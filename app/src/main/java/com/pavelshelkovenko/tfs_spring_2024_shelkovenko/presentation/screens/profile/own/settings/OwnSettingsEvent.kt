@@ -17,6 +17,7 @@ sealed interface OwnSettingsEvent {
 
         data object ActivateEditingMode: Ui
 
+        data object ReloadData: Ui
     }
 
     sealed interface Internal: OwnSettingsEvent {

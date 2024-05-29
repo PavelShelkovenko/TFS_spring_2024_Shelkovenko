@@ -70,6 +70,7 @@ class ChatReducer @Inject constructor(
                     newestAnchor = event.messages.last().id.toString()
                 }
                 val messagesUi = convertMessagesToDelegateItemWithDate(event.messages)
+                delegateItemList.value = messagesUi
                 state {
                     ChatState.Content(
                         messages = messagesUi,
