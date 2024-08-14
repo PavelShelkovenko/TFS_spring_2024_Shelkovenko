@@ -1,5 +1,32 @@
 # TFS Android Spring 2024
 
+
+#### Курсовая работа:
+
+В рамках последнего задания было разработано несколько новых функцих:
+  - Возможность создавать стримы
+  - Возможность подписываться на стримы и отписываться от них
+  - Возможность писать в разные топики внутри чата
+  - Переработан Longtap на свое сообщение (можно удалять, редактировать, копировать сообщение и добавлять реакции)
+  - Добавил новый экран настроек пользователя (можно изменить имя, включить невидимку, изменить видимость личной почты)
+
+Для сборки проекта нужно использовать Java 17
+  
+#### В проекте использовались следующие библиотеки:
+
+- [Room](https://developer.android.com/jetpack/androidx/releases/room) - Сохранения информации о стримах, профилях, последних сообщениях в чатах
+- [Retrofit2](https://github.com/square/retrofit) - Работа с сетью
+- [Okhttp3](https://github.com/square/okhttp) - Логирования запросов в сеть
+- [Dagger2](https://github.com/google/dagger) - Инъекция зависимостей
+- [Glide](https://github.com/bumptech/glide) - Загрузка изображений из интернета
+- [Kotlin Coroutines](https://github.com/Kotlin/kotlinx.coroutines/) - Асинхронная работы
+- [Jetpack's Navigation component](https://developer.android.com/guide/navigation) -Навигация между экранами приложения
+- [Elmslie](https://github.com/vivid-money/elmslie) - Реализация TEA/ELM архитектуры 
+- [Kaspresso](https://github.com/KasperskyLab/Kaspresso) - UI тестирование
+- [JUnit](https://github.com/junit-team/junit5) - Unit тесты
+- [Wiremock](https://github.com/wiremock/wiremock) - Мокирование запросов при тестировании
+
+
 #### Общие требования:
 
 - Данная работа является проверкой всех знаний, полученных на курсе.
